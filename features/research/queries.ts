@@ -36,6 +36,16 @@ export async function listPublications(query = "", limit = 50) {
   return data;
 }
 
+export async function listResearchers(query = "") {
+  const client = await createClient();
+  let request = client.from("researchers").select("*").order("name");
+  const term = query.trim().slice(0, 100).replace(/[\\%_]/g, "\\$&");
+  if (term) request = request.ilike("name", `%${term}%`);
+  const { data, error } = await request;
+  if (error) throw new Error("Could not load researchers");
+  return data;
+}
+
 export type ResearcherDetailData = {
   researcher: Researcher;
   areas: Area[];
