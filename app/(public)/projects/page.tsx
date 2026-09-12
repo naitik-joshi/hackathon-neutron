@@ -8,9 +8,9 @@ import { ProjectFilterBar } from "@/components/projects/project-filter-bar";
 import type { Project } from "@/lib/supabase/database.types";
 
 export const metadata = {
-  title: "Research Projects & Labs",
+  title: "Research Projects",
   description:
-    "Explore collaborative research initiatives, active labs, and student-faculty projects across Islington College.",
+    "Explore research projects and their connections across Islington College.",
 };
 
 export default async function ProjectsDirectoryPage({
@@ -27,7 +27,12 @@ export default async function ProjectsDirectoryPage({
   const rawStatus = resolvedParams.status;
 
   const query = typeof rawQ === "string" ? rawQ.slice(0, 100) : "";
-  const validStatuses = ["proposed", "ongoing", "completed", "archived"] as const;
+  const validStatuses = [
+    "proposed",
+    "ongoing",
+    "completed",
+    "archived",
+  ] as const;
   const statusFilter =
     typeof rawStatus === "string" &&
     validStatuses.includes(rawStatus as (typeof validStatuses)[number])
@@ -72,50 +77,53 @@ export default async function ProjectsDirectoryPage({
   return (
     <>
       <PageHeader
-        eyebrow="Discover / Projects & Labs"
-        title="Collaborative Research Projects & Labs"
-        description="Explore ongoing interdisciplinary research across Islington College. Connect with student investigators, faculty mentors, open codebases, and funded initiatives."
+        eyebrow="Discover / Projects"
+        title="Research projects"
+        description="Explore current project records and follow their connections to research areas, researchers and published work."
       />
 
       {/* Structured Academic Ledger / Quick Metric Bar */}
-      <section aria-label="Project Statistics" className="my-8 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-4">
+      <section
+        aria-label="Project Statistics"
+        className="my-8 grid grid-cols-2 gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-4"
+      >
         <div className="border-r border-slate-100 p-2 sm:p-3 last:border-r-0">
-          <span className="eyebrow block">Total Cohorts</span>
+          <span className="eyebrow block">All projects</span>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-[#142c43]">
               {counts.all}
             </span>
-            <span className="text-xs text-slate-500">Initiatives</span>
+            <span className="text-xs text-slate-500">Records</span>
           </div>
         </div>
 
         <div className="border-r border-slate-100 p-2 sm:p-3 sm:border-r last:border-r-0">
-          <span className="eyebrow block">Active Labs</span>
+          <span className="eyebrow block">Ongoing</span>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-emerald-700">
               {counts.ongoing}
             </span>
-            <span className="text-xs text-slate-500">In-Progress</span>
+            <span className="text-xs text-slate-500">Projects</span>
           </div>
         </div>
 
         <div className="border-r border-slate-100 p-2 sm:p-3 last:border-r-0">
-          <span className="eyebrow block">New Proposals</span>
+          <span className="eyebrow block">Proposed</span>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-blue-700">
               {counts.proposed}
             </span>
-            <span className="text-xs text-slate-500">Forming</span>
+            <span className="text-xs text-slate-500">Projects</span>
           </div>
         </div>
 
         <div className="p-2 sm:p-3">
-          <span className="eyebrow block">Linked Papers</span>
+          <span className="eyebrow block">Published outputs</span>
           <div className="mt-1 flex items-baseline gap-2">
             <span className="text-3xl font-bold text-slate-800">
               {totalPublications}
             </span>
-            <span className="text-xs text-slate-500">Peer-Reviewed</span>
+            <span className="text-xs text-slate-500">Linked records</span>
           </div>
         </div>
       </section>
@@ -151,17 +159,16 @@ export default async function ProjectsDirectoryPage({
       <section className="mt-12 flex flex-wrap items-center justify-between gap-6 rounded-xl border border-slate-200 bg-white p-8">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">
-            Have an idea for an interdisciplinary lab?
+            Want to contribute research?
           </h2>
           <p className="mt-2 text-sm text-slate-600">
-            Faculty members and student researchers can submit manuscripts and proposed projects for review.
+            Researchers can submit publications for institutional review.
+            Students can explore projects while participation features are
+            prepared.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4">
-          <Link
-            href="/research"
-            className="text-link text-sm font-semibold"
-          >
+          <Link href="/research" className="text-link text-sm font-semibold">
             Browse research areas →
           </Link>
           <Link

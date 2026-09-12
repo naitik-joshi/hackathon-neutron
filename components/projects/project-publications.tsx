@@ -12,9 +12,9 @@ export function ProjectPublications({
   if (publications.length === 0) {
     return (
       <Card className="bg-slate-50/50 border-dashed border-slate-300">
-        <h3 className="text-xl">Peer-Reviewed Outputs</h3>
+        <h3 className="text-xl">Published outputs</h3>
         <p className="mt-2 text-sm text-slate-600">
-          This project is currently active in the laboratory phase. Manuscripts and pre-prints are undergoing peer review and will appear here once approved by the editorial desk.
+          No published outputs are linked to this project record yet.
         </p>
       </Card>
     );
@@ -24,7 +24,7 @@ export function ProjectPublications({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-2xl font-semibold text-slate-900">
-          Peer-Reviewed Outputs & Pre-prints ({publications.length})
+          Published outputs ({publications.length})
         </h3>
       </div>
 
@@ -34,12 +34,15 @@ export function ProjectPublications({
           const abstract = pub.abstract.replace(/^DEMO DATA — /, "");
 
           return (
-            <Card key={pub.id} className="p-6 transition-all hover:border-blue-300">
+            <Card
+              key={pub.id}
+              className="p-6 transition-all hover:border-blue-300"
+            >
               <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
                     <BookOpen size={12} aria-hidden="true" />
-                    IJMR {pub.year ?? "Recent"}
+                    Publication {pub.year ?? "Year not provided"}
                   </span>
                   <DemoBadge demo={pub.is_demo} />
                 </div>
@@ -51,9 +54,7 @@ export function ProjectPublications({
               </div>
 
               <h4 className="text-xl font-bold text-slate-900 hover:text-blue-700 transition-colors">
-                <Link href={`/publications/${pub.slug}`}>
-                  {title}
-                </Link>
+                <Link href={`/publications/${pub.slug}`}>{title}</Link>
               </h4>
 
               <p className="mt-2 text-sm text-slate-600 line-clamp-2 leading-relaxed">
@@ -65,7 +66,7 @@ export function ProjectPublications({
                   href={`/publications/${pub.slug}`}
                   className="text-link inline-flex items-center gap-1 font-semibold"
                 >
-                  Read full paper <ArrowRight size={13} aria-hidden="true" />
+                  Read publication <ArrowRight size={13} aria-hidden="true" />
                 </Link>
 
                 {pub.doi && (
@@ -75,7 +76,8 @@ export function ProjectPublications({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-800 transition-colors"
                   >
-                    View DOI Record <ExternalLink size={12} aria-hidden="true" />
+                    View DOI Record{" "}
+                    <ExternalLink size={12} aria-hidden="true" />
                   </a>
                 )}
               </div>

@@ -14,7 +14,9 @@ export function ProjectCard({ project }: { project: ProjectWithRelations }) {
         : "border-t-4 border-t-slate-400";
 
   return (
-    <Card className={`flex flex-col justify-between transition-all hover:shadow-md ${accentBorder}`}>
+    <Card
+      className={`flex flex-col justify-between transition-all hover:shadow-md ${accentBorder}`}
+    >
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -27,9 +29,7 @@ export function ProjectCard({ project }: { project: ProjectWithRelations }) {
         </div>
 
         <h3 className="text-2xl hover:text-blue-700 transition-colors">
-          <Link href={`/projects/${project.slug}`}>
-            {project.title}
-          </Link>
+          <Link href={`/projects/${project.slug}`}>{project.title}</Link>
         </h3>
 
         <p className="mt-3 text-slate-600 leading-relaxed line-clamp-3">
@@ -60,11 +60,17 @@ export function ProjectCard({ project }: { project: ProjectWithRelations }) {
           <div className="flex items-center gap-3">
             {project.researchers.length > 0 ? (
               <span className="flex items-center gap-1.5 font-medium text-slate-800">
-                <Users size={14} className="text-slate-500" aria-hidden="true" />
-                {project.researchers.map((r) => r.name.replace(/^DEMO DATA — /, "")).join(", ")}
+                <Users
+                  size={14}
+                  className="text-slate-500"
+                  aria-hidden="true"
+                />
+                {project.researchers
+                  .map((r) => r.name.replace(/^DEMO DATA — /, ""))
+                  .join(", ")}
               </span>
             ) : (
-              <span className="text-slate-400 italic">Interdisciplinary Lab</span>
+              <span className="text-slate-500">Research team not linked</span>
             )}
           </div>
 
@@ -72,7 +78,8 @@ export function ProjectCard({ project }: { project: ProjectWithRelations }) {
             {project.publicationCount > 0 && (
               <span className="flex items-center gap-1 font-mono text-slate-600">
                 <BookOpen size={13} aria-hidden="true" />
-                {project.publicationCount} {project.publicationCount === 1 ? "paper" : "papers"}
+                {project.publicationCount}{" "}
+                {project.publicationCount === 1 ? "paper" : "papers"}
               </span>
             )}
             <Link

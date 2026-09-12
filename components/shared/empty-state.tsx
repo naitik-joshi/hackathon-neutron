@@ -12,9 +12,9 @@ export function EmptyState({
   action?: string;
 }) {
   return (
-    <Card>
+    <Card className="border-dashed bg-slate-50/60 py-10 text-center">
       <h2 className="text-xl">{title}</h2>
-      <p className="my-3 text-slate-600">{description}</p>
+      <p className="mx-auto my-3 max-w-xl text-slate-600">{description}</p>
       <Link className="text-link" href={href}>
         {action} →
       </Link>

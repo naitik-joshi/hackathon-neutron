@@ -2,11 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Calendar,
   Layers,
-  Sparkles,
   Users,
-  CheckCircle2,
   FileText,
   School,
 } from "lucide-react";
@@ -14,9 +13,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getProjectBySlug } from "@/features/projects/queries";
 import { DemoBadge } from "@/components/shared/status-badge";
 import { SetupState } from "@/components/shared/empty-state";
-import { Card, Badge } from "@/components/ui";
+import { Card, buttonVariants } from "@/components/ui";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
-import { ProjectLifecycle } from "@/components/projects/project-lifecycle";
 import { ProjectTeam } from "@/components/projects/project-team";
 import { ProjectPublications } from "@/components/projects/project-publications";
 
@@ -54,17 +52,21 @@ export default async function ProjectDetailPage({
   }
 
   const { project, areas, researchers, publications } = data;
-  const lead = researchers[0];
-
   return (
     <>
       {/* Breadcrumbs Navigation */}
-      <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+      <nav
+        aria-label="Breadcrumb"
+        className="mb-6 flex flex-wrap items-center gap-2 text-xs text-slate-500"
+      >
         <Link href="/" className="hover:text-blue-700 transition-colors">
           Home
         </Link>
         <span>/</span>
-        <Link href="/projects" className="hover:text-blue-700 transition-colors">
+        <Link
+          href="/projects"
+          className="hover:text-blue-700 transition-colors"
+        >
           Projects
         </Link>
         {areas.length > 0 && (
@@ -122,33 +124,38 @@ export default async function ProjectDetailPage({
             </div>
           )}
 
-          {lead && (
+          {researchers.length > 0 && (
             <div className="flex items-center gap-1.5">
               <Users size={16} className="text-blue-700" aria-hidden="true" />
-              <span className="font-medium text-slate-900">Principal Investigator:</span>
-              <span>{lead.name.replace(/^DEMO DATA — /, "")}</span>
+              <span className="font-medium text-slate-900">Research team:</span>
+              <span>
+                {researchers.length} linked{" "}
+                {researchers.length === 1 ? "researcher" : "researchers"}
+              </span>
             </div>
           )}
 
           <div className="flex items-center gap-1.5 font-mono text-xs text-slate-500">
             <Calendar size={14} aria-hidden="true" />
-            <span>Updated {new Date(project.updated_at).toLocaleDateString("en-GB", { timeZone: "UTC" })}</span>
+            <span>
+              Updated{" "}
+              {new Date(project.updated_at).toLocaleDateString("en-GB", {
+                timeZone: "UTC",
+              })}
+            </span>
           </div>
         </div>
 
         {/* Action Row */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-slate-50 p-4 border border-slate-100">
           <div className="flex flex-wrap items-center gap-3">
-            <a
-              href="#get-involved"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#215ac7] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 transition-colors shadow-sm"
-            >
+            <a href="#get-involved" className={buttonVariants()}>
               <School size={16} aria-hidden="true" />
               Express Interest / Get Involved
             </a>
             <Link
               href="/publications"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors"
+              className={buttonVariants({ variant: "secondary" })}
             >
               <FileText size={16} aria-hidden="true" />
               Browse Published Papers
@@ -165,72 +172,28 @@ export default async function ProjectDetailPage({
         </div>
       </header>
 
-      {/* Interactive Project Lifecycle Stepper */}
-      <ProjectLifecycle status={project.status} />
-
       {/* Main 2-Column Split: 8 cols main + 4 cols sidebar */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start my-8">
         {/* Left Column (8 cols) */}
-        <main className="lg:col-span-8 space-y-8">
-          {/* Section 1: Overview & Research Objectives */}
+        <div className="lg:col-span-8 space-y-8">
           <Card>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="p-1.5 rounded bg-blue-50 text-blue-800">
-                <Sparkles size={18} aria-hidden="true" />
-              </span>
-              <h2 className="text-2xl font-semibold text-slate-900">
-                Project Overview & Research Objectives
-              </h2>
-            </div>
-
-            <p className="text-base text-slate-700 leading-relaxed mb-6">
+            <h2 className="text-2xl font-semibold text-slate-900">
+              About this project
+            </h2>
+            <p className="mt-4 text-base text-slate-700 leading-relaxed">
               {project.summary}
             </p>
-
-            <h3 className="eyebrow block mb-3">
-              Core Hypotheses & Investigation Focus
-            </h3>
-
-            <div className="space-y-3">
-              <div className="rounded-lg bg-slate-50 p-4 border border-slate-100">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 size={18} className="text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900">
-                      Objective 1: Methodological Innovation
-                    </h4>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                      Evaluate reproducible protocols and assess algorithmic accuracy in real-world educational and community environments.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-lg bg-slate-50 p-4 border border-slate-100">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 size={18} className="text-emerald-600 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <h4 className="text-sm font-semibold text-slate-900">
-                      Objective 2: Collaborative Data Openness
-                    </h4>
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                      Build benchmark datasets formatted for ethical open-access citation and peer verification in subsequent journal volumes.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
           </Card>
 
-          {/* Section 2: Peer-Reviewed Outputs */}
+          {/* Linked published outputs */}
           <section aria-label="Project Publications">
             <ProjectPublications publications={publications} />
           </section>
 
-          {/* Section 3: Get Involved / Participation Callout */}
+          {/* Participation direction */}
           <section
             id="get-involved"
-            aria-label="Student Collaboration Opportunities"
+            aria-label="Student participation"
             className="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-900 to-[#142c43] p-6 sm:p-8 text-white shadow-md"
           >
             <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
@@ -247,53 +210,41 @@ export default async function ProjectDetailPage({
                   </h3>
                 </div>
               </div>
-              <Badge className="bg-amber-400/20 text-amber-200 border border-amber-400/30">
-                Recruiting Collaborators
-              </Badge>
             </div>
 
             <p className="text-sm text-blue-100 leading-relaxed mb-6">
-              Islington College computing and IT students are encouraged to participate in active research investigations. Gain hands-on laboratory experience, direct mentorship from faculty investigators, and the opportunity for co-authorship on future IJMR publications.
+              Interested students can sign in to follow the participation path.
+              Opportunity details are added only when the project team confirms
+              them.
             </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 text-xs text-blue-100">
-              <div className="rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                <span className="font-semibold text-white block mb-1">Student Role:</span>
-                Literature review, data validation & prototype testing.
-              </div>
-              <div className="rounded-lg bg-white/10 p-3 backdrop-blur-sm">
-                <span className="font-semibold text-white block mb-1">Eligibility:</span>
-                Current Islington undergraduate or graduate student.
-              </div>
-            </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 border-t border-blue-800/80 pt-4">
               <span className="text-xs text-blue-200">
-                Participation requests are reviewed directly by the project lead.
+                Public project information remains available without an account.
               </span>
               <Link
-                href="/auth/sign-in"
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-bold text-[#142c43] hover:bg-blue-50 transition-colors shadow-sm"
+                href="/account"
+                className={buttonVariants({ variant: "secondary" })}
               >
-                Sign in to Express Interest →
+                Open your account <ArrowRight aria-hidden="true" size={14} />
               </Link>
             </div>
           </section>
-        </main>
+        </div>
 
         {/* Right Sidebar Column (4 cols) */}
         <aside className="lg:col-span-4 space-y-6">
-          {/* Principal Investigator & Team */}
+          {/* Connected research team */}
           <ProjectTeam researchers={researchers} />
 
           {/* Quick Project Facts */}
           <Card>
-            <span className="eyebrow block mb-3">Institutional Metadata</span>
+            <span className="eyebrow block mb-3">Project record</span>
             <dl className="divide-y divide-slate-100 text-xs">
               <div className="flex justify-between py-2">
                 <dt className="text-slate-500">Repository ID</dt>
                 <dd className="font-mono font-medium text-slate-800">
-                  IJMR-PRJ-{project.id.slice(0, 8)}
+                  PRJ-{project.id.slice(0, 8)}
                 </dd>
               </div>
               <div className="flex justify-between py-2">
@@ -303,15 +254,11 @@ export default async function ProjectDetailPage({
                 </dd>
               </div>
               <div className="flex justify-between py-2">
-                <dt className="text-slate-500">Ethics Review</dt>
-                <dd className="font-medium text-emerald-700">
-                  Institutional Approval Verified
-                </dd>
-              </div>
-              <div className="flex justify-between py-2">
-                <dt className="text-slate-500">Open Access</dt>
+                <dt className="text-slate-500">Updated</dt>
                 <dd className="font-medium text-slate-800">
-                  Compliant (CC BY 4.0)
+                  {new Date(project.updated_at).toLocaleDateString("en-GB", {
+                    timeZone: "UTC",
+                  })}
                 </dd>
               </div>
             </dl>

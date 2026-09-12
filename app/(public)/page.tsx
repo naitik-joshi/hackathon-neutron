@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, BookOpen, Network } from "lucide-react";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { listAreas, listPublications } from "@/features/research/queries";
 import { listProjects } from "@/features/projects/queries";
@@ -11,26 +11,44 @@ import { SetupState } from "@/components/shared/empty-state";
 export default async function Home() {
   const configured = isSupabaseConfigured();
   const [areas, publications, projects] = configured
-    ? await Promise.all([listAreas(), listPublications("", 4), listProjects({ limit: 2 })])
+    ? await Promise.all([
+        listAreas(),
+        listPublications("", 4),
+        listProjects({ status: "ongoing", limit: 2 }),
+      ])
     : [[], [], []];
   return (
     <>
-      <section className="mb-12 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
-        <div>
+      <section className="hero-panel mb-14 grid gap-8 lg:grid-cols-[1.45fr_.85fr]">
+        <div className="hero-copy">
           <p className="eyebrow">Islington College / Research & Development</p>
-          <h1 className="my-5 max-w-2xl text-5xl leading-tight md:text-6xl">
-            Ideas to explore.
+          <h1 className="my-5 max-w-3xl text-5xl leading-[1.02] md:text-6xl">
+            Discover research.
             <br />
-            <span className="text-blue-700">Research to connect.</span>
+            Connect with its next chapter.
           </h1>
-          <p className="mb-7 max-w-xl text-lg text-slate-600">
+          <p className="mb-7 max-w-2xl text-lg text-slate-600">
             Find research, understand the work behind it, and discover where you
             can contribute to the Islington R&D community.
           </p>
           <SearchForm />
+          <div className="mt-5 flex flex-wrap gap-5 text-sm">
+            <Link
+              href="/publications"
+              className="text-link inline-flex items-center gap-2"
+            >
+              <BookOpen aria-hidden="true" size={16} /> Browse publications
+            </Link>
+            <Link
+              href="/projects"
+              className="text-link inline-flex items-center gap-2"
+            >
+              <Network aria-hidden="true" size={16} /> Explore projects
+            </Link>
+          </div>
         </div>
-        <aside className="self-center rounded-2xl bg-[#142c43] p-8 text-white">
-          <p className="mb-6 text-xs uppercase tracking-widest text-blue-200">
+        <aside className="journey-panel self-center">
+          <p className="mb-6 text-xs uppercase tracking-[0.16em] text-blue-200">
             Your path through research
           </p>
           {[
@@ -41,7 +59,7 @@ export default async function Home() {
           ].map(([title, text], i) => (
             <div
               key={title}
-              className="flex gap-4 border-t border-slate-600 py-4"
+              className="flex gap-4 border-t border-white/15 py-4"
             >
               <span className="font-mono text-sm text-blue-200">0{i + 1}</span>
               <div>
@@ -53,27 +71,36 @@ export default async function Home() {
         </aside>
       </section>
       {!configured && <SetupState />}
-      <section className="my-12">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-3xl">Explore by research area</h2>
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Discover / Areas</p>
+            <h2 className="text-3xl">Explore by research area</h2>
+          </div>
           <Link href="/research" className="text-link">
             All research areas →
           </Link>
         </div>
         <AreaList areas={areas.slice(0, 4)} />
       </section>
-      <section className="my-12">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-3xl">Recently published</h2>
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Understand / Publications</p>
+            <h2 className="text-3xl">Recently published</h2>
+          </div>
           <Link href="/publications" className="text-link">
             All publications →
           </Link>
         </div>
         {configured && <PublicationList items={publications} />}
       </section>
-      <section className="my-12">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <h2 className="text-3xl">Active projects & labs</h2>
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Connect / Projects</p>
+            <h2 className="text-3xl">Active projects</h2>
+          </div>
           <Link href="/projects" className="text-link">
             All research projects →
           </Link>
@@ -86,12 +113,15 @@ export default async function Home() {
           </div>
         ) : (
           <p className="text-slate-600">
-            Research projects and labs will appear here as teams form.
+            Ongoing research projects will appear here as teams publish them.
           </p>
         )}
       </section>
-      <section className="flex flex-wrap items-center justify-between gap-6 rounded-xl border border-blue-200 bg-blue-50 p-8">
+      <section className="participation-callout">
         <div>
+          <p className="eyebrow text-blue-200">
+            Participate / Researcher workflow
+          </p>
           <h2 className="text-3xl">
             Make your research part of the conversation.
           </h2>
@@ -101,9 +131,9 @@ export default async function Home() {
         </div>
         <Link
           href="/researcher/publications/new"
-          className="text-link flex items-center gap-2"
+          className="inline-flex min-h-11 items-center gap-2 rounded bg-white px-5 py-3 text-sm font-semibold text-slate-950"
         >
-          Submit research <ArrowUpRight aria-hidden="true" size={20} />
+          Submit research <ArrowUpRight aria-hidden="true" size={18} />
         </Link>
       </section>
     </>
