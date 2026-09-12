@@ -1,9 +1,11 @@
-import Link from "next/link";
-import { requireRole } from "@/lib/auth/guards";
 import { PageHeader } from "@/components/shared/page-header";
-import { Card, Badge, buttonClass } from "@/components/ui";
+import { AttentionList } from "@/components/admin/attention-list";
+import { OverviewMetrics } from "@/components/admin/overview-metrics";
+import { getAdminOverview } from "@/features/operations/queries";
+
 export default async function Admin() {
-  await requireRole(["admin"]);
+  const { metrics, attention } = await getAdminOverview();
+
   return (
     <>
       <PageHeader
@@ -11,34 +13,9 @@ export default async function Admin() {
         title="Research operations"
         description="Review submissions and keep public research trustworthy."
       />
-      <Card className="mb-8">
-        <h2 className="mb-3 text-2xl">Publication review</h2>
-        <p className="mb-5">
-          Inspect submitted research, start a review, then approve and publish.
-        </p>
-        <Link href="/admin/submissions" className={buttonClass}>
-          Open submissions
-        </Link>
-      </Card>
-      <h2 className="mb-5 text-2xl">Next operations modules</h2>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          "Needs Attention",
-          "Analytics",
-          "Projects",
-          "Researchers",
-          "Events",
-          "Opportunities",
-        ].map((name) => (
-          <Card key={name}>
-            <Badge>Planned</Badge>
-            <h3 className="mt-3 text-xl">{name}</h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Extension area for parallel hackathon work.
-            </p>
-          </Card>
-        ))}
-      </div>
+      <OverviewMetrics metrics={metrics} />
+      <div className="my-10 border-t border-slate-200" />
+      <AttentionList items={attention} />
     </>
   );
 }
