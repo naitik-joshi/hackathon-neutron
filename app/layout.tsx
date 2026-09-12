@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SiteHeader } from "@/components/navigation/site-header";
 import { SiteFooter } from "@/components/shared/site-footer";
 import "./globals.css";
+
 export const metadata = {
   title: {
     default: "Islington R&D Digital Hub",
@@ -14,15 +15,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col bg-[#FAFBFD] text-[#0B1C30]">
-        <a href="#main" className="sr-only focus:not-sr-only">
+    <html lang="en" data-scroll-behavior="smooth">
+      <body className="flex min-h-screen flex-col">
+        <a href="#main" className="skip-link sr-only focus:not-sr-only">
           Skip to content
         </a>
-        <div className="announcement-banner text-center">
-          Discover → Understand → Connect → Participate · Public research, open
-          to everyone
-        </div>
         <Suspense fallback={<div className="h-16 border-b bg-white" />}>
           <SiteHeader />
         </Suspense>
