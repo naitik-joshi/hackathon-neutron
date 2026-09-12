@@ -215,12 +215,10 @@ def repl_loop(store: DocumentStore, bridge: GroundedOllamaBridge) -> None:
             matches = store.find_similar_papers(resolved_target)
 
             candidates = []
-            for other_p, score, shared in matches:
+            for other_p, title, score, shared in matches:
                 if other_p == resolved_target or other_p == target:
                     continue
                 _, _, abst = store.get_section_text(other_p, "Abstract")
-                _, _, header = store.get_section_text(other_p, "Header block")
-                title = header.split("\n")[0].strip() if header else other_p
                 if abst:
                     candidates.append((other_p, title, score, shared, abst))
                 if len(candidates) >= 3:

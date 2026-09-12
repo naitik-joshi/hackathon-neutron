@@ -141,10 +141,12 @@ class DocumentStore:
 
             return paper_key, section_key, doc_sections[section_key]
 
-    def find_similar_papers(self, target_paper_query: str) -> List[Tuple[str, float, List[str]]]:
+    def find_similar_papers(
+        self, target_paper_query: str, top_n: int = 5
+    ) -> List[Tuple[str, str, float, List[str]]]:
         """
         Find indexed papers that share keywords or thematic concepts with the target paper.
-        Returns a list of tuples: (matched_paper_name, similarity_score, common_terms)
+        Returns: (paper_name, title, similarity_score, common_terms).
         """
         with self._lock:
             target_key = self.resolve_paper_key(target_paper_query)
@@ -187,10 +189,17 @@ class DocumentStore:
                 intersection = target_tokens.intersection(other_tokens)
                 if intersection:
                     score = len(intersection) / max(1, len(target_tokens.union(other_tokens)))
-                    results.append((other_key, round(score * 100, 1), sorted(list(intersection))[:5]))
+                    results.append(
+                        (
+                            other_key,
+                            self.get_paper_title(other_key),
+                            round(score * 100, 1),
+                            sorted(list(intersection))[:5],
+                        )
+                    )
 
-            results.sort(key=lambda x: x[1], reverse=True)
-            return results
+            results.sort(key=lambda x: x[2], reverse=True)
+            return results[:max(0, top_n)]
 
     def clear(self) -> None:
         """Clear all indexed documents."""

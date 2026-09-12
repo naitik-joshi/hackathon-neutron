@@ -1,14 +1,6 @@
 #!/bin/bash
 set -e
 
-if [ -z "${QWEN_API_KEY:-}" ]; then
-  echo "Set QWEN_API_KEY before installing the service." >&2
-  exit 1
-fi
-
-install -m 600 /dev/null /etc/qwen-api.env
-printf 'QWEN_API_KEY=%s\n' "$QWEN_API_KEY" > /etc/qwen-api.env
-
 cat << 'EOF' > /etc/systemd/system/qwen-api.service
 [Unit]
 Description=Grounded Research Paper Qwen API Server
@@ -21,14 +13,20 @@ User=ubuntu
 WorkingDirectory=/home/ubuntu
 ExecStart=/home/ubuntu/venv/bin/python3 /home/ubuntu/api_server.py
 Restart=always
-RestartSec=3
+# Required: QWEN_API_KEY=<rotated server-only secret>
+EnvironmentFile=/home/ubuntu/.api_key_env
 Environment=PYTHONUNBUFFERED=1
-EnvironmentFile=/etc/qwen-api.env
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/watch_papers /home/ubuntu/parsed_insights
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable --now qwen-api
+systemctl enable qwen-api
+systemctl restart qwen-api
 systemctl status qwen-api --no-pager

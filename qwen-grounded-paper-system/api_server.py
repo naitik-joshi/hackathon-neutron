@@ -5,7 +5,7 @@ Features:
 - Instant warm Ollama inference (keep_alive: -1)
 - Live watchdog background synchronization
 - CORS-enabled REST endpoints for UI button clicks and query submissions
-- Built-in interactive Web UI dashboard with API key management
+- Server-to-server integration contract; the legacy dashboard is not served
 - Systemd socket-activation / on-demand request startup support
 """
 
@@ -25,50 +25,44 @@ if hasattr(sys.stdout, "reconfigure"):
 
 from config import HARD_NEGATIVE_RESPONSE, MODEL_NAME, TEMPERATURE
 from store import DocumentStore
-from watcher import PaperWatcher
-from ollama_bridge import GroundedOllamaBridge
+from ollama_bridge import GroundedOllamaBridge, ModelUnavailableError
 
 
 # =====================================================================
 # API Key Security Manager
 # =====================================================================
-API_KEY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".api_key")
-
 def get_or_create_api_key() -> str:
-    """Retrieve existing API key or generate a cryptographically secure one."""
+    """Read the API credential from the process environment only."""
     env_key = os.environ.get("QWEN_API_KEY", "").strip()
-    if env_key:
-        return env_key
+    if len(env_key) < 32:
+        raise RuntimeError(
+            "QWEN_API_KEY must be set to a secret of at least 32 characters."
+        )
+    return env_key
 
-    if os.path.exists(API_KEY_FILE):
-        with open(API_KEY_FILE, "r", encoding="utf-8") as f:
-            key = f.read().strip()
-            if key:
-                return key
-
-    # Generate a new secure API key
-    new_key = f"qwen_live_{secrets.token_urlsafe(24)}"
-    try:
-        with open(API_KEY_FILE, "w", encoding="utf-8") as f:
-            f.write(new_key)
-        print(f"\n[Security] GENERATED NEW API KEY: {new_key}")
-        print(f"[Security] Saved to: {API_KEY_FILE}\n")
-    except Exception as e:
-        print(f"[Security] Warning saving key file: {e}")
-    return new_key
-
-SERVER_API_KEY = get_or_create_api_key()
+SERVER_API_KEY = os.environ.get("QWEN_API_KEY", "").strip()
 
 
 # =====================================================================
 # Global Singletons & Ingestion
 # =====================================================================
 store = DocumentStore()
-watcher = PaperWatcher(store)
 bridge = GroundedOllamaBridge()
+watcher = None
 
-watcher.scan_existing_files()
-watcher.start()
+_runtime_started = False
+
+
+def initialize_runtime() -> None:
+    """Initialize ingestion once at server startup, not during module import."""
+    global _runtime_started, watcher
+    if not _runtime_started:
+        from watcher import PaperWatcher
+
+        watcher = PaperWatcher(store)
+        watcher.scan_existing_files()
+        watcher.start()
+        _runtime_started = True
 
 import threading
 # Smart On-Demand: 0% CPU & 0% Model RAM on idle. Warmed only when paper is clicked or queried.
@@ -439,12 +433,23 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
     """
 
     def send_cors_headers(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization, X-API-Key")
+        origin = self.headers.get("Origin", "").strip()
+        allowed = {
+            value.strip()
+            for value in os.environ.get("QWEN_ALLOWED_ORIGINS", "").split(",")
+            if value.strip()
+        }
+        if origin and origin in allowed:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header(
+                "Access-Control-Allow-Headers",
+                "Content-Type, Authorization, X-API-Key",
+            )
 
     def do_OPTIONS(self):
-        self.send_response(200)
+        self.send_response(204)
         self.send_cors_headers()
         self.end_headers()
 
@@ -456,39 +461,67 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
             if auth_header.startswith("Bearer "):
                 req_key = auth_header[7:].strip()
 
-        return secrets.compare_digest(req_key, SERVER_API_KEY)
+        return bool(SERVER_API_KEY) and secrets.compare_digest(req_key, SERVER_API_KEY)
+
+    def _read_text(
+        self,
+        payload: Dict[str, Any],
+        field: str,
+        *,
+        required: bool = False,
+        default: str = "",
+        max_length: int = 2_000,
+    ):
+        value = payload.get(field, default)
+        if not isinstance(value, str):
+            self._send_error(400, "INVALID_FIELD", f"'{field}' must be a string.")
+            return None
+        value = value.strip()
+        if required and not value:
+            self._send_error(400, "MISSING_FIELD", f"'{field}' is required.")
+            return None
+        if len(value) > max_length:
+            self._send_error(
+                400,
+                "FIELD_TOO_LONG",
+                f"'{field}' must not exceed {max_length} characters.",
+            )
+            return None
+        return value
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
 
-        # 1. Root / UI Dashboard (Public access to load dashboard shell)
+        # Root is informational only. Credentials must never be entered into a
+        # browser UI; the supported integration is server-to-server.
         if parsed.path in ["/", "/index.html"]:
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_cors_headers()
-            self.end_headers()
-            self.wfile.write(HTML_DASHBOARD.encode("utf-8"))
+            self._send_json(
+                200,
+                {
+                    "service": "grounded-paper-api",
+                    "status_endpoint": "/api/health",
+                    "authentication": "server-side API key required",
+                },
+            )
             return
 
         # 2. Health check (Public)
         if parsed.path == "/api/health":
+            model_ready = bridge.check_health()
             health = {
-                "status": "healthy",
+                "status": "healthy" if model_ready else "degraded",
                 "indexed_papers_count": len(store.list_papers()),
                 "model": MODEL_NAME,
                 "temperature": TEMPERATURE,
-                "ollama_ready": bridge.check_health(),
+                "ollama_ready": model_ready,
                 "auth_required": True
             }
-            self._send_json(200, health)
+            self._send_json(200 if model_ready else 503, health)
             return
 
         # Protected Endpoints Require API Key
         if not self.check_authenticated():
-            self._send_json(401, {
-                "error": "Unauthorized",
-                "message": "Valid API Key required. Pass 'X-API-Key: <key>' or 'Authorization: Bearer <key>'."
-            })
+            self._send_error(401, "UNAUTHORIZED", "A valid server API key is required.")
             return
 
         # 3. List papers (Protected)
@@ -507,41 +540,45 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
             self._send_json(200, {"status": "success", "count": len(papers_meta), "papers": papers_meta})
             return
 
-        self._send_json(404, {"error": "Endpoint not found"})
+        self._send_error(404, "ENDPOINT_NOT_FOUND", "Endpoint not found.")
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
 
         # Enforce API Key Authentication on all POST endpoints
         if not self.check_authenticated():
-            self._send_json(401, {
-                "error": "Unauthorized",
-                "message": "Valid API Key required. Pass 'X-API-Key: <key>' or 'Authorization: Bearer <key>'."
-            })
+            self._send_error(401, "UNAUTHORIZED", "A valid server API key is required.")
             return
 
-        content_length = int(self.headers.get("Content-Length", 0))
-        raw_body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
-
         try:
+            content_length = int(self.headers.get("Content-Length", 0))
+        except (TypeError, ValueError):
+            self._send_error(400, "INVALID_CONTENT_LENGTH", "Content-Length must be an integer.")
+            return
+        if content_length < 0 or content_length > 32_768:
+            self._send_error(413, "PAYLOAD_TOO_LARGE", "Request body must not exceed 32 KiB.")
+            return
+        try:
+            raw_body = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
             payload = json.loads(raw_body)
-        except Exception:
-            self._send_json(400, {"error": "Invalid JSON payload"})
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            self._send_error(400, "INVALID_JSON", "Request body must be valid JSON.")
+            return
+        if not isinstance(payload, dict):
+            self._send_error(400, "INVALID_REQUEST", "Request body must be a JSON object.")
             return
 
         # Endpoint 1: Paper Selection (Triggered by Button Click in UI)
         if parsed.path == "/api/select_paper":
-            paper_name = payload.get("paper_name", "").strip()
-            if not paper_name:
-                self._send_json(400, {"error": "Missing 'paper_name' in request payload."})
+            paper_name = self._read_text(
+                payload, "paper_name", required=True, max_length=255
+            )
+            if paper_name is None:
                 return
 
             resolved = store.resolve_paper_key(paper_name)
             if not resolved:
-                self._send_json(404, {
-                    "error": f"Paper '{paper_name}' not found in dataset.",
-                    "available_papers": store.list_papers()
-                })
+                self._send_error(404, "PAPER_NOT_FOUND", "Paper not found in dataset.")
                 return
 
             sections = store.get_section_names(resolved)
@@ -570,17 +607,18 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
 
         # Endpoint 2: Grounded Query (Triggered by User Submitting Question)
         if parsed.path == "/api/query":
-            paper_name = payload.get("paper_name", "").strip()
-            question = payload.get("question", "").strip()
-            target_section = payload.get("section", "").strip()
-
-            if not paper_name or not question:
-                self._send_json(400, {"error": "Both 'paper_name' and 'question' are required."})
+            paper_name = self._read_text(
+                payload, "paper_name", required=True, max_length=255
+            )
+            question = self._read_text(payload, "question", required=True)
+            section_field = "section" if "section" in payload else "section_name"
+            target_section = self._read_text(payload, section_field, max_length=200)
+            if paper_name is None or question is None or target_section is None:
                 return
 
             resolved_paper = store.resolve_paper_key(paper_name)
             if not resolved_paper:
-                self._send_json(404, {"error": f"Paper '{paper_name}' not found."})
+                self._send_error(404, "PAPER_NOT_FOUND", "Paper not found in dataset.")
                 return
 
             start_time = time.time()
@@ -605,13 +643,32 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
                         target_section = "Abstract"
 
             _, actual_sec, text = store.get_section_text(resolved_paper, target_section)
-            answer = bridge.query_section(resolved_paper, actual_sec or target_section, text, question)
+            if not actual_sec or not text:
+                self._send_error(
+                    422,
+                    "SECTION_NOT_FOUND",
+                    "The requested section is not available in this paper.",
+                    {"available_sections": store.list_sections(resolved_paper)},
+                )
+                return
+            try:
+                answer = bridge.query_section(
+                    resolved_paper, actual_sec, text, question
+                )
+            except ModelUnavailableError:
+                self._send_error(
+                    503,
+                    "MODEL_UNAVAILABLE",
+                    "The grounded model is temporarily unavailable.",
+                    {"retryable": True},
+                )
+                return
             elapsed_ms = round((time.time() - start_time) * 1000, 2)
 
             response_data = {
                 "status": "success",
                 "paper_name": resolved_paper,
-                "section_matched": actual_sec or target_section,
+                "section_matched": actual_sec,
                 "question": question,
                 "answer": answer,
                 "latency_ms": elapsed_ms,
@@ -623,10 +680,14 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
 
         # Endpoint 3: Find Similar Papers
         if parsed.path == "/api/similar":
-            paper_name = payload.get("paper_name", "").strip()
+            paper_name = self._read_text(
+                payload, "paper_name", required=True, max_length=255
+            )
+            if paper_name is None:
+                return
             resolved_paper = store.resolve_paper_key(paper_name)
             if not resolved_paper:
-                self._send_json(404, {"error": f"Paper '{paper_name}' not found."})
+                self._send_error(404, "PAPER_NOT_FOUND", "Paper not found in dataset.")
                 return
 
             similar = store.find_similar_papers(resolved_paper, top_n=5)
@@ -644,66 +705,157 @@ class GroundedAnalysisAPIHandler(BaseHTTPRequestHandler):
             })
             return
 
-        # Endpoint 4: Cross-Paper Comparative Analysis
+        # Endpoint 4: Deterministic related-paper recommendation.
+        # This stays available when the model is offline because it uses only
+        # lexical overlap from indexed document titles, keywords and abstracts.
+        if parsed.path == "/api/recommend":
+            current_paper = self._read_text(
+                payload, "current_paper", required=True, max_length=255
+            )
+            if current_paper is None:
+                return
+            resolved_paper = store.resolve_paper_key(current_paper)
+            if not resolved_paper:
+                self._send_error(404, "PAPER_NOT_FOUND", "Paper not found in dataset.")
+                return
+            matches = store.find_similar_papers(resolved_paper, top_n=5)
+            recommendations = [
+                {
+                    "paper_name": name,
+                    "title": title,
+                    "similarity_score": score,
+                    "shared_keywords": shared,
+                }
+                for name, title, score, shared in matches
+            ]
+            self._send_json(
+                200,
+                {
+                    "status": "success",
+                    "source_paper": resolved_paper,
+                    "recommendation": recommendations[0] if recommendations else None,
+                    "recommendations": recommendations,
+                    "method": "indexed_lexical_overlap",
+                    "model_used": False,
+                },
+            )
+            return
+
+        # Endpoint 5: Cross-Paper Comparative Analysis
         if parsed.path == "/api/compare":
-            paper1 = payload.get("paper_1", "").strip()
-            paper2 = payload.get("paper_2", "").strip()
-            section = payload.get("section", "4. Results and Discussion").strip()
-            question = payload.get("question", "").strip()
+            paper1 = self._read_text(
+                payload, "paper_1", required=True, max_length=255
+            )
+            paper2 = self._read_text(
+                payload, "paper_2", required=True, max_length=255
+            )
+            section_field = "section" if "section" in payload else "section_name"
+            section = self._read_text(
+                payload,
+                section_field,
+                default="4. Results and Discussion",
+                max_length=200,
+            )
+            question = self._read_text(payload, "question", required=True)
+            if None in (paper1, paper2, section, question):
+                return
 
             res1 = store.resolve_paper_key(paper1)
             res2 = store.resolve_paper_key(paper2)
 
-            if not res1 or not res2 or not question:
-                self._send_json(400, {"error": "Both 'paper_1', 'paper_2', and 'question' are required."})
+            if not res1 or not res2:
+                self._send_error(404, "PAPER_NOT_FOUND", "One or both papers were not found.")
                 return
 
-            _, _, text1 = store.get_section_text(res1, section)
-            _, _, text2 = store.get_section_text(res2, section)
+            _, section1, text1 = store.get_section_text(res1, section)
+            _, section2, text2 = store.get_section_text(res2, section)
+            if not section1 or not text1 or not section2 or not text2:
+                self._send_error(
+                    422,
+                    "SECTION_NOT_FOUND",
+                    "The requested section must exist in both papers.",
+                )
+                return
 
             start_time = time.time()
-            answer = bridge.query_comparison(res1, text1, res2, text2, section, question)
+            try:
+                answer = bridge.query_comparison(
+                    res1, text1, res2, text2, section1, question
+                )
+            except ModelUnavailableError:
+                self._send_error(
+                    503,
+                    "MODEL_UNAVAILABLE",
+                    "The grounded model is temporarily unavailable.",
+                    {"retryable": True},
+                )
+                return
             elapsed_ms = round((time.time() - start_time) * 1000, 2)
 
             self._send_json(200, {
                 "status": "success",
                 "paper_1": res1,
                 "paper_2": res2,
-                "section": section,
+                "section": section1,
                 "question": question,
                 "answer": answer,
-                "latency_ms": elapsed_ms
+                "latency_ms": elapsed_ms,
+                "is_grounded": True,
+                "hard_negative": (answer.strip() == HARD_NEGATIVE_RESPONSE),
             })
             return
 
-        self._send_json(404, {"error": "Endpoint not found"})
+        self._send_error(404, "ENDPOINT_NOT_FOUND", "Endpoint not found.")
+
+    def _send_error(
+        self,
+        status_code: int,
+        code: str,
+        message: str,
+        details: Dict[str, Any] | None = None,
+    ):
+        payload: Dict[str, Any] = {
+            "status": "error",
+            "error": {"code": code, "message": message},
+        }
+        if details:
+            payload["error"].update(details)
+        self._send_json(status_code, payload)
 
     def _send_json(self, status_code: int, data: Dict[str, Any]):
         response_bytes = json.dumps(data, indent=2).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(response_bytes)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
         self.send_cors_headers()
         self.end_headers()
         self.wfile.write(response_bytes)
 
     def log_message(self, format, *args):
-        sys.stdout.write(f"[API] {args[0]} - {args[1]} - {args[2]}\n")
+        # Use the standard formatter so malformed HTTP requests cannot crash
+        # logging by supplying a different argument count.
+        sys.stdout.write(f"[API] {self.address_string()} - {format % args}\n")
 
 
 def run_api_server(host: str = "0.0.0.0", port: int = 8000):
+    global SERVER_API_KEY
+    SERVER_API_KEY = get_or_create_api_key()
+    initialize_runtime()
     server = ThreadedHTTPServer((host, port), GroundedAnalysisAPIHandler)
     print("=" * 70)
     print(f"  GROUNDED RESEARCH ANALYSIS API SERVER RUNNING")
     print(f"  Local / Cloud Endpoint: http://{host}:{port}")
-    print(f"  Interactive Dashboard : http://localhost:{port}")
-    print(f"  Active API Key        : {SERVER_API_KEY}")
+    print(f"  Health endpoint       : http://localhost:{port}/api/health")
+    print("  API authentication    : configured from QWEN_API_KEY")
     print("=" * 70)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         print("\n[API Server] Shutting down cleanly...")
-        watcher.stop()
+        if watcher:
+            watcher.stop()
         server.server_close()
 
 

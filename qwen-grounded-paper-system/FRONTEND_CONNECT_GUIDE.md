@@ -1,210 +1,161 @@
-# Grounded Research AI Backend — Frontend Connection Guide
+# Grounded Paper API — Next.js server integration contract
 
-This document contains everything needed to connect any web UI (React, Next.js, Vue, Svelte, or vanilla JS) to the live Grounded Research Paper API.
+This document is the handoff contract for the R&D Hub frontend owner. The browser must call a Next.js server Route Handler or Server Action; only that server code may call this backend.
 
----
+## Configuration and trust boundary
 
-## 1. Quick Connection Specs
+Configure these only in `.env.local` for local Next.js development and in server-side Vercel environment variables for deployment:
 
-| Item | Details |
-| :--- | :--- |
-| **Direct Server URL** | `http://43.204.235.82:8000` |
-| **Authentication Header** | `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1` |
-| **Content-Type** | `application/json` |
-| **Status / Uptime** | Running 24/7 as a systemd service (`qwen-api.service`) |
+```dotenv
+QWEN_BACKEND_URL=https://your-grounded-api.example
+QWEN_API_KEY=your-rotated-server-only-secret
+```
 
-> **Note on Strict System Behavior:**
-> - **Zero Hallucination / Strict Grounding:** The AI only answers using facts and metrics from the parsed research paper sections.
-> - **Anti-Coding Guardrail:** If asked to generate software code, scripts, or answer outside the text, the system strictly outputs:  
->   `"Information not available in the provided document(s)."`
+- Never use a `NEXT_PUBLIC_` prefix for either value.
+- Never send `QWEN_API_KEY` to a Client Component, browser, analytics system or log.
+- Do not use a Next.js rewrite that lets browsers call arbitrary backend paths. Create narrow server handlers, validate their input, authenticate/authorize the Hub user where appropriate, and add rate limiting at the public edge.
+- The backend accepts `X-API-Key` or `Authorization: Bearer`; the Next.js integration should consistently use `X-API-Key`.
+- Backend request bodies are limited to 32 KiB. Paper names are limited to 255 characters, sections to 200 and questions to 2,000.
+- The current EC2 endpoint may be HTTP. Production Next.js should call it server-side through HTTPS or a private network/TLS reverse proxy before launch.
 
----
+Canonical base paths below include `/api`. All protected calls include `Content-Type: application/json` and `X-API-Key`.
 
-## 2. API Endpoints Reference
+## Success contracts
 
-### A. List All Available Papers
-Retrieves all uploaded research papers and their extracted sections.
+### `GET /api/papers`
 
-- **Method:** `GET`
-- **URL:** `/api/papers`
-- **Headers:** `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-- **Response Example:**
 ```json
 {
-  "total_papers": 7,
+  "status": "success",
+  "count": 2,
   "papers": [
     {
-      "filename": "sample_paper.docx",
-      "title": "A Fully Grounded Architecture for Document Analysis",
-      "total_sections": 18,
-      "sections": [
-        "Header block",
-        "Abstract",
-        "Keywords",
-        "1. Introduction",
-        "2. Literature and Related Work",
-        "3. Methodology / Approach",
-        "4. Results and Discussion",
-        "5. Conclusion"
-      ]
+      "filename": "paper.pdf",
+      "title": "Stored document title",
+      "section_count": 18,
+      "sections": ["Abstract", "4. Results and Discussion"]
     }
   ]
 }
 ```
 
----
+This endpoint reads the in-memory index and remains usable if Ollama is offline.
 
-### B. Pre-Warm Model on Paper Select (Instant Response Optimization)
-Call this as soon as the user clicks a paper in your sidebar/dropdown. It warms up the model in the background so queries execute with zero delay.
+### `POST /api/query`
 
-- **Method:** `POST`
-- **URL:** `/api/select_paper`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
-- **Body:**
 ```json
 {
-  "paper_name": "sample_paper.docx"
+  "paper_name": "paper.pdf",
+  "section": "Abstract",
+  "question": "What problem does the paper address?"
 }
 ```
 
----
+`section` is optional; the backend then uses a small deterministic keyword map and defaults to `Abstract`. `section_name` remains accepted as a compatibility alias, but new integration code should send `section`.
 
-### C. Query Single Paper Section
-Performs strictly grounded factual analysis on a specific section of a paper.
-
-- **Method:** `POST`
-- **URL:** `/api/query`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
-- **Body:**
-```json
-{
-  "paper_name": "sample_paper.docx",
-  "section_name": "4. Results and Discussion",
-  "question": "What was the exact accuracy and F1-score achieved by the model?"
-}
-```
-- **Response Example:**
 ```json
 {
   "status": "success",
-  "paper_name": "sample_paper.docx",
-  "section_matched": "4. Results and Discussion",
-  "question": "What was the exact accuracy and F1-score achieved by the model?",
-  "answer": "The model achieved an Factual Accuracy of 96.8% and an F1-Score of 98.4%.",
-  "latency_ms": 1229.8,
+  "paper_name": "paper.pdf",
+  "section_matched": "Abstract",
+  "question": "What problem does the paper address?",
+  "answer": "Answer grounded in that section.",
+  "latency_ms": 1200.5,
   "is_grounded": true,
   "hard_negative": false
 }
 ```
 
----
+When the requested fact is absent, the request still succeeds with `hard_negative: true` and the exact answer `Information not available in the provided document(s).`
 
-### D. Cross-Paper Comparison
-Compares the same section across two different research papers.
+### `POST /api/compare`
 
-- **Method:** `POST`
-- **URL:** `/api/compare`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
-- **Body:**
 ```json
 {
-  "paper1_name": "sample_paper.docx",
-  "paper2_name": "sample_paper_2.txt",
-  "section_name": "4. Results and Discussion",
-  "question": "Compare the performance metrics between both papers."
+  "paper_1": "paper-one.pdf",
+  "paper_2": "paper-two.pdf",
+  "section": "4. Results and Discussion",
+  "question": "How do the reported results differ?"
 }
 ```
 
----
+Both papers must contain the requested section. The success response contains `status`, resolved `paper_1`, resolved `paper_2`, resolved `section`, `question`, `answer`, `latency_ms`, `is_grounded` and `hard_negative`.
 
-### E. Grounded Paper Recommendation
-Recommends the next relevant paper to read based purely on shared terminology in the dataset.
+### `POST /api/recommend`
 
-- **Method:** `POST`
-- **URL:** `/api/recommend`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
-- **Body:**
 ```json
-{
-  "current_paper": "sample_paper.docx"
-}
+{ "current_paper": "paper-one.pdf" }
 ```
 
----
-
-## 3. Important: Vercel / Next.js Setup (Avoid Mixed-Content)
-
-Because Vercel hosts your frontend over **HTTPS**, modern web browsers block requests sent directly to an `http://` backend ("Mixed Content Error").
-
-To solve this cleanly, add an API rewrite in your Next.js config so the frontend calls `/api/*` on its own domain, and Next.js proxies it server-side to the EC2 instance:
-
-### If using Next.js (`next.config.js` or `next.config.mjs`):
-```javascript
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/backend-api/:path*',
-        destination: 'http://43.204.235.82:8000/api/:path*',
-      },
-    ];
+```json
+{
+  "status": "success",
+  "source_paper": "paper-one.pdf",
+  "recommendation": {
+    "paper_name": "paper-two.pdf",
+    "title": "Stored document title",
+    "similarity_score": 12.5,
+    "shared_keywords": ["grounded systems"]
   },
-};
-
-export default nextConfig;
+  "recommendations": [],
+  "method": "indexed_lexical_overlap",
+  "model_used": false
+}
 ```
 
-### If using Vite / Plain Vercel (`vercel.json`):
+The first item is repeated as `recommendation` for a simple related-paper card. When nothing overlaps, it is `null` and `recommendations` is empty. This is intentionally deterministic and remains available while Ollama is offline; it does not invent an AI explanation.
+
+### `GET /api/health`
+
+No API key is required. Returns HTTP 200 with `status: "healthy"` when Ollama responds. Returns HTTP 503 with `status: "degraded"` and `ollama_ready: false` when inference is unavailable.
+
+## Error contract
+
+All non-success responses use:
+
 ```json
 {
-  "rewrites": [
-    {
-      "source": "/backend-api/(.*)",
-      "destination": "http://43.204.235.82:8000/api/$1"
-    }
-  ]
-}
-```
-
----
-
-## 4. Frontend Example (React / TypeScript / JavaScript)
-
-```typescript
-const API_KEY = "qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1";
-
-// If using the rewrite proxy:
-const BASE_URL = "/backend-api"; 
-// Or if direct: "http://43.204.235.82:8000/api"
-
-export async function askQuestion(paperName: string, sectionName: string, question: string) {
-  const response = await fetch(`${BASE_URL}/query`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": API_KEY,
-    },
-    body: JSON.stringify({
-      paper_name: paperName,
-      section_name: sectionName,
-      question: question,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+  "status": "error",
+  "error": {
+    "code": "MODEL_UNAVAILABLE",
+    "message": "The grounded model is temporarily unavailable.",
+    "retryable": true
   }
-
-  const data = await response.json();
-  return data.answer; // Contains factual extraction or "Information not available in the provided document(s)."
 }
 ```
+
+| HTTP | Code | Meaning |
+|---:|---|---|
+| 400 | `INVALID_JSON`, `INVALID_REQUEST`, `INVALID_FIELD`, `MISSING_FIELD`, `FIELD_TOO_LONG` | Caller input is malformed. |
+| 401 | `UNAUTHORIZED` | Server credential is absent or invalid. Never expose this response detail to browser logs. |
+| 404 | `PAPER_NOT_FOUND`, `ENDPOINT_NOT_FOUND` | Indexed paper or route does not exist. |
+| 413 | `PAYLOAD_TOO_LARGE` | Body exceeds 32 KiB. |
+| 422 | `SECTION_NOT_FOUND` | Requested/inferred section is unavailable, or comparison papers do not both contain it. |
+| 503 | `MODEL_UNAVAILABLE` | Query/compare inference is offline; show a retry state. |
+
+## Minimal Next.js server-side requirements
+
+The frontend owner should create separate, narrow Route Handlers for papers, query, compare and recommend. Each must:
+
+1. import `server-only` in the backend client module;
+2. read and validate configuration at server startup/request time;
+3. validate browser input with Zod before forwarding;
+4. allow only the documented fields and endpoint;
+5. apply a shorter frontend-facing timeout than the backend's 180-second inference limit;
+6. forward status codes and safe JSON error codes without internal exception details;
+7. set `Cache-Control: no-store` for responses;
+8. never log request headers, keys, full paper content or model prompts;
+9. enforce rate/abuse controls before exposing query and compare publicly;
+10. keep normal public research pages independent so an AI outage never blocks discovery.
+
+Suggested server-only TypeScript types should mirror the JSON above. Do not treat `is_grounded` as independent proof of truth: display the resolved paper and section beside every answer and provide a link back to the source publication.
+
+## Deployment verification
+
+From this directory, after configuring the two server-only variables:
+
+```bash
+python verify_ec2_api.py
+```
+
+The verifier calls papers, query, compare and recommend, but prints only pass/fail and indexed-paper count—never credentials or paper contents.

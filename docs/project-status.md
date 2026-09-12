@@ -79,6 +79,12 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 **Status:** Public code audit and local checks complete; browser/hosted acceptance pending
 
 ### Latest handoff
+- Qwen grounded-paper backend (2026-09-12):
+  - Fixed and deployed the authenticated API contract for papers, grounded query, comparison and deterministic related-paper recommendation; eight papers are indexed on the active EC2 service.
+  - Rotated the newly disclosed API key again without logging it, moved systemd to an environment file, disabled browser credential entry/wildcard CORS, added input limits and structured offline/error states, and hardened the service sandbox. No main-site UI was changed.
+  - Live verification passed for all four required endpoints and the exact absent-claim fallback. Local focused suite passed 10/10; EC2 contract suite passed 6/6; real EC2 parser/watcher/Qwen suite passed 7/7.
+  - Contract and deployment evidence: `qwen-grounded-paper-system/FRONTEND_CONNECT_GUIDE.md` and `qwen-grounded-paper-system/DEPLOYMENT_STATUS.md`.
+  - Remaining blocker: the EC2 endpoint is plain HTTP. Add trusted TLS/private networking and restrict direct port 8000 before production/Vercel integration. Frontend owner retains all Next.js route/UI placement and Supabase-user authorization work.
 - Public-site audit (2026-09-12, carried out by Rabin):
   - Inspected all 11 public route patterns against current `dev` baseline `e05a583`; repaired slug links, real area connections, published-only detail/metadata, honest search filters and account-aware navigation.
   - Removed unsupported metrics, journal/indexing claims, fabricated project details and placeholder events/opportunities. Preserved visible DEMO DATA and shared components.

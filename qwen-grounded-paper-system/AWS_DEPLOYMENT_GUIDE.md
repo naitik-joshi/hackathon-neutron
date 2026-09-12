@@ -64,9 +64,7 @@ flowchart TD
 Open PowerShell in `c:\Users\ASUS\Downloads\Qwen`:
 
 ```powershell
-# Set your AWS credentials
-$env:AWS_ACCESS_KEY_ID = "YOUR_AWS_ACCESS_KEY_ID"
-$env:AWS_SECRET_ACCESS_KEY = "YOUR_AWS_SECRET_ACCESS_KEY"
+# Prefer AWS SSO or an assumed role. Do not paste long-lived access keys into a shell.
 $env:AWS_DEFAULT_REGION = "us-east-1"
 $env:AWS_S3_BUCKET = "my-research-papers-dataset-2026"
 
@@ -86,7 +84,7 @@ python s3_sync.py upload --bucket my-research-papers-dataset-2026 --prefix paper
 5. **Key Pair**: Select or create an SSH key pair (`my-key.pem`).
 6. **Storage**: Set storage to at least **50 GB** (gp3).
 7. **IAM Instance Profile (Recommended)**:
-   - Attach an IAM role with `AmazonS3FullAccess` (or read/write access to your specific bucket) so the instance authenticates with S3 passwordlessly.
+   - Attach an IAM role with least-privilege read/write access to the one required bucket and `papers/` prefix so the instance authenticates without stored access keys. Do not use `AmazonS3FullAccess`.
 8. Click **Launch instance**.
 
 ---
@@ -117,10 +115,10 @@ From your **local machine**, transfer the core code files to EC2:
 
 ```powershell
 # Run from c:\Users\ASUS\Downloads\Qwen on your local machine:
-scp -i "my-key.pem" config.py parser.py store.py watcher.py ollama_bridge.py s3_sync.py main.py requirements.txt AGENTS.md benchmark_grounding.py test_live_mutation.py test_system.py ubuntu@<YOUR_EC2_PUBLIC_IP>:~/app/
+scp -i "my-key.pem" api_server.py config.py parser.py store.py watcher.py ollama_bridge.py s3_sync.py requirements.txt setup_service_remote.sh ubuntu@<YOUR_EC2_PUBLIC_IP>:/home/ubuntu/
 ```
 
-*(Alternatively, push your code to a private GitHub/GitLab repository and run `git clone` inside `~/app` on EC2).*
+The current service layout runs from `/home/ubuntu`. Keep that path consistent with `setup_service_remote.sh`.
 
 ---
 
@@ -128,7 +126,7 @@ scp -i "my-key.pem" config.py parser.py store.py watcher.py ollama_bridge.py s3_
 Back in your EC2 SSH terminal:
 
 ```bash
-cd ~/app
+cd /home/ubuntu
 
 # Create virtual environment
 python3 -m venv venv
@@ -143,6 +141,17 @@ export AWS_S3_BUCKET="my-research-papers-dataset-2026"
 export AWS_DEFAULT_REGION="us-east-1"
 python s3_sync.py pull --bucket $AWS_S3_BUCKET --prefix papers/
 ```
+
+Create the server-only API environment file without printing its value:
+
+```bash
+umask 077
+printf 'QWEN_API_KEY=%s\n' '<rotated-secret>' > /home/ubuntu/.api_key_env
+chmod 600 /home/ubuntu/.api_key_env
+sudo bash /home/ubuntu/setup_service_remote.sh
+```
+
+Do not put the key directly in the systemd unit, shell history, repository or logs. In production, terminate TLS in front of the API and restrict port `8000` at the security group/firewall; the Next.js server is the only supported application caller.
 
 ---
 
@@ -161,18 +170,6 @@ Runs the live system with closed-domain grounding:
 ```bash
 python main.py run
 ```
-
-For the systemd API service, provide the API key at install time instead of
-placing it in the repository:
-
-```bash
-export QWEN_API_KEY="<generate-a-strong-api-key>"
-sudo --preserve-env=QWEN_API_KEY bash setup_service_remote.sh
-```
-
-The installer stores the value in root-readable `/etc/qwen-api.env`. Never
-commit `.api_key`, `.env` files, AWS credentials, or the generated service
-environment file.
 
 ---
 
