@@ -40,30 +40,31 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend & Integration Primary
 
-**Current issue:** WEB-5 / WEB-10 / WEB-11 integration
-**Branch:** `dev`
-**Status:** Local integration complete; hosted acceptance pending
+**Current issue:** WEB-17 / WEB-22 integration, with WEB-14 next
+**Branch:** `feat/WEB-17-needs-attention`
+**Status:** Local implementation and current admin UI integration complete; hosted acceptance pending
 
 ### Latest handoff
 - Work completed:
-  - Audited the merged frontend/backend contracts and removed misleading project-specific claims that were not backed by schema fields.
-  - Added student-only registration, account-aware global navigation, responsive researcher/admin workspace navigation, and a role-aware account page.
-  - Wired ownership-scoped publication edit/resubmit, private researcher review history, and admin review notes for request-changes/reject/publish decisions.
-  - Applied the shared Stitch-inspired editorial UI foundation and a focused homepage pass using only database-backed records.
+  - WEB-17: added deterministic stale-review, inactive-changes-requested, and stale-ongoing-project rules with configurable demo thresholds and normalized severity/action results.
+  - Configured 7-day stale-review, 14-day changes-requested, and 60-day stale-ongoing-project demonstration thresholds; these are not institutional policy.
+  - WEB-17: added a compact admin Needs Attention list with record links and an honest empty state.
+  - WEB-22: added exact database-backed counts for published publications, pending/reviewing submissions, projects, changes requested, and records needing attention.
+  - Integrated the attention engine into Millind's latest database-backed admin dashboard without replacing its KPIs, review queue, recent submissions, or interest inbox.
+  - Kept the operations API presentation-independent for later WEB-14 dashboard use.
 - Areas touched:
-  - `app/auth/`, `app/account/`, `app/researcher/`, `app/admin/`, shared layout/styles/navigation/UI.
-  - Publication and submission frontend integration, project data-fidelity fixes, auth validation tests, and handoff docs.
+  - `features/operations/`, `components/admin/`, `app/admin/page.tsx`.
+  - `tests/operations.test.ts`, `docs/research-operations.md`.
 - Checks:
   - `npm run check` passed (ESLint and TypeScript).
-  - `npm test` passed: 24/24 tests.
-  - Default Turbopack `npm run build` was blocked by this agent sandbox's worker-port restriction; `npm run build -- --webpack` passed and generated all routes.
-  - Local production smoke: public homepage/signup rendered from hosted data, signup mismatch feedback was announced, and signed-out researcher/admin routes redirected to sign-in.
+  - `npm test` passed: 32/32 tests.
+  - Default `npm run build` hit the known agent-environment Turbopack worker-port restriction.
+  - `npm run build -- --webpack` passed and generated all routes.
 - Blockers / dependencies:
-  - Hosted migrations `202609120002_review_feedback.sql` and `202609120003_project_interests.sql` remain unapplied, so review-history and interest acceptance cannot pass against hosted Supabase yet.
-  - Hosted Auth/cookie/Data API acceptance remains pending; local checks and PGlite tests do not complete WEB-5.
+  - Hosted Supabase authorization and live-count acceptance were not performed. WEB-17 and WEB-22 remain pending hosted verification.
+  - Shared review/interest migrations and WEB-5 acceptance remain separate pending work.
 - Next:
-  - Coordinate the hosted migration push with Rabin, compare generated types, then run the complete anonymous/student/researcher/admin acceptance matrix in `docs/testing.md`.
-  - After WEB-5 evidence is recorded, continue WEB-6 connected search support without taking WEB-7/WEB-8 public page ownership.
+  - Complete WEB-14 integration review, then verify the admin overview with a hosted admin session after the coordinated migration/WEB-5 work is ready.
 
 ---
 

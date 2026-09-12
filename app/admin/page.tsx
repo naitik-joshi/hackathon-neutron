@@ -10,7 +10,8 @@ import {
   CheckCircle2,
   Inbox,
 } from "lucide-react";
-import { requireRole } from "@/lib/auth/guards";
+import { AttentionList } from "@/components/admin/attention-list";
+import { getAdminOverview } from "@/features/operations/queries";
 import { getAdminDashboardData } from "@/features/submissions/admin-queries";
 import { StatusBadge, DemoBadge } from "@/components/shared/status-badge";
 
@@ -19,9 +20,10 @@ export const metadata = {
 };
 
 export default async function Admin() {
-  await requireRole(["admin"]);
-  const { metrics, recentSubmissions, recentInterests } =
-    await getAdminDashboardData();
+  const [
+    { metrics, recentSubmissions, recentInterests },
+    { attention },
+  ] = await Promise.all([getAdminDashboardData(), getAdminOverview()]);
 
   const pendingAttentionCount =
     metrics.submitted + metrics.underReview + metrics.changesRequested;
@@ -156,6 +158,8 @@ export default async function Admin() {
           </Link>
         </div>
       </div>
+
+      <AttentionList items={attention} />
 
       {/* Active Submissions Needing Editorial Attention */}
       <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm space-y-4">
