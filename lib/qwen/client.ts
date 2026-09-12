@@ -16,7 +16,7 @@ import type {
 } from "./schemas.ts";
 
 const SHORT_TIMEOUT_MS = 12_000;
-const INFERENCE_TIMEOUT_MS = 120_000;
+const INFERENCE_TIMEOUT_MS = 165_000;
 
 export function readQwenConfig() {
   return validateQwenConfig(
