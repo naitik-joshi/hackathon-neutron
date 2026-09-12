@@ -4,7 +4,7 @@ This plan follows the public/auth audit in `docs/ui-ux-audit.md`. Pass 1 now imp
 
 ## Pass 1 implementation note
 
-- The tracked root `logo.svg` is the approved source used for this pass. An unchanged public copy lives at `public/brand/ijmr-logo.svg` so Next.js can serve it without a custom asset pipeline.
+- The tracked root `logo.svg` is the approved source used for this pass. A visually unchanged public copy, normalized only for trailing whitespace, lives at `public/brand/ijmr-logo.svg` so Next.js can serve it without a custom asset pipeline.
 - `next/font/google` was evaluated for the planned Source Serif 4 and Inter pairing, but the build environment cannot fetch Google font files. Pass 1 therefore uses stable system serif and sans stacks with the same hierarchy and metrics. Approved self-hosted font files can replace these stacks later without changing component APIs.
 - The project-interest form now calls the existing server action. When an action is unavailable it reports that the request was not saved; it never simulates success.
 - Homepage data sources settle independently, so one failed query no longer removes every discovery section.
