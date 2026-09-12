@@ -1,0 +1,46 @@
+@import "tailwindcss";
+:root {
+  --ink: #142c43;
+  --paper: #f5f7fb;
+  --accent: #215ac7;
+}
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+}
+h1,
+h2,
+h3 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+  line-height: 1.15;
+}
+p {
+  line-height: 1.65;
+}
+label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+:focus-visible {
+  outline: 3px solid #215ac7;
+  outline-offset: 4px;
+}
+.eyebrow {
+  color: #52677b;
+  font:
+    600 0.75rem/1.5 ui-monospace,
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.text-link {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}

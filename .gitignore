@@ -1,0 +1,11 @@
+.next/
+node_modules/
+.env*
+!.env.example
+*.tsbuildinfo
+coverage/
+.DS_Store
+.supabase/
+supabase/.temp/
+
+stitch/

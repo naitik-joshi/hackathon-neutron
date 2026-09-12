@@ -1,0 +1,476 @@
+{
+  "project": {
+    "name": "Islington R&D Digital Hub — Hackathon 2026",
+    "id": "0219a1e7-55da-4a2e-92a3-08294b13f985",
+    "url": "https://linear.app/web-dev-2026/project/islington-randd-digital-hub-hackathon-2026-9dd9e3a41481"
+  },
+  "milestones": [
+    "Foundation Alive",
+    "Discovery Works",
+    "Participation Works",
+    "Research Operations Works",
+    "Demo Ready"
+  ],
+  "issues": [
+    {
+      "key": "F01",
+      "title": "Verify the hosted Supabase publication journey",
+      "priority": "P0",
+      "linearPriority": "Urgent",
+      "milestone": "Foundation Alive",
+      "ownerRole": "Backend/Auth",
+      "description": "Connect a development Supabase project and exercise the full signed-in workflow.",
+      "scope": "supabase/, features/auth/, docs/testing.md",
+      "acceptanceCriteria": [
+        "Apply migration and seed to a development project.",
+        "Create researcher/admin/student accounts through trusted provisioning.",
+        "Capture submit → review → publish → anonymous read and negative role tests."
+      ],
+      "dependencies": [],
+      "suggestedBranch": "feat/WEB-5-verify-supabase-journey",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-5",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-5/verify-the-hosted-supabase-publication-journey"
+    },
+    {
+      "key": "D01",
+      "title": "Add connected search across research entities",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Discovery Works",
+      "ownerRole": "Backend/Integration",
+      "description": "Extend title search to areas, researchers, projects and publications without leaking private rows.",
+      "scope": "features/research/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Search returns grouped entity results with useful links.",
+        "RLS prevents private submissions from appearing.",
+        "Empty query, special characters and zero results are tested."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-6-connected-search",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-6",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-6/add-connected-search-across-research-entities"
+    },
+    {
+      "key": "D02",
+      "title": "Connect research area pages to people and publications",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Discovery Works",
+      "ownerRole": "Public UI/UX",
+      "description": "Expand the existing area-to-project preview into a connected discovery page.",
+      "scope": "app/(public)/research/[slug]/, features/research/",
+      "acceptanceCriteria": [
+        "Show linked researchers and published outputs via relationship tables.",
+        "Preserve DEMO DATA and mobile layouts.",
+        "Each entity has a useful next action."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-7-area-connections",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-7",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-7/connect-research-area-pages-to-people-and-publications"
+    },
+    {
+      "key": "D03",
+      "title": "Create public researcher detail pages",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Discovery Works",
+      "ownerRole": "Public UI/UX",
+      "description": "Give a public researcher identity context and connected work.",
+      "scope": "app/(public)/researchers/, components/research/",
+      "acceptanceCriteria": [
+        "Unique slug route shows biography and public projects/publications.",
+        "Private profile data and unpublished outputs remain hidden.",
+        "Missing records and demo labels are handled."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-8-researcher-pages",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-8",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-8/create-public-researcher-detail-pages"
+    },
+    {
+      "key": "D04",
+      "title": "Create public project detail pages",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Discovery Works",
+      "ownerRole": "Public UI/UX",
+      "description": "Explain a project with its areas, people and published outputs.",
+      "scope": "app/(public)/projects/, features/projects/",
+      "acceptanceCriteria": [
+        "Slug route shows project purpose and lifecycle status.",
+        "Link relevant areas, researchers and published outputs.",
+        "Keyboard and mobile navigation work."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-9-project-pages",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-9",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-9/create-public-project-detail-pages"
+    },
+    {
+      "key": "W01",
+      "title": "Add researcher edit and resubmit screens",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Backend/Auth",
+      "description": "Expose the existing draft/change-request permissions through a small edit flow.",
+      "scope": "features/publications/, app/researcher/publications/",
+      "acceptanceCriteria": [
+        "Only owners can edit Draft or Changes Requested.",
+        "Resubmission changes status to Submitted and locks edits.",
+        "Direct API and action attempts against other states are tested."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-10-resubmit-publication",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-10",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-10/add-researcher-edit-and-resubmit-screens"
+    },
+    {
+      "key": "W02",
+      "title": "Add review feedback and reviewer attribution",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Dashboard UI/UX",
+      "description": "Explain requested changes and rejection with a visible review note.",
+      "scope": "features/submissions/, app/admin/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Coordinate an additive migration for review note and reviewer.",
+        "Researcher sees the review feedback on their own record.",
+        "Review notes stay private and cannot be changed by researchers."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-11-review-feedback",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-11",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-11/add-review-feedback-and-reviewer-attribution"
+    },
+    {
+      "key": "P01",
+      "title": "Create expression-of-interest database and action",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Participation Works",
+      "ownerRole": "Backend/Auth",
+      "description": "Let authenticated students express interest in one project with private contact context.",
+      "scope": "features/participation/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Coordinate minimal interest schema and RLS.",
+        "Validate and deduplicate submissions.",
+        "Only owner and authorized admin can read private interest records."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-12-interest-backend",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-12",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-12/create-expression-of-interest-database-and-action"
+    },
+    {
+      "key": "P02",
+      "title": "Build Get Involved entry and interest form",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Participation Works",
+      "ownerRole": "Public UI/UX",
+      "description": "Provide a clear participation action from project detail.",
+      "scope": "app/(public)/projects/, features/participation/",
+      "acceptanceCriteria": [
+        "Public information remains accessible without login.",
+        "Account required only when submitting interest.",
+        "Show accessible validation, pending and confirmation states."
+      ],
+      "dependencies": ["P01", "D04"],
+      "suggestedBranch": "feat/WEB-13-get-involved",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-13",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-13/build-get-involved-entry-and-interest-form"
+    },
+    {
+      "key": "W03",
+      "title": "Show role-relevant dashboard next actions",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Dashboard UI/UX",
+      "description": "Replace generic next steps with counts and actionable status links.",
+      "scope": "app/researcher/, app/admin/",
+      "acceptanceCriteria": [
+        "Counts reflect the signed-in role and current records.",
+        "Change requests link to editing and feedback.",
+        "Admin queue shows meaningful empty and error states."
+      ],
+      "dependencies": ["W01", "W02"],
+      "suggestedBranch": "feat/WEB-14-dashboard-next-actions",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-14",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-14/show-role-relevant-dashboard-next-actions"
+    },
+    {
+      "key": "Q01",
+      "title": "Audit responsive and keyboard journeys",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Demo Ready",
+      "ownerRole": "Public UI/UX",
+      "description": "Make core discovery and dashboard journeys usable on mobile and by keyboard.",
+      "scope": "components/, app/, docs/testing.md",
+      "acceptanceCriteria": [
+        "Check 375px and desktop layouts without horizontal overflow.",
+        "Labels, focus order and feedback are usable without a mouse.",
+        "Capture representative screenshots and fix critical issues."
+      ],
+      "dependencies": ["D02", "D03", "D04", "W03"],
+      "suggestedBranch": "feat/WEB-15-responsive-audit",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-15",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-15/audit-responsive-and-keyboard-journeys"
+    },
+    {
+      "key": "Q02",
+      "title": "Rehearse and record the demo acceptance journey",
+      "priority": "P0",
+      "linearPriority": "High",
+      "milestone": "Demo Ready",
+      "ownerRole": "Backend/Integration",
+      "description": "Prove the integrated hackathon workflow and prepare a fallback demonstration.",
+      "scope": "docs/demo-plan.md, docs/handoff-v0.1.md",
+      "acceptanceCriteria": [
+        "Run lint, types, tests and production build on frozen main.",
+        "Rehearse anonymous → researcher → admin → anonymous in separate sessions.",
+        "Check all fictional records have DEMO DATA; save backup screenshots."
+      ],
+      "dependencies": ["Q01", "P02"],
+      "suggestedBranch": "feat/WEB-16-demo-rehearsal",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-16",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-16/rehearse-and-record-the-demo-acceptance-journey"
+    },
+    {
+      "key": "O01",
+      "title": "Add Needs Attention and freshness queries",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Backend/Integration",
+      "description": "Prioritize stale reviews and incomplete research records.",
+      "scope": "features/submissions/, app/admin/",
+      "acceptanceCriteria": [
+        "Define a small set of actionable stale/incomplete rules.",
+        "Admin-only results link to affected records.",
+        "No invented analytics or exposed private records."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-17-needs-attention",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-17",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-17/add-needs-attention-and-freshness-queries"
+    },
+    {
+      "key": "O02",
+      "title": "Create a minimal event management slice",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Backend/Integration",
+      "description": "Model an admin-managed event with optional external registration.",
+      "scope": "features/events/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Add coordinated schema, RLS and admin form for title/date/URL.",
+        "Validate external URLs and label outbound registration.",
+        "Public event summary preserves demo labels."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-18-event-slice",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-18",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-18/create-a-minimal-event-management-slice"
+    },
+    {
+      "key": "O03",
+      "title": "Create a minimal opportunity management slice",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Participation Works",
+      "ownerRole": "Dashboard UI/UX",
+      "description": "Let admins publish a small opportunity record with an application direction.",
+      "scope": "features/opportunities/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Coordinate schema and admin-only mutations.",
+        "Show public deadline, description and next action.",
+        "Expired opportunities are clearly indicated."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-19-opportunity-slice",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-19",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-19/create-a-minimal-opportunity-management-slice"
+    },
+    {
+      "key": "O04",
+      "title": "Prototype grant directory schema and read view",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Backend/Integration",
+      "description": "Document and display the minimum information needed for grants.",
+      "scope": "features/grants/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Agree minimal fields before migrating.",
+        "Only admins curate; public records are explicitly public.",
+        "Seed only clearly marked demonstration records."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-20-grant-directory",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-20",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-20/prototype-grant-directory-schema-and-read-view"
+    },
+    {
+      "key": "O05",
+      "title": "Add in-app review notifications",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Backend/Auth",
+      "description": "Notify a researcher when a review decision changes.",
+      "scope": "features/notifications/, supabase/migrations/",
+      "acceptanceCriteria": [
+        "Owner-only notification reads and mark-read action.",
+        "Generate notifications transactionally or document reliable delivery.",
+        "No email integration required for this slice."
+      ],
+      "dependencies": ["W02"],
+      "suggestedBranch": "feat/WEB-21-review-notifications",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-21",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-21/add-in-app-review-notifications"
+    },
+    {
+      "key": "O06",
+      "title": "Add basic admin counts from real records",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Dashboard UI/UX",
+      "description": "Replace the analytics shell with a few useful database-derived counts.",
+      "scope": "app/admin/, features/analytics/",
+      "acceptanceCriteria": [
+        "Counts show published outputs, pending reviews and projects.",
+        "Admin-only queries are enforced and empty states are honest.",
+        "No fabricated metrics or large chart dependencies."
+      ],
+      "dependencies": ["F01"],
+      "suggestedBranch": "feat/WEB-22-admin-counts",
+      "estimateMinutes": 45,
+      "linearIdentifier": "WEB-22",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-22/add-basic-admin-counts-from-real-records"
+    },
+    {
+      "key": "O07",
+      "title": "Define researcher profile update review flow",
+      "priority": "P1",
+      "linearPriority": "Medium",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Backend/Auth",
+      "description": "Design a reviewed profile change request without direct institutional publishing.",
+      "scope": "features/researchers/, docs/data-model.md",
+      "acceptanceCriteria": [
+        "Document minimal requested-change schema and transitions.",
+        "Researcher proposes changes; admin decides publication.",
+        "Add permission tests for proposed data access."
+      ],
+      "dependencies": ["W02"],
+      "suggestedBranch": "feat/WEB-23-profile-review",
+      "estimateMinutes": 90,
+      "linearIdentifier": "WEB-23",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-23/define-researcher-profile-update-review-flow"
+    },
+    {
+      "key": "S01",
+      "title": "Evaluate semantic search with a public-only dataset",
+      "priority": "P2",
+      "linearPriority": "Low",
+      "milestone": "Discovery Works",
+      "ownerRole": "Backend/Integration",
+      "description": "Timebox a feasibility study after the demo-critical paths work.",
+      "scope": "docs/decisions.md, features/research/",
+      "acceptanceCriteria": [
+        "Compare keyword search against a small public test set.",
+        "Document cost, privacy and infrastructure tradeoffs.",
+        "No production embeddings added without team decision."
+      ],
+      "dependencies": ["D01", "Q02"],
+      "suggestedBranch": "feat/WEB-24-semantic-search-spike",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-24",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-24/evaluate-semantic-search-with-a-public-only-dataset"
+    },
+    {
+      "key": "S02",
+      "title": "Design a cited public research assistant",
+      "priority": "P2",
+      "linearPriority": "Low",
+      "milestone": "Discovery Works",
+      "ownerRole": "Public UI/UX",
+      "description": "Explore a grounded assistant that points back to published evidence.",
+      "scope": "docs/product-vision.md, docs/architecture.md",
+      "acceptanceCriteria": [
+        "Specify citations, refusal/unknown behavior and public data boundary.",
+        "Create a small reviewable interaction sketch.",
+        "Record evaluation criteria before choosing an AI SDK."
+      ],
+      "dependencies": ["Q02"],
+      "suggestedBranch": "feat/WEB-25-assistant-spike",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-25",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-25/design-a-cited-public-research-assistant"
+    },
+    {
+      "key": "S03",
+      "title": "Evaluate admin recommendations and personalization",
+      "priority": "P2",
+      "linearPriority": "Low",
+      "milestone": "Research Operations Works",
+      "ownerRole": "Dashboard UI/UX",
+      "description": "Explore useful recommendations without opaque institutional decisions.",
+      "scope": "docs/decisions.md, app/admin/",
+      "acceptanceCriteria": [
+        "Identify two actionable suggestions with explanations.",
+        "Document privacy and opt-in requirements for personalization.",
+        "Keep approval and publication human-controlled."
+      ],
+      "dependencies": ["O01", "Q02"],
+      "suggestedBranch": "feat/WEB-26-recommendations-spike",
+      "estimateMinutes": 60,
+      "linearIdentifier": "WEB-26",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-26/evaluate-admin-recommendations-and-personalization"
+    },
+    {
+      "key": "S04",
+      "title": "Scope partners and richer integrations",
+      "priority": "P2",
+      "linearPriority": "Low",
+      "milestone": "Participation Works",
+      "ownerRole": "Backend/Integration",
+      "description": "Plan a partner directory and one useful integration without expanding bootstrap.",
+      "scope": "docs/data-model.md, docs/roadmap.md",
+      "acceptanceCriteria": [
+        "Document partner relationships and public/private fields.",
+        "Identify one integration with source ownership and failure behavior.",
+        "Break implementation into bounded follow-up issues."
+      ],
+      "dependencies": ["Q02"],
+      "suggestedBranch": "feat/WEB-27-partner-integrations-spike",
+      "estimateMinutes": 45,
+      "linearIdentifier": "WEB-27",
+      "linearUrl": "https://linear.app/web-dev-2026/issue/WEB-27/scope-partners-and-richer-integrations"
+    }
+  ]
+}
