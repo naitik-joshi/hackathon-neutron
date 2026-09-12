@@ -1,36 +1,44 @@
-# Naitik — WEB-29 Pass 1 public UI foundation
+# Naitik — WEB-29 public UI/UX redesign
 
-**Branch:** `feat/WEB-29-ui-foundation`
+**Branch:** `feat/WEB-29-public-experience`
 
-**Status:** Local implementation and browser QA complete; hosted acceptance pending.
+**Status:** Pass 2 implementation and local browser acceptance complete; hosted Supabase write acceptance remains pending.
 
-## Work completed
+## Pass 2 completed
 
-- Repaired the project-interest path so it invokes the real server action and never reports simulated success. Guest and non-student states now show honest access guidance without a disabled fake form.
-- Added strict, tested internal return-path handling for sign-in and sign-up. Admin and researcher post-authentication destinations remain server-derived and cannot be overridden by a public redirect.
-- Added independent homepage data loading, a publication-title-only search entry, and an editorial homepage hierarchy built entirely from public database records.
-- Established semantic brand, surface, typography, state, focus, radius, shadow and motion tokens; rebuilt shared buttons, fields, messages and route states on those tokens.
-- Added the tracked IJMR mark under `public/brand/`, a server-rendered role-aware header with a small interactive navigation island, keyboard/Escape mobile behavior, and a footer with verified IJMR links.
-- Rebuilt sign-in, student-only sign-up and forbidden recovery around the existing Supabase actions. Added accessible password reveal controls and explicit institution-provisioned researcher/admin guidance.
-- Kept role resolution, authorization, writes and published-data filtering on the existing server/database boundaries. No schema, migration, admin, researcher or Qwen code was changed.
+- Rebuilt the public research, researcher, project, and publication directories with entity-specific editorial patterns and honest URL-backed search/filter controls.
+- Rebuilt all four entity detail routes around real public relationships, breadcrumbs, concise page introductions, specific empty states, and clear next paths.
+- Added a reusable database-backed relationship rail that adapts its current entity and links across research areas, researchers, projects, published outputs, and participation.
+- Batched directory relationship lookups to avoid per-row relationship queries. Publications remain restricted to published records in public query paths.
+- Preserved the real project-interest action and student/guest access states on project detail. No hosted interest record was created during this visual pass.
+- Made Events and Opportunities intentional honest states without inventing events, grants, deadlines, or eligibility. Opportunities directs visitors through Projects to Get Involved.
+- Added route-shaped loading states, context-preserving error recovery, purposeful empty states, and a branded not-found route.
+- Used CSS-only interaction feedback. Motion was intentionally not installed because short transitions and the existing mobile-navigation island cover the required behavior without additional hydration.
+- Removed two unused project-detail presentation components after their real functionality was consolidated into the connected detail page.
+- Left auth, admin, researcher workspaces, Qwen, migrations, Supabase core utilities, and the database schema unchanged.
 
-## Files and boundaries
+## Data and asset integrity
 
-- Shared changes are concentrated in `app/globals.css`, the root layout, `components/ui/`, the public header/footer/brand components and global route states.
-- Feature changes are limited to public homepage composition, project participation wiring, authentication pages/forms/actions, and small reusable redirect/loading helpers.
-- The user-provided `assets/` directory was left untouched and is not part of this branch.
+- Public pages display stored fields and real relationship rows only. DEMO DATA remains visible.
+- The local `assets/` source files were not published, uploaded, or linked to database records. They are ignored by Git in the current branch. Approved public files can later move to `public/resources/`; managed or record-linked documents should use hosted Supabase Storage after coordinated data-model work.
 
 ## Verification
 
-- `npm run check` passed (ESLint and TypeScript).
-- `npm test` passed: 40/40 tests.
-- Default `npm run build` hit the known agent-environment Turbopack worker-port restriction after local font fetching had already been removed.
-- `npm run build -- --webpack` passed and generated all application routes.
-- Browser QA covered the homepage, sign-in, sign-up, forbidden recovery and a project participation boundary at 375px, 768px, 1024px and 1440px. The mobile menu opens, closes with Escape and restores the trigger state; password reveal updates its label and input type.
-- Browser console hydration messages were traced to installed extensions injecting `bis_skin_checked` and a generated `__processed_*` body attribute, rather than application markup.
-- Hosted Supabase registration, post-auth redirects and a real student interest write remain pending. No hosted schema was mutated.
+- `npm run check` passed (ESLint, route type generation, and TypeScript).
+- `npm test` passed: 41/41 tests.
+- Default `npm run build` reached the known agent-environment Turbopack worker-port restriction (`Operation not permitted`) and reported no application error.
+- `npm run build -- --webpack` passed and generated every application route.
+- `git diff --check` passed.
+- Browser QA covered Home → Research → Area → Researcher → Project → Publication → participation, plus direct project filters, publication and researcher journeys, Events, Opportunities, and not-found at 375px, 768px, 1024px, and 1440px.
+- Keyboard QA covered the skip link, desktop and mobile navigation, search/filter controls, entity links, relationship navigation, participation boundary, and footer. The mobile menu closes with Escape and restores the trigger state.
+- No application console errors were found. Hydration messages observed during QA were caused by installed browser extensions injecting attributes.
 
-## Next
+## Remaining work
 
-- Review and merge WEB-29 Pass 1, then smoke-test student registration, confirmation behavior, role routing and one project-interest write against hosted Supabase.
-- Continue WEB-29 with public directory/detail phases on a new coordinated branch; keep WEB-6 connected search and Qwen UI integration separately scoped.
+- Verify one real student project-interest write and the wider auth flow against hosted Supabase without changing hosted schema. This remains part of hosted acceptance rather than WEB-29 visual implementation.
+- Map each approved IJMR document to a real entity and decide whether it is a stable public resource or a managed Supabase Storage object before publishing it.
+- Keep WEB-6 connected search and the future Qwen publication tools separately scoped. The publication layout provides a clean future integration boundary without rendering dead controls.
+
+## Next recommended task
+
+Complete hosted Supabase smoke acceptance, then start WEB-6 from the finished public directory query and command-surface conventions. Do not combine that work with Qwen UI integration or asset-storage schema changes.

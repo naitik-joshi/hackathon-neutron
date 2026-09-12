@@ -3,14 +3,15 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { listProjects } from "@/features/projects/queries";
 import { projectSearchSchema } from "@/features/research/filters";
 import { SetupState, EmptyState } from "@/components/shared/empty-state";
-import { PageHeader } from "@/components/shared/page-header";
+import { PageIntro } from "@/components/shared/page-intro";
 import { ProjectCard } from "@/components/projects/project-card";
-import { Input, Select, Button } from "@/components/ui";
+import { ProjectFilterBar } from "@/components/projects/project-filter-bar";
+
 export const metadata = {
   title: "Projects",
-  description:
-    "Explore research projects and their connected people and published outputs.",
+  description: "Explore research projects, their people and published outputs.",
 };
+
 export default async function Projects({
   searchParams,
 }: {
@@ -20,66 +21,59 @@ export default async function Projects({
   const projects = isSupabaseConfigured()
     ? await listProjects({ query: q, status })
     : null;
+  const filtered = Boolean(q) || status !== "all";
+
   return (
     <div className="page-shell">
-      <PageHeader
-        eyebrow="Understand / Projects"
-        title="Explore research projects"
-        description="Follow the connections between research areas, people and published outputs. Project status reflects the recorded lifecycle."
+      <PageIntro
+        eyebrow="Understand · Projects"
+        title="See research taking shape"
+        description="Projects turn themes into recorded work. Follow each project to its researchers, research areas, published outputs and participation path."
+        actions={
+          <Link href="/research" className="text-link">
+            Browse research themes →
+          </Link>
+        }
       />
-      <form
-        action="/projects"
-        role="search"
-        aria-label="Find projects"
-        className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end"
-      >
-        <div className="flex-1 min-w-0">
-          <label htmlFor="project-query">Search project titles</label>
-          <Input
-            id="project-query"
-            name="q"
-            type="search"
-            maxLength={100}
-            defaultValue={q}
-          />
-        </div>
-        <div>
-          <label htmlFor="project-status">Status</label>
-          <Select id="project-status" name="status" defaultValue={status}>
-            {["all", "proposed", "ongoing", "completed", "archived"].map(
-              (s) => (
-                <option key={s} value={s}>
-                  {s === "all"
-                    ? "All statuses"
-                    : s.charAt(0).toUpperCase() + s.slice(1)}
-                </option>
-              ),
-            )}
-          </Select>
-        </div>
-        <Button type="submit">Search</Button>
-        <Link href="/projects" className="py-3 underline">
-          Reset
-        </Link>
-      </form>
+      <div className="mt-10">
+        <ProjectFilterBar currentStatus={status} query={q} />
+      </div>
       {projects === null ? (
         <SetupState />
       ) : projects.length ? (
-        <>
-          <p className="mb-4 text-sm text-slate-600">
-            Showing {projects.length} results (up to 50).
-          </p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {projects.map((p) => (
-              <ProjectCard key={p.id} project={p} />
+        <section className="mt-10" aria-labelledby="project-results-title">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <p className="section-kicker">
+                {filtered ? "Filtered projects" : "Project index"}
+              </p>
+              <h2 id="project-results-title" className="type-h3 mt-1">
+                {q
+                  ? `Results for “${q}”`
+                  : status === "all"
+                    ? "Recorded research projects"
+                    : `${status.replace("_", " ")} projects`}
+              </h2>
+            </div>
+            <p className="text-sm text-muted">
+              {projects.length} {projects.length === 1 ? "project" : "projects"}
+            </p>
+          </div>
+          <div className="grid gap-5 lg:grid-cols-2">
+            {projects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
-        </>
+        </section>
       ) : (
-        <EmptyState
-          title="No matching projects"
-          description="Try another title or status, or explore research areas."
-        />
+        <div className="mt-10">
+          <EmptyState
+            title="No projects match these filters"
+            description="Clear the current filters or continue through the research-area directory."
+            href="/projects"
+            action="Clear project filters"
+          />
+        </div>
       )}
     </div>
   );

@@ -1,7 +1,10 @@
 import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Area,
+  Database,
+  Project,
   Researcher,
   Publication,
 } from "@/lib/supabase/database.types";
@@ -11,9 +14,21 @@ import {
   findPublishedPublication,
 } from "./public-records";
 
-export async function getPublicPublicationBySlug(slug: string) {
-  return findPublishedPublication(await createClient(), slug);
-}
+export type AreaDirectoryItem = Area & {
+  researcherCount: number;
+  projectCount: number;
+  publicationCount: number;
+};
+
+export type ResearcherDirectoryItem = Researcher & {
+  areas: Area[];
+};
+
+export type PublicationWithRelations = Publication & {
+  authors: Researcher[];
+  projects: Project[];
+  areas: Area[];
+};
 
 export async function getAreaWithRelations(slug: string) {
   return findAreaConnections(await createClient(), slug);
@@ -33,8 +48,168 @@ export async function listAreas(query = "") {
   if (term) request = request.ilike("name", `%${term}%`);
   const { data, error } = await request;
   if (error) throw new Error("Could not load research areas");
-  return data;
+  if (!data.length) return [];
+
+  const areaIds = data.map((area) => area.id);
+  const [researcherLinks, projectLinks] = await Promise.all([
+    client
+      .from("researcher_research_areas")
+      .select("researcher_id, research_area_id")
+      .in("research_area_id", areaIds),
+    client
+      .from("project_research_areas")
+      .select("project_id, research_area_id")
+      .in("research_area_id", areaIds),
+  ]);
+  if (researcherLinks.error || projectLinks.error) {
+    throw new Error("Could not load research area connections");
+  }
+
+  const projectIds = [
+    ...new Set(projectLinks.data.map((link) => link.project_id)),
+  ];
+  const publicationLinks = projectIds.length
+    ? await client
+        .from("publication_projects")
+        .select("publication_id, project_id")
+        .in("project_id", projectIds)
+    : { data: [], error: null };
+  if (publicationLinks.error) {
+    throw new Error("Could not load research area publications");
+  }
+
+  const publicationIds = [
+    ...new Set(publicationLinks.data.map((link) => link.publication_id)),
+  ];
+  const published = publicationIds.length
+    ? await client
+        .from("publications")
+        .select("id")
+        .eq("status", "published")
+        .in("id", publicationIds)
+    : { data: [], error: null };
+  if (published.error) throw new Error("Could not verify published research");
+
+  const publishedIds = new Set(published.data.map((item) => item.id));
+  const projectsByArea = new Map<string, Set<string>>();
+  const researchersByArea = new Map<string, Set<string>>();
+  const publicationsByArea = new Map<string, Set<string>>();
+
+  for (const link of researcherLinks.data) {
+    const set =
+      researchersByArea.get(link.research_area_id) ?? new Set<string>();
+    set.add(link.researcher_id);
+    researchersByArea.set(link.research_area_id, set);
+  }
+  for (const link of projectLinks.data) {
+    const set = projectsByArea.get(link.research_area_id) ?? new Set<string>();
+    set.add(link.project_id);
+    projectsByArea.set(link.research_area_id, set);
+  }
+  for (const area of data) {
+    const areaProjects = projectsByArea.get(area.id) ?? new Set<string>();
+    const set = new Set<string>();
+    for (const link of publicationLinks.data) {
+      if (
+        areaProjects.has(link.project_id) &&
+        publishedIds.has(link.publication_id)
+      ) {
+        set.add(link.publication_id);
+      }
+    }
+    publicationsByArea.set(area.id, set);
+  }
+
+  return data.map((area): AreaDirectoryItem => ({
+    ...area,
+    researcherCount: researchersByArea.get(area.id)?.size ?? 0,
+    projectCount: projectsByArea.get(area.id)?.size ?? 0,
+    publicationCount: publicationsByArea.get(area.id)?.size ?? 0,
+  }));
 }
+
+async function attachPublicationRelations(
+  client: SupabaseClient<Database>,
+  publications: Publication[],
+): Promise<PublicationWithRelations[]> {
+  if (!publications.length) return [];
+  const publicationIds = publications.map((item) => item.id);
+  const [authorLinks, projectLinks] = await Promise.all([
+    client
+      .from("publication_researchers")
+      .select("publication_id, researcher_id")
+      .in("publication_id", publicationIds),
+    client
+      .from("publication_projects")
+      .select("publication_id, project_id")
+      .in("publication_id", publicationIds),
+  ]);
+  if (authorLinks.error || projectLinks.error) {
+    throw new Error("Could not load publication connections");
+  }
+
+  const researcherIds = [
+    ...new Set(authorLinks.data.map((link) => link.researcher_id)),
+  ];
+  const projectIds = [
+    ...new Set(projectLinks.data.map((link) => link.project_id)),
+  ];
+  const projectAreaLinks = projectIds.length
+    ? await client
+        .from("project_research_areas")
+        .select("project_id, research_area_id")
+        .in("project_id", projectIds)
+    : { data: [], error: null };
+  if (projectAreaLinks.error)
+    throw new Error("Could not load publication areas");
+  const areaIds = [
+    ...new Set(projectAreaLinks.data.map((link) => link.research_area_id)),
+  ];
+
+  const [researchers, projects, areas] = await Promise.all([
+    researcherIds.length
+      ? client.from("researchers").select("*").in("id", researcherIds)
+      : { data: [] as Researcher[], error: null },
+    projectIds.length
+      ? client.from("projects").select("*").in("id", projectIds)
+      : { data: [] as Project[], error: null },
+    areaIds.length
+      ? client.from("research_areas").select("*").in("id", areaIds)
+      : { data: [] as Area[], error: null },
+  ]);
+  if (researchers.error || projects.error || areas.error) {
+    throw new Error("Could not load connected publication records");
+  }
+
+  const researcherMap = new Map(
+    researchers.data.map((item) => [item.id, item]),
+  );
+  const projectMap = new Map(projects.data.map((item) => [item.id, item]));
+  const areaMap = new Map(areas.data.map((item) => [item.id, item]));
+
+  return publications.map((publication) => {
+    const linkedProjects = projectLinks.data
+      .filter((link) => link.publication_id === publication.id)
+      .map((link) => projectMap.get(link.project_id))
+      .filter((item): item is Project => Boolean(item));
+    const linkedProjectIds = new Set(linkedProjects.map((item) => item.id));
+    const linkedAreas = projectAreaLinks.data
+      .filter((link) => linkedProjectIds.has(link.project_id))
+      .map((link) => areaMap.get(link.research_area_id))
+      .filter((item): item is Area => Boolean(item));
+
+    return {
+      ...publication,
+      authors: authorLinks.data
+        .filter((link) => link.publication_id === publication.id)
+        .map((link) => researcherMap.get(link.researcher_id))
+        .filter((item): item is Researcher => Boolean(item)),
+      projects: linkedProjects,
+      areas: [...new Map(linkedAreas.map((item) => [item.id, item])).values()],
+    };
+  });
+}
+
 export async function listPublications(query = "", limit = 50) {
   const client = await createClient();
   let request = client
@@ -51,7 +226,14 @@ export async function listPublications(query = "", limit = 50) {
   if (term) request = request.ilike("title", `%${term}%`);
   const { data, error } = await request;
   if (error) throw new Error("Could not load published research");
-  return data;
+  return attachPublicationRelations(client, data);
+}
+
+export async function getPublicPublicationWithRelations(slug: string) {
+  const client = await createClient();
+  const publication = await findPublishedPublication(client, slug);
+  if (!publication) return null;
+  return (await attachPublicationRelations(client, [publication]))[0] ?? null;
 }
 
 export async function listResearchers(query = "") {
@@ -64,7 +246,26 @@ export async function listResearchers(query = "") {
   if (term) request = request.ilike("name", `%${term}%`);
   const { data, error } = await request;
   if (error) throw new Error("Could not load researchers");
-  return data;
+  if (!data.length) return [];
+  const researcherIds = data.map((researcher) => researcher.id);
+  const links = await client
+    .from("researcher_research_areas")
+    .select("researcher_id, research_area_id")
+    .in("researcher_id", researcherIds);
+  if (links.error) throw new Error("Could not load researcher areas");
+  const areaIds = [...new Set(links.data.map((link) => link.research_area_id))];
+  const areas = areaIds.length
+    ? await client.from("research_areas").select("*").in("id", areaIds)
+    : { data: [] as Area[], error: null };
+  if (areas.error) throw new Error("Could not load researcher areas");
+  const areaMap = new Map(areas.data.map((area) => [area.id, area]));
+  return data.map((researcher): ResearcherDirectoryItem => ({
+    ...researcher,
+    areas: links.data
+      .filter((link) => link.researcher_id === researcher.id)
+      .map((link) => areaMap.get(link.research_area_id))
+      .filter((area): area is Area => Boolean(area)),
+  }));
 }
 
 export type ResearcherDetailData = {
