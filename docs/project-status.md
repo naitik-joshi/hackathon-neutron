@@ -107,19 +107,28 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Frontend Primary — Dashboards & Participation
 
-**Current issue:** _Assign after context handoff_  
-**Branch:** _TBD_  
-**Status:** Context handoff
+**Current issue:** WEB-9  
+**Branch:** `frontend/MPhase0`  
+**Status:** Complete / Ready for Review & Handoff
 
 ### Latest handoff
 - Work completed:
-  - None yet.
+  - Implemented public project query layer in `features/projects/queries.ts` (`listProjects`, `getProjectBySlug`).
+  - Created reusable project UI components: `ProjectCard`, `ProjectFilterBar`, `ProjectLifecycle`, `ProjectTeam`, `ProjectPublications`, and `ProjectStatusBadge`.
+  - Implemented public project directory page at `/projects` with real-time status filtering and search.
+  - Implemented public project detail page at `/projects/[slug]` with research lifecycle tracker, team sidebar, outputs list, and Get Involved participation callout.
+  - Added PostgreSQL/PGlite security and relation tests in `tests/projects.test.ts`.
 - Areas touched:
-  - None.
+  - `app/(public)/projects/**`
+  - `components/projects/**`
+  - `features/projects/**`
+  - `tests/projects.test.ts`
 - Checks:
-  - None.
+  - `npm run check` (0 errors, 0 warnings).
+  - `npm test` (all 15 tests passing, including new project RLS tests).
+  - `npm run build` (Next.js production build succeeded with `/projects` and `/projects/[slug]`).
 - Blockers / dependencies:
-  - WEB-14 depends on workflow work; WEB-13 depends on participation backend/project route.
+  - Ready for Sambhav (WEB-7 and WEB-8) to connect research area pages and public researcher profile routes.
 - Next:
-  - Start with WEB-9 public project detail pages after context handoff.
-  - Then move to dashboard/participation UI as dependencies become ready.
+  - Hand off context to Sambhav for WEB-7 / WEB-8.
+  - Coordinate with Rabin on WEB-12 (expression of interest backend) to connect WEB-13 (Get Involved form submission).
