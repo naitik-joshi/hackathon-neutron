@@ -141,28 +141,33 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Frontend Primary — Dashboards & Participation
 
-**Current issue:** WEB-9  
-**Branch:** `frontend/MPhase0`  
-**Status:** Complete / Ready for Review & Handoff
+**Current issue:** WEB-14 — Admin Editorial Panel & Research Operations  
+**Branch:** `admin/sprint`  
+**Status:** Complete / Ready for Review & Integration
 
 ### Latest handoff
 - Work completed:
-  - Implemented public project query layer in `features/projects/queries.ts` (`listProjects`, `getProjectBySlug`).
-  - Created reusable project UI components: `ProjectCard`, `ProjectFilterBar`, `ProjectLifecycle`, `ProjectTeam`, `ProjectPublications`, and `ProjectStatusBadge`.
-  - Implemented public project directory page at `/projects` with real-time status filtering and search.
-  - Implemented public project detail page at `/projects/[slug]` with research lifecycle tracker, team sidebar, outputs list, and Get Involved participation callout.
-  - Added PostgreSQL/PGlite security and relation tests in `tests/projects.test.ts`.
+  - Phase 1: Real database-backed admin dashboard overview (`/admin`) computing live operational KPIs (triage, peer review, revisions, published records, student interest count) and displaying real submissions requiring editorial action.
+  - Phase 2: Manuscript review queue (`/admin/submissions`) with real-time status filter tabs (`Active Queue`, `Awaiting Triage`, `Under Review`, `Revisions`, `Published`, `All Records`), title/abstract search, and submitter profile resolution.
+  - Phase 3: State-aware submission review dossier (`/admin/submissions/[id]`) integrating submitter profile, co-authors, affiliated projects, private review history (`getPublicationReviews`), and formal editorial review actions (`under_review`, `published`, `changes_requested`, `rejected`).
+  - Phase 4: Student participation & project interest inbox (`/admin/interests`) integrating `getInterestInbox()` with enriched project and student profile metadata.
+  - Phase 5: Responsive and accessibility validation across desktop, tablet, and 375px mobile widths, ensuring semantic headings, accessible forms, and clear `DEMO DATA` labeling.
 - Areas touched:
-  - `app/(public)/projects/**`
-  - `components/projects/**`
-  - `features/projects/**`
-  - `tests/projects.test.ts`
+  - `app/admin/layout.tsx`
+  - `app/admin/page.tsx`
+  - `app/admin/submissions/page.tsx`
+  - `app/admin/submissions/[id]/page.tsx`
+  - `app/admin/interests/page.tsx`
+  - `features/submissions/admin-queries.ts`
+  - `features/submissions/review-form.tsx`
+  - `features/participation/queries.ts`
 - Checks:
-  - `npm run check` (0 errors, 0 warnings).
-  - `npm test` (all 15 tests passing, including new project RLS tests).
-  - `npm run build` (Next.js production build succeeded with `/projects` and `/projects/[slug]`).
+  - `npm run lint` passed (0 errors, 0 warnings).
+  - `npm run typecheck` passed.
+  - `npm test` passed (24/24 tests passing).
+  - `npm run build` passed (Next.js production build succeeded with all admin routes).
 - Blockers / dependencies:
-  - Ready for Sambhav (WEB-7 and WEB-8) to connect research area pages and public researcher profile routes.
+  - Ready for Naitik to review and integrate into `dev`.
+  - Local PGlite and backend tests verified; hosted Supabase acceptance pending deployment of migrations `202609120002_review_feedback.sql` and `202609120003_project_interests.sql`.
 - Next:
-  - Hand off context to Sambhav for WEB-7 / WEB-8.
-  - Coordinate with Rabin on WEB-12 (expression of interest backend) to connect WEB-13 (Get Involved form submission).
+  - Coordinate branch review and integration into `dev`.
