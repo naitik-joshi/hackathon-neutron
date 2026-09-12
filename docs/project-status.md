@@ -149,33 +149,29 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Frontend Primary — Dashboards & Participation
 
-**Current issue:** WEB-14 — Admin Editorial Panel & Research Operations  
-**Branch:** `admin/sprint`  
-**Status:** Complete / Ready for Review & Integration
+**Current issue:** WEB-13 — Build Get Involved entry and interest form  
+**Branch:** `feat/WEB-13-get-involved`  
+**Status:** Frontend Complete / Ready for Naitik Backend Integration
 
 ### Latest handoff
 - Work completed:
-  - Phase 1: Real database-backed admin dashboard overview (`/admin`) computing live operational KPIs (triage, peer review, revisions, published records, student interest count) and displaying real submissions requiring editorial action.
-  - Phase 2: Manuscript review queue (`/admin/submissions`) with real-time status filter tabs (`Active Queue`, `Awaiting Triage`, `Under Review`, `Revisions`, `Published`, `All Records`), title/abstract search, and submitter profile resolution.
-  - Phase 3: State-aware submission review dossier (`/admin/submissions/[id]`) integrating submitter profile, co-authors, affiliated projects, private review history (`getPublicationReviews`), and formal editorial review actions (`under_review`, `published`, `changes_requested`, `rejected`).
-  - Phase 4: Student participation & project interest inbox (`/admin/interests`) integrating `getInterestInbox()` with enriched project and student profile metadata.
-  - Phase 5: Responsive and accessibility validation across desktop, tablet, and 375px mobile widths, ensuring semantic headings, accessible forms, and clear `DEMO DATA` labeling.
+  - Phase 1: Integrated "Get Involved" entry CTA in the project detail header and added `ProjectParticipationCallout` sidebar card linking smoothly to `#get-involved`.
+  - Phase 2: Implemented accessible, responsive `InterestForm` (`features/participation/interest-form.tsx`) with contact email, statement of interest textarea, real-time character counter (20–2000 chars), and WCAG semantic markup.
+  - Phase 3: Built all required UI states: `idle`, `validation error`, `submitting/pending` with spinner, `success confirmation` card, `error` alert, `authentication required` gateway with return redirects, and `already submitted` status notice. Added client validation unit tests in `tests/interest-form.test.ts`.
+  - Phase 4: Validated responsive behavior across desktop, tablet, and 375px mobile viewports; verified touch target sizing, focus rings, keyboard navigation, and aria-describedby associations.
 - Areas touched:
-  - `app/admin/layout.tsx`
-  - `app/admin/page.tsx`
-  - `app/admin/submissions/page.tsx`
-  - `app/admin/submissions/[id]/page.tsx`
-  - `app/admin/interests/page.tsx`
-  - `features/submissions/admin-queries.ts`
-  - `features/submissions/review-form.tsx`
-  - `features/participation/queries.ts`
+  - `app/(public)/projects/[slug]/page.tsx`
+  - `components/projects/project-participation-callout.tsx`
+  - `features/participation/interest-form.tsx`
+  - `features/participation/validation.ts`
+  - `tests/interest-form.test.ts`
 - Checks:
   - `npm run lint` passed (0 errors, 0 warnings).
-  - `npm run typecheck` passed.
-  - `npm test` passed (24/24 tests passing).
-  - `npm run build` passed (Next.js production build succeeded with all admin routes).
+  - `npm run typecheck` passed (0 errors).
+  - `npm test` passed (33/33 tests passing).
+  - `npm run build` passed (all Next.js routes built cleanly).
 - Blockers / dependencies:
-  - Ready for Naitik to review and integrate into `dev`.
-  - Local PGlite and backend tests verified; hosted Supabase acceptance pending deployment of migrations `202609120002_review_feedback.sql` and `202609120003_project_interests.sql`.
+  - Ready for Naitik to connect `expressInterest` server action (`features/participation/actions.ts`) to `InterestForm.onSubmitAction` and wire student session verification.
 - Next:
-  - Coordinate branch review and integration into `dev`.
+  - Provide Naitik with integration handoff notes for final backend wiring into `dev`.
+
