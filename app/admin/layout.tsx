@@ -15,6 +15,7 @@ export default async function AdminLayout({
         links={[
           { href: "/admin", label: "Overview" },
           { href: "/admin/submissions", label: "Publication review queue" },
+          { href: "/admin/interests", label: "Project interest inbox" },
         ]}
       />
       {children}
