@@ -20,10 +20,8 @@ export const metadata = {
 };
 
 export default async function Admin() {
-  const [
-    { metrics, recentSubmissions, recentInterests },
-    { attention },
-  ] = await Promise.all([getAdminDashboardData(), getAdminOverview()]);
+  const [{ metrics, recentSubmissions, recentInterests }, { attention }] =
+    await Promise.all([getAdminDashboardData(), getAdminOverview()]);
 
   const pendingAttentionCount =
     metrics.submitted + metrics.underReview + metrics.changesRequested;
@@ -43,7 +41,8 @@ export default async function Admin() {
               Academic Editorial & Triage Desk
             </h1>
             <p className="mt-1 text-sm text-[#64748b]">
-              Oversee the peer review pipeline, adjudicate reviewer evaluations, and manage student research participation.
+              Review publication submissions, monitor workflow status, and
+              manage expressions of interest.
             </p>
           </div>
 
@@ -70,7 +69,9 @@ export default async function Admin() {
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Awaiting Triage</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Awaiting Triage
+            </span>
             <Clock className="h-4 w-4 text-[#ea580c]" />
           </div>
           <div className="mt-2 text-2xl font-bold text-[#0f172a]">
@@ -83,7 +84,9 @@ export default async function Admin() {
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Under Peer Review</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Under Peer Review
+            </span>
             <FileCheck2 className="h-4 w-4 text-[#0284c7]" />
           </div>
           <div className="mt-2 text-2xl font-bold text-[#0f172a]">
@@ -96,7 +99,9 @@ export default async function Admin() {
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Revisions Requested</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Revisions Requested
+            </span>
             <AlertCircle className="h-4 w-4 text-amber-600" />
           </div>
           <div className="mt-2 text-2xl font-bold text-[#0f172a]">
@@ -109,7 +114,9 @@ export default async function Admin() {
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Repository Published</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Repository Published
+            </span>
             <CheckCircle2 className="h-4 w-4 text-[#16a34a]" />
           </div>
           <div className="mt-2 text-2xl font-bold text-[#0f172a]">
@@ -122,14 +129,16 @@ export default async function Admin() {
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm col-span-2 sm:col-span-1">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Student Interests</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Student Interests
+            </span>
             <Inbox className="h-4 w-4 text-[#002147]" />
           </div>
           <div className="mt-2 text-2xl font-bold text-[#0f172a]">
             {metrics.totalInterestCount}
           </div>
           <div className="mt-1 text-xs text-slate-600 font-medium">
-            Project applications
+            Expressions of interest
           </div>
         </div>
       </div>
@@ -140,13 +149,15 @@ export default async function Admin() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-[#ecfdf5] px-2.5 py-0.5 text-xs font-semibold text-[#166534]">
               <span className="h-1.5 w-1.5 rounded-full bg-[#16a34a]" />
-              Active Editorial Adjudication
+              Active publication review
             </div>
             <h2 className="font-serif text-2xl font-bold text-[#0f172a]">
-              Peer Review Synthesis & Institutional Publishing
+              Publication review and publishing
             </h2>
             <p className="max-w-2xl text-sm text-[#64748b]">
-              Evaluate submitted manuscripts, review private peer review feedback history, formulate binding editorial decisions (Start Review, Request Changes, Reject, or Publish to the open repository).
+              Review submissions and their private feedback history, then use
+              the available workflow actions to request changes, reject, or
+              publish.
             </p>
           </div>
           <Link
@@ -169,14 +180,16 @@ export default async function Admin() {
               Submissions Requiring Editorial Action
             </h2>
             <p className="text-xs text-[#64748b]">
-              Latest manuscripts submitted for triage or under active peer review
+              Latest manuscripts submitted for triage or under active peer
+              review
             </p>
           </div>
           <Link
             href="/admin/submissions"
             className="text-xs font-semibold text-blue-700 hover:underline inline-flex items-center gap-1"
           >
-            View all ({recentSubmissions.length}) <ArrowRight className="h-3.5 w-3.5" />
+            View all ({recentSubmissions.length}){" "}
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
@@ -213,7 +226,7 @@ export default async function Admin() {
                     href={`/admin/submissions/${sub.id}`}
                     className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
                   >
-                    <span>Adjudicate Dossier</span>
+                    <span>Review submission</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
@@ -236,14 +249,16 @@ export default async function Admin() {
                 Student Project Expressions of Interest
               </h2>
               <p className="text-xs text-[#64748b]">
-                Inquiries from students applying to participate in active research initiatives
+                Inquiries from students applying to participate in active
+                research initiatives
               </p>
             </div>
             <Link
               href="/admin/interests"
               className="text-xs font-semibold text-blue-700 hover:underline inline-flex items-center gap-1"
             >
-              Open Inbox ({metrics.totalInterestCount}) <ArrowRight className="h-3.5 w-3.5" />
+              Open Inbox ({metrics.totalInterestCount}){" "}
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
           </div>
 
@@ -281,7 +296,7 @@ export default async function Admin() {
       {/* Academic Operations & Standards Grid */}
       <div>
         <h2 className="font-serif text-xl font-bold text-[#0f172a] mb-4">
-          Scholarly Governance & Standards
+          Research operations
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-xl border border-[#e2e8f0] bg-white p-5 shadow-sm">
@@ -292,10 +307,11 @@ export default async function Admin() {
               <ShieldCheck className="h-4 w-4 text-[#64748b]" />
             </div>
             <h3 className="mt-3 text-base font-bold text-[#0f172a]">
-              COPE Single-Blind Triage
+              Publication review
             </h3>
             <p className="mt-1 text-xs text-[#64748b]">
-              Verify manuscript scopes, initial formatting, ethical clearance, and plagiarism checks before assigning peer review.
+              Move submitted records through the review states supported by the
+              current workflow.
             </p>
           </div>
 
@@ -310,7 +326,8 @@ export default async function Admin() {
               Private Review Feedback
             </h3>
             <p className="mt-1 text-xs text-[#64748b]">
-              Review notes and recommendations remain strictly confidential between editorial staff and submitting researchers.
+              Review notes are visible only to administrators and the researcher
+              who submitted the record.
             </p>
           </div>
 
@@ -322,10 +339,11 @@ export default async function Admin() {
               <BookOpen className="h-4 w-4 text-[#64748b]" />
             </div>
             <h3 className="mt-3 text-base font-bold text-[#0f172a]">
-              Institutional Repository
+              Public research records
             </h3>
             <p className="mt-1 text-xs text-[#64748b]">
-              Approved publications automatically deploy with public read access under CC-BY 4.0 open knowledge standards.
+              Publishing makes the stored publication record available through
+              the public research directory.
             </p>
           </div>
         </div>

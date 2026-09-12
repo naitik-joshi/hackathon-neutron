@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { ArrowUpRight, LogOut } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { signOut } from "@/features/auth/actions";
 import { cn } from "@/lib/utilities/cn";
@@ -28,9 +28,9 @@ export function WorkspaceNav({
 
   return (
     <aside className="workspace-nav" aria-label={`${title} navigation`}>
-      <div>
-        <p className="eyebrow">{title}</p>
-        <p className="mt-1 truncate text-sm font-semibold text-slate-900">
+      <div className="min-w-0">
+        <p className="section-kicker">{title}</p>
+        <p className="mt-1 truncate font-serif text-lg font-semibold text-[var(--color-ink)]">
           {identity}
         </p>
       </div>
@@ -52,7 +52,10 @@ export function WorkspaceNav({
           );
         })}
       </nav>
-      <form action={signOut} className="sm:ml-auto">
+      <Link href="/research" className="workspace-public-link">
+        Public research <ArrowUpRight aria-hidden="true" size={15} />
+      </Link>
+      <form action={signOut}>
         <button className="workspace-signout">
           <LogOut aria-hidden="true" size={16} /> Sign out
         </button>

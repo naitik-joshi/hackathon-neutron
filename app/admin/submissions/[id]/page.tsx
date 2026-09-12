@@ -20,7 +20,8 @@ import type { PublicationStatus } from "@/lib/supabase/database.types";
 
 export const metadata = {
   title: "Editorial Dossier & Review Action | IJMR Admin",
-  description: "Institutional review action, peer feedback history, and status governance.",
+  description:
+    "Institutional review action, peer feedback history, and status governance.",
 };
 
 function formatStatusBadge(status: PublicationStatus) {
@@ -116,8 +117,7 @@ export default async function AdminSubmissionDetailPage({
   if (error) throw new Error("Could not load submission");
   if (!data) notFound();
 
-  const isDemoRecord =
-    data.is_demo || data.title.startsWith("DEMO DATA");
+  const isDemoRecord = data.is_demo || data.title.startsWith("DEMO DATA");
   const cleanTitle = data.title.replace(/^DEMO DATA\s*[—–-]\s*/, "");
   const cleanAbstract = data.abstract.replace(/^DEMO DATA\s*[—–-]\s*/, "");
 
@@ -177,8 +177,14 @@ export default async function AdminSubmissionDetailPage({
     <div className="page-shell space-y-8">
       {/* Breadcrumb & Navigation */}
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-        <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-slate-500">
-          <Link href="/admin" className="hover:text-slate-900 transition-colors">
+        <nav
+          aria-label="Breadcrumb"
+          className="flex items-center gap-2 text-slate-500"
+        >
+          <Link
+            href="/admin"
+            className="hover:text-slate-900 transition-colors"
+          >
             Dashboard
           </Link>
           <span>/</span>
@@ -189,7 +195,9 @@ export default async function AdminSubmissionDetailPage({
             Submissions Queue
           </Link>
           <span>/</span>
-          <span className="font-mono text-slate-800 font-semibold">{trackingId}</span>
+          <span className="font-mono text-slate-800 font-semibold">
+            {trackingId}
+          </span>
         </nav>
 
         <div className="flex items-center gap-2">
@@ -221,9 +229,7 @@ export default async function AdminSubmissionDetailPage({
             </span>
             {formatStatusBadge(data.status)}
             {isDemoRecord && (
-              <span className="pill-badge pill-collab text-xs">
-                DEMO DATA
-              </span>
+              <span className="pill-badge pill-collab text-xs">DEMO DATA</span>
             )}
             {data.year && (
               <span className="rounded bg-slate-100 text-slate-700 px-2 py-0.5 text-xs font-mono font-medium">
@@ -269,7 +275,9 @@ export default async function AdminSubmissionDetailPage({
                 <span className="text-slate-600">
                   Co-Authors:{" "}
                   <strong className="text-slate-800">
-                    {authors.map((a) => a.name.replace(/^DEMO DATA\s*[—–-]\s*/, "")).join(", ")}
+                    {authors
+                      .map((a) => a.name.replace(/^DEMO DATA\s*[—–-]\s*/, ""))
+                      .join(", ")}
                   </strong>
                 </span>
               </>
@@ -284,7 +292,8 @@ export default async function AdminSubmissionDetailPage({
           >
             <CheckCircle2 size={16} className="text-[#0F766E] shrink-0" />
             <span>
-              Review decision recorded successfully in institutional audit ledger. The submission status has been synchronized.
+              Review decision recorded successfully. The submission status has
+              been updated.
             </span>
           </div>
         )}
@@ -314,7 +323,9 @@ export default async function AdminSubmissionDetailPage({
 
             {data.doi && (
               <div className="pt-4 border-t border-slate-100 flex items-center gap-2 text-xs font-mono text-slate-600">
-                <span className="text-slate-400 uppercase">DOI Identifier:</span>
+                <span className="text-slate-400 uppercase">
+                  DOI Identifier:
+                </span>
                 <a
                   href={`https://doi.org/${data.doi}`}
                   target="_blank"
@@ -338,7 +349,10 @@ export default async function AdminSubmissionDetailPage({
                 </h2>
               </div>
               <span className="font-mono text-xs text-slate-500">
-                Current Status: <strong className="capitalize text-slate-800">{data.status.replace("_", " ")}</strong>
+                Current Status:{" "}
+                <strong className="capitalize text-slate-800">
+                  {data.status.replace("_", " ")}
+                </strong>
               </span>
             </div>
 
@@ -351,9 +365,7 @@ export default async function AdminSubmissionDetailPage({
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <History className="w-4 h-4 text-[#0F2042]" />
-                <h2 className="headline-sm text-[#0F2042]">
-                  Confidential Review History & Ledger
-                </h2>
+                <h2 className="headline-sm text-[#0F2042]">Review history</h2>
               </div>
               <span className="font-mono text-xs text-slate-500">
                 {reviews.length} {reviews.length === 1 ? "entry" : "entries"}
@@ -361,7 +373,8 @@ export default async function AdminSubmissionDetailPage({
             </div>
 
             <p className="text-xs text-slate-500 leading-relaxed">
-              This audit ledger records all peer review transitions, editorial justifications, and author communications. Confidential to administrators and the submitting researcher.
+              This history records review transitions and written feedback. It
+              is visible only to administrators and the submitting researcher.
             </p>
 
             {reviews.length === 0 ? (
@@ -371,7 +384,8 @@ export default async function AdminSubmissionDetailPage({
                   No prior editorial review actions recorded.
                 </p>
                 <p className="text-[0.72rem] text-slate-400">
-                  This manuscript is awaiting initial triage by the editorial desk.
+                  This manuscript is awaiting initial triage by the editorial
+                  desk.
                 </p>
               </div>
             ) : (
@@ -414,7 +428,8 @@ export default async function AdminSubmissionDetailPage({
                         </div>
                       ) : (
                         <p className="text-xs text-slate-400 italic">
-                          No written feedback note was attached to this transition.
+                          No written feedback note was attached to this
+                          transition.
                         </p>
                       )}
                     </div>
@@ -440,8 +455,10 @@ export default async function AdminSubmissionDetailPage({
 
             <div className="space-y-3 font-mono text-[0.72rem]">
               <div className="flex justify-between items-center py-1 border-b border-slate-50">
-                <span className="text-slate-500">Ledger Identifier:</span>
-                <strong className="text-slate-900 font-mono">{trackingId}</strong>
+                <span className="text-slate-500">Record ID:</span>
+                <strong className="text-slate-900 font-mono">
+                  {trackingId}
+                </strong>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-slate-50">
                 <span className="text-slate-500">Current Status:</span>
@@ -451,11 +468,15 @@ export default async function AdminSubmissionDetailPage({
               </div>
               <div className="flex justify-between items-center py-1 border-b border-slate-50">
                 <span className="text-slate-500">Publication Year:</span>
-                <strong className="text-slate-800">{data.year || "Pending"}</strong>
+                <strong className="text-slate-800">
+                  {data.year || "Pending"}
+                </strong>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-slate-50">
                 <span className="text-slate-500">DOI Minting:</span>
-                <strong className="text-slate-800">{data.doi || "Pending publication"}</strong>
+                <strong className="text-slate-800">
+                  {data.doi || "Pending publication"}
+                </strong>
               </div>
               <div className="flex justify-between items-center py-1 border-b border-slate-50">
                 <span className="text-slate-500">Date Received:</span>
@@ -537,7 +558,9 @@ export default async function AdminSubmissionDetailPage({
                         className="text-[#0F2042] font-semibold hover:underline inline-flex items-center gap-1 block"
                       >
                         <FolderGit2 size={12} className="shrink-0" />
-                        <span>{project.title.replace(/^DEMO DATA\s*[—–-]\s*/, "")}</span>
+                        <span>
+                          {project.title.replace(/^DEMO DATA\s*[—–-]\s*/, "")}
+                        </span>
                       </Link>
                     ))}
                   </div>
@@ -546,27 +569,34 @@ export default async function AdminSubmissionDetailPage({
             </div>
           </div>
 
-          {/* Editorial Governance & COPE Compliance */}
+          {/* Supported workflow notes */}
           <div className="academic-card p-5 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-500">
-                Editorial Protocol
+                Workflow notes
               </span>
               <BookOpen className="w-3.5 h-3.5 text-slate-400" />
             </div>
 
             <div className="space-y-2 text-[0.72rem] text-slate-600 leading-relaxed">
               <p>
-                <strong className="text-slate-900 block">Confidentiality:</strong>
-                All review comments and audit logs remain private between editorial staff and the author. Reviewer profiles are protected under double-blind ethics.
+                <strong className="text-slate-900 block">
+                  Review visibility:
+                </strong>
+                Review comments are available to administrators and the
+                submitting researcher through the protected workspace.
               </p>
               <p>
-                <strong className="text-slate-900 block">Mandatory Justification:</strong>
-                Rejection or change requests require constructive feedback between 3 and 4000 characters to guide revision.
+                <strong className="text-slate-900 block">
+                  Required feedback:
+                </strong>
+                Rejection or change requests require constructive feedback
+                between 3 and 4000 characters to guide revision.
               </p>
               <p>
-                <strong className="text-slate-900 block">Publishing Release:</strong>
-                Publishing issues an immutable timestamp and automatically exposes the manuscript to open-access discovery.
+                <strong className="text-slate-900 block">Publishing:</strong>
+                Publishing records a database timestamp and makes the
+                publication visible through public discovery.
               </p>
             </div>
           </div>

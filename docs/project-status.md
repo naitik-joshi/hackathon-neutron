@@ -72,13 +72,21 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** Public-site integration audit (user reassigned to Rabin); WEB-11 / WEB-12 hosted follow-up
+**Current issue:** WEB-30 — grounded assistant integration and authenticated-workspace polish
 
-**Branch:** `rabin-01`
+**Branch:** `feat/WEB-30-private-ui-qwen`
 
-**Status:** Public code audit and local checks complete; browser/hosted acceptance pending
+**Status:** Implementation and local static/browser checks complete; hosted role and live-Qwen acceptance pending
 
 ### Latest handoff
+- WEB-30 integration (2026-09-13):
+  - Added server-only Qwen configuration/client/error handling, strict Zod request contracts, bounded bodies, timeouts, no-store responses and best-effort per-route rate limits behind five same-origin Next.js handlers.
+  - Added one global public Research Paper Assistant with ephemeral grounded conversation, source paper/section presentation, exact-title publication context matching, deterministic recommendations, compare mode, keyboard/Escape support and offline recovery.
+  - Added **Analyze this paper** to public publication detail; it opens the same assistant and auto-selects only an exact normalized indexed title.
+  - Added a shared responsive researcher/admin workspace shell and removed unsupported policy/licensing/editorial claims from admin copy without changing workflow logic or database schema.
+  - Touched `lib/qwen/`, `app/api/research-assistant/`, `components/assistant/`, workspace navigation/layout styles, public publication detail, private workspace presentation/copy, `.env.example`, focused tests and integration documentation.
+  - `npm run lint`, `npm run typecheck`, `npm test` (47/47), `npm run build` and `git diff --check` passed. Anonymous desktop/mobile assistant and unavailable-state behavior were browser-checked; no horizontal overflow at 375/768/1024/1440.
+  - Live Next.js-to-Qwen acceptance is blocked because the configured EC2 endpoint was unreachable during this pass. Hosted Supabase reads also failed locally, so signed-in student/researcher/admin browser acceptance remains pending. The documented plain-HTTP production limitation remains.
 - Qwen grounded-paper backend (2026-09-12):
   - Fixed and deployed the authenticated API contract for papers, grounded query, comparison and deterministic related-paper recommendation; eight papers are indexed on the active EC2 service.
   - Rotated the newly disclosed API key again without logging it, moved systemd to an environment file, disabled browser credential entry/wildcard CORS, added input limits and structured offline/error states, and hardened the service sandbox. No main-site UI was changed.

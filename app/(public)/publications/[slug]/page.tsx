@@ -9,6 +9,7 @@ import { PageIntro, SectionHeader } from "@/components/shared/page-intro";
 import { RelationshipRail } from "@/components/shared/relationship-rail";
 import { DemoBadge, StatusBadge } from "@/components/shared/status-badge";
 import { EmptyState, SetupState } from "@/components/shared/empty-state";
+import { AnalyzePublicationButton } from "@/components/assistant/analyze-publication-button";
 
 export async function generateMetadata({
   params,
@@ -65,16 +66,19 @@ export default async function PublicationDetail({
           </>
         }
         actions={
-          item.doi ? (
-            <a
-              href={`https://doi.org/${encodeURIComponent(item.doi)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-link inline-flex items-center gap-1.5"
-            >
-              DOI record <ExternalLink size={15} aria-hidden="true" />
-            </a>
-          ) : undefined
+          <div className="flex flex-wrap items-center gap-3">
+            <AnalyzePublicationButton title={item.title} />
+            {item.doi && (
+              <a
+                href={`https://doi.org/${encodeURIComponent(item.doi)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-link inline-flex min-h-11 items-center gap-1.5"
+              >
+                DOI record <ExternalLink size={15} aria-hidden="true" />
+              </a>
+            )}
+          </div>
         }
       />
 

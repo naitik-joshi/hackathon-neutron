@@ -34,7 +34,7 @@ export default async function ResearcherPublicationPage({
   );
 
   return (
-    <>
+    <div className="page-shell pb-16">
       <Link
         href="/researcher/publications"
         className="text-link mb-6 inline-block"
@@ -106,6 +106,6 @@ export default async function ResearcherPublicationPage({
           )}
         </Card>
       </div>
-    </>
+    </div>
   );
 }

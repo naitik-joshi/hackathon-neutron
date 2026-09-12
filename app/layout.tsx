@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/navigation/site-header";
 import { SiteFooter } from "@/components/shared/site-footer";
+import { ResearchPaperAssistant } from "@/components/assistant/research-paper-assistant";
 import "./globals.css";
 
 export const metadata = {
@@ -27,6 +28,7 @@ export default function RootLayout({
           {children}
         </main>
         <SiteFooter />
+        <ResearchPaperAssistant />
       </body>
     </html>
   );
