@@ -242,7 +242,7 @@ export function InterestForm({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6 md:p-8 shadow-xs space-y-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6 md:p-8 shadow-xs space-y-6 break-words">
       <div className="border-b border-slate-100 pb-4 space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export function InterestForm({
             Confidential to project PIs
           </span>
         </div>
-        <h3 className="font-serif text-xl md:text-2xl font-bold text-[#0F2042] pt-1">
+        <h3 className="font-serif text-xl md:text-2xl font-bold text-[#0F2042] pt-1 break-words">
           Express Interest in &ldquo;{projectTitle}&rdquo;
         </h3>
         <p className="text-xs md:text-sm text-slate-600 leading-relaxed max-w-2xl">
