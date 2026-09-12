@@ -111,21 +111,29 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Frontend Primary — Public Discovery
 
-**Current issue:** _Assign after context handoff_  
-**Branch:** _TBD_  
-**Status:** Context handoff
+**Current issue:** WEB-7 / WEB-8
+**Branch:** `feat/WEB-7-area-connections` / `feat/WEB-8-researcher-pages`
+**Status:** Completed WEB-7 and WEB-8. Ready for review/integration.
 
 ### Latest handoff
 - Work completed:
-  - None yet.
+  - Added area relationship queries to fetch projects, researchers, and published publications.
+  - Connected `/research/[slug]` page to real data.
+  - Created `ResearcherCard` component and reused existing components.
+  - Implemented public researcher profile routes `/researchers/[slug]`.
+  - Linked `ProjectTeam` component to public researcher profiles.
 - Areas touched:
-  - None.
+  - `app/(public)/research/[slug]/page.tsx`
+  - `app/(public)/researchers/[slug]/page.tsx`
+  - `features/research/queries.ts`
+  - `components/research/researcher-card.tsx`
+  - `components/projects/project-team.tsx`
 - Checks:
-  - None.
+  - `npm run check` passed on both branches.
 - Blockers / dependencies:
-  - Read project docs and inspect existing public patterns.
+  - Ready for Naitik to review and integrate into `dev`.
 - Next:
-  - Recommended lane: WEB-7 → WEB-8.
+  - Help with public discovery polish after WEB-7 and WEB-8 are integrated.
 
 ---
 
