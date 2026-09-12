@@ -16,21 +16,21 @@ export default async function ResearcherDetail({
 }) {
   if (!isSupabaseConfigured()) return <SetupState />;
   const { slug } = await params;
-  
+
   const data = await getResearcherWithRelations(slug);
-  
+
   if (!data) notFound();
-  
+
   const { researcher, areas, projects, publications } = data;
 
   return (
-    <>
+    <div className="page-shell py-10">
       <div className="mb-4">
         <DemoBadge demo={researcher.is_demo} />
       </div>
-      
+
       <PageHeader
-        eyebrow={`Discover / ${researcher.position}`}
+        eyebrow={`Discover / ${researcher.position || "Researcher"}`}
         title={researcher.name}
         description={researcher.bio}
       />
@@ -46,7 +46,8 @@ export default async function ResearcherDetail({
                 className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
               >
                 <Layers size={14} aria-hidden="true" />
-                {area.name.replace(/^DEMO DATA — /, "")}
+                {area.name}
+                <DemoBadge demo={area.is_demo} />
               </Link>
             ))}
           </div>
@@ -97,6 +98,6 @@ export default async function ResearcherDetail({
           Explore projects →
         </Link>
       </div>
-    </>
+    </div>
   );
 }
