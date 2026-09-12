@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { DemoBadge } from "@/components/shared/status-badge";
 import { ProjectStatusBadge } from "@/components/projects/project-status-badge";
 import { ProjectTeam } from "@/components/projects/project-team";
+import { ProjectParticipationCallout } from "@/components/projects/project-participation-callout";
 import { PublicationList } from "@/components/research/publication-list";
 import { SetupState } from "@/components/shared/empty-state";
 export async function generateMetadata({
@@ -35,14 +36,28 @@ export default async function ProjectDetail({
   const data = await getProjectBySlug((await params).slug);
   if (!data) notFound();
   const { project, areas, researchers, publications } = data;
+  const canParticipate =
+    project.status === "ongoing" || project.status === "proposed";
+
   return (
     <div className="page-shell space-y-8 break-words">
       <Link href="/projects" className="underline">
         ← All projects
       </Link>
-      <div className="flex flex-wrap gap-2">
-        <DemoBadge demo={project.is_demo} />
-        <ProjectStatusBadge status={project.status} />
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <DemoBadge demo={project.is_demo} />
+          <ProjectStatusBadge status={project.status} />
+        </div>
+        {canParticipate && (
+          <a
+            href="#get-involved"
+            className="btn-academic-accent text-xs md:text-sm inline-flex items-center gap-2"
+          >
+            <span>Get involved in this project</span>
+            <span aria-hidden="true">↓</span>
+          </a>
+        )}
       </div>
       <h1 className="display-lg">{project.title}</h1>
       <div className="grid gap-8 lg:grid-cols-3">
@@ -52,8 +67,9 @@ export default async function ProjectDetail({
             {project.summary}
           </p>
         </section>
-        <aside className="min-w-0">
+        <aside className="min-w-0 space-y-6">
           <ProjectTeam researchers={researchers} />
+          <ProjectParticipationCallout project={project} />
         </aside>
       </div>
       <section className="space-y-4">
