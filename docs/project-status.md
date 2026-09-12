@@ -71,13 +71,20 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** WEB-11 / WEB-12 — Review feedback and expression-of-interest backend
+**Current issue:** Public-site integration audit (user reassigned to Rabin); WEB-11 / WEB-12 hosted follow-up
 
-**Branch:** `rabin`
+**Branch:** `rabin-01`
 
-**Status:** Local backend verified; hosted migrations and frontend integration pending
+**Status:** Public code audit and local checks complete; browser/hosted acceptance pending
 
 ### Latest handoff
+- Public-site audit (2026-09-12, carried out by Rabin):
+  - Inspected all 11 public route patterns against current `dev` baseline `e05a583`; repaired slug links, real area connections, published-only detail/metadata, honest search filters and account-aware navigation.
+  - Removed unsupported metrics, journal/indexing claims, fabricated project details and placeholder events/opportunities. Preserved visible DEMO DATA and shared components.
+  - Touched public routes, public navigation/footer/cards, narrow root layout copy, research query/filter helpers and focused tests. No AI, admin/dashboard, migrations, environment or credentials changed.
+  - `npm run check` passed; `npm test` passed (28/28); default `npm run build` passed. Full responsive/browser and live hosted role-matrix checks were not run in this time-boxed pass.
+  - Full findings and next ownership actions: `docs/public-site-audit.md`. No push, merge, Linear mutation or hosted migration performed.
+  - Next: Naitik/Sambhav review and verify 375px/tablet/desktop; Millind wire WEB-13 interest UI; Rabin/Naitik coordinate hosted backend acceptance below. WEB-6 unified search remains separate.
 - Work completed:
   - Added private review history and an atomic admin review RPC with reviewer attribution.
   - Added validated student interest submissions, database deduplication, and owner/admin-only reads.
