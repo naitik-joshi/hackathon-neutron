@@ -1,6 +1,13 @@
 # WEB-29 UI/UX implementation plan
 
-This plan follows the public/auth audit in `docs/ui-ux-audit.md`. It describes future work; no production UI changes were made during the audit.
+This plan follows the public/auth audit in `docs/ui-ux-audit.md`. Pass 1 now implements Phases A–C; later route work remains planned.
+
+## Pass 1 implementation note
+
+- The tracked root `logo.svg` is the approved source used for this pass. An unchanged public copy lives at `public/brand/ijmr-logo.svg` so Next.js can serve it without a custom asset pipeline.
+- `next/font/google` was evaluated for the planned Source Serif 4 and Inter pairing, but the build environment cannot fetch Google font files. Pass 1 therefore uses stable system serif and sans stacks with the same hierarchy and metrics. Approved self-hosted font files can replace these stacks later without changing component APIs.
+- The project-interest form now calls the existing server action. When an action is unavailable it reports that the request was not saved; it never simulates success.
+- Homepage data sources settle independently, so one failed query no longer removes every discovery section.
 
 ## 1. Final design direction
 
@@ -81,18 +88,18 @@ Use an 8px spacing family for layout (`0.5, 1, 1.5, 2, 3, 4, 6rem`) with 4px inc
 
 Retain the intended Source Serif 4 + Inter pairing because it matches the official serif/sans direction and avoids an unnecessary third visual system. Change delivery from runtime CSS `@import` to `next/font` or approved self-hosted files after confirming build availability. Keep system fallbacks.
 
-| Role | Face | Size/line height | Use |
-|---|---|---|---|
-| Display | Source Serif 4, 650–700 | `clamp(2.5rem, 6vw, 5rem)` / 0.98–1.06 | Homepage thesis only; max 12–14 words |
-| H1 | Source Serif 4, 650 | `clamp(2.1rem, 4vw, 3.75rem)` / 1.08 | One route/entity title |
-| H2 | Source Serif 4, 620 | `clamp(1.6rem, 2.6vw, 2.4rem)` / 1.15 | Major sections |
-| H3 | Source Serif 4, 600 | `1.25–1.5rem` / 1.25 | Entity/card headings |
-| Editorial body | Source Serif 4, 400 | `1.1–1.2rem` / 1.7–1.8 | Abstracts and long biography/summary text only |
-| UI/body | Inter, 400–600 | `1rem` / 1.55–1.65 | Navigation, controls, explanatory copy |
-| Metadata | Inter, 500 | `0.8125–0.875rem` / 1.4 | Dates, roles, relationship counts |
-| Label | Inter, 650 | `0.75–0.8125rem` / 1.25 | Form labels and short taxonomy markers; sentence case by default |
-| Button | Inter, 650 | `0.875rem` / 1 | Verb-led controls |
-| Mono | JetBrains Mono or system mono | `0.75rem` / 1.4 | DOI/technical identifiers only; remove from generic labels |
+| Role           | Face                          | Size/line height                       | Use                                                              |
+| -------------- | ----------------------------- | -------------------------------------- | ---------------------------------------------------------------- |
+| Display        | Source Serif 4, 650–700       | `clamp(2.5rem, 6vw, 5rem)` / 0.98–1.06 | Homepage thesis only; max 12–14 words                            |
+| H1             | Source Serif 4, 650           | `clamp(2.1rem, 4vw, 3.75rem)` / 1.08   | One route/entity title                                           |
+| H2             | Source Serif 4, 620           | `clamp(1.6rem, 2.6vw, 2.4rem)` / 1.15  | Major sections                                                   |
+| H3             | Source Serif 4, 600           | `1.25–1.5rem` / 1.25                   | Entity/card headings                                             |
+| Editorial body | Source Serif 4, 400           | `1.1–1.2rem` / 1.7–1.8                 | Abstracts and long biography/summary text only                   |
+| UI/body        | Inter, 400–600                | `1rem` / 1.55–1.65                     | Navigation, controls, explanatory copy                           |
+| Metadata       | Inter, 500                    | `0.8125–0.875rem` / 1.4                | Dates, roles, relationship counts                                |
+| Label          | Inter, 650                    | `0.75–0.8125rem` / 1.25                | Form labels and short taxonomy markers; sentence case by default |
+| Button         | Inter, 650                    | `0.875rem` / 1                         | Verb-led controls                                                |
+| Mono           | JetBrains Mono or system mono | `0.75rem` / 1.4                        | DOI/technical identifiers only; remove from generic labels       |
 
 Cap readable prose around 65–72 characters. Avoid all-caps eyebrows except short journal/taxonomy markers. Long research titles must wrap naturally without forced truncation on detail pages.
 
@@ -120,22 +127,22 @@ Consolidate link-buttons and buttons through `components/ui/index.tsx` or small 
 
 ## 5. Exact route redesign plan
 
-| Route | Planned composition | Data/behavior constraint |
-|---|---|---|
-| `/` | Branded editorial hero + honest scoped search; one featured real area with relationship preview; compact project/publication editorial rows; one participation close | Independent section failures; no fake totals; search label matches scope |
-| `/research` | Taxonomy intro; search; area hub results with real relationship availability/counts if queried | Counts must be database-derived and public |
-| `/research/[slug]` | Breadcrumb; area identity; relationship rail; people/projects/publications sections with useful empty branches | Only public/published relations |
-| `/researchers` | Directory intro; search; identity-led cards/rows with initials | No images/contact/achievements without approved fields |
-| `/researchers/[slug]` | Profile masthead; stored bio/position/areas; projects and published outputs rail | No inferred title or private profile data |
-| `/projects` | Compact query/filter command; result context; status-aware project cards/rows | One maintained filter implementation |
-| `/projects/[slug]` | Breadcrumb and real status; editorial summary; team/area/output rail; real participation handoff | Wire `expressInterest`; remove simulated success and unsupported claims |
-| `/publications` | IJMR-influenced publication index; query; title/author/year/context rows | Public `published` records only |
-| `/publications/[slug]` | Publication masthead; manuscript abstract; real metadata rail; authors/area/project; related route links | Future AI boundary described in architecture, no dead UI |
-| `/events` | Intentional empty state with route back to research; secondary navigation | No invented records |
-| `/opportunities` | Intentional empty state pointing to current project participation; secondary navigation | No grants/deadlines/eligibility claims |
-| `/auth/sign-in` | Shared branded auth layout; one form; institutional role explanation; student/public paths | Role resolved server-side; safe return URL |
-| `/auth/sign-up` | Explicit student registration; confirmation outcome; provisioned-account note | No role input/metadata; safe return URL |
-| `/auth/forbidden` | Branded access state with account/workspace, public research, sign-out recovery | No role leakage or client authorization |
+| Route                  | Planned composition                                                                                                                                                  | Data/behavior constraint                                                 |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `/`                    | Branded editorial hero + honest scoped search; one featured real area with relationship preview; compact project/publication editorial rows; one participation close | Independent section failures; no fake totals; search label matches scope |
+| `/research`            | Taxonomy intro; search; area hub results with real relationship availability/counts if queried                                                                       | Counts must be database-derived and public                               |
+| `/research/[slug]`     | Breadcrumb; area identity; relationship rail; people/projects/publications sections with useful empty branches                                                       | Only public/published relations                                          |
+| `/researchers`         | Directory intro; search; identity-led cards/rows with initials                                                                                                       | No images/contact/achievements without approved fields                   |
+| `/researchers/[slug]`  | Profile masthead; stored bio/position/areas; projects and published outputs rail                                                                                     | No inferred title or private profile data                                |
+| `/projects`            | Compact query/filter command; result context; status-aware project cards/rows                                                                                        | One maintained filter implementation                                     |
+| `/projects/[slug]`     | Breadcrumb and real status; editorial summary; team/area/output rail; real participation handoff                                                                     | Wire `expressInterest`; remove simulated success and unsupported claims  |
+| `/publications`        | IJMR-influenced publication index; query; title/author/year/context rows                                                                                             | Public `published` records only                                          |
+| `/publications/[slug]` | Publication masthead; manuscript abstract; real metadata rail; authors/area/project; related route links                                                             | Future AI boundary described in architecture, no dead UI                 |
+| `/events`              | Intentional empty state with route back to research; secondary navigation                                                                                            | No invented records                                                      |
+| `/opportunities`       | Intentional empty state pointing to current project participation; secondary navigation                                                                              | No grants/deadlines/eligibility claims                                   |
+| `/auth/sign-in`        | Shared branded auth layout; one form; institutional role explanation; student/public paths                                                                           | Role resolved server-side; safe return URL                               |
+| `/auth/sign-up`        | Explicit student registration; confirmation outcome; provisioned-account note                                                                                        | No role input/metadata; safe return URL                                  |
+| `/auth/forbidden`      | Branded access state with account/workspace, public research, sign-out recovery                                                                                      | No role leakage or client authorization                                  |
 
 ## 6. Exact shared files likely to change
 
