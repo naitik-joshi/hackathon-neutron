@@ -1,6 +1,6 @@
 # Grounded Research AI Backend — Frontend Connection Guide
 
-This document contains everything needed to connect any web UI (React, Next.js, Vue, Svelte, or vanilla JS) to the live Grounded Research Paper API.
+This document contains everything needed to connect any web UI (Next.js, React, Vue, Svelte) to the live Grounded Research Paper API.
 
 ---
 
@@ -8,27 +8,100 @@ This document contains everything needed to connect any web UI (React, Next.js, 
 
 | Item | Details |
 | :--- | :--- |
-| **Direct Server URL** | `http://43.204.235.82:8000` |
-| **Authentication Header** | `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1` |
+| **Backend Server URL** | `http://43.204.235.82:8000` |
+| **Authentication Header** | `X-API-Key: <YOUR_BACKEND_API_KEY>` (Keep Server-Side Only!) |
 | **Content-Type** | `application/json` |
-| **Status / Uptime** | Running 24/7 as a systemd service (`qwen-api.service`) |
+| **Status / Uptime** | Running 24/7 as a systemd daemon (`qwen-api.service`) |
 
-> **Note on Strict System Behavior:**
-> - **Zero Hallucination / Strict Grounding:** The AI only answers using facts and metrics from the parsed research paper sections.
-> - **Anti-Coding Guardrail:** If asked to generate software code, scripts, or answer outside the text, the system strictly outputs:  
+> **Crucial Behavioral Guardrails:**
+> - **Strict Closed-Domain Grounding:** The model only extracts facts and metrics explicitly stated in the ingested paper sections.
+> - **Anti-Coding Constraint:** If prompted to write code, build scripts, or extrapolate outside the research text, the system strictly returns:  
 >   `"Information not available in the provided document(s)."`
 
 ---
 
-## 2. API Endpoints Reference
+## 2. Security Architecture: WEB-28 (Server-Side Credential Isolation)
+
+> [!IMPORTANT]
+> **NEVER expose the API key in client-side code, git repositories, or `NEXT_PUBLIC_*` environment variables.**
+> All requests with `X-API-Key` should be executed **server-side** (e.g., via Next.js Route Handlers / API Routes or server rewrites).
+
+### Step 1: Store Key in Server Environment (`.env.local` on Next.js/Vercel)
+Add to your frontend project's `.env.local` (ensure `.env.local` is in `.gitignore`):
+```bash
+# Server-only (DO NOT prefix with NEXT_PUBLIC_)
+QWEN_BACKEND_URL=http://43.204.235.82:8000
+QWEN_API_KEY=your_private_api_key_here
+```
+
+### Step 2: Create a Server-Side Proxy Route
+By proxying queries through a Next.js server route:
+1. Your API key remains 100% hidden from the browser / client DevTools.
+2. You avoid CORS and browser HTTPS -> HTTP mixed-content errors.
+
+#### Next.js App Router: `app/api/query/route.ts`
+```typescript
+import { NextRequest, NextResponse } from 'next/server';
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+
+    const response = await fetch(`${process.env.QWEN_BACKEND_URL}/api/query`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': process.env.QWEN_API_KEY || '',
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+    return NextResponse.json(data, { status: response.status });
+  } catch (error: any) {
+    return NextResponse.json(
+      { error: 'Failed to communicate with Qwen backend', details: error.message },
+      { status: 500 }
+    );
+  }
+}
+```
+
+#### Client-Side Hook / Fetch (Clean & Safe)
+Now your React components can query cleanly without handling any credentials:
+```typescript
+export async function askPaperQuestion(paperName: string, sectionName: string, question: string) {
+  const res = await fetch('/api/query', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      paper_name: paperName,
+      section_name: sectionName,
+      question: question,
+    }),
+  });
+
+  const data = await res.json();
+  return data.answer; // Grounded factual text
+}
+```
+
+---
+
+## 3. Backend Endpoints Reference
+
+All requests sent to the backend must include:
+- `X-API-Key: <YOUR_BACKEND_API_KEY>`
+- `Content-Type: application/json`
+
+---
 
 ### A. List All Available Papers
-Retrieves all uploaded research papers and their extracted sections.
+Retrieves all uploaded research papers and their structured section hierarchy.
 
 - **Method:** `GET`
-- **URL:** `/api/papers`
-- **Headers:** `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-- **Response Example:**
+- **URL:** `http://43.204.235.82:8000/api/papers`
+- **Response Structure:**
 ```json
 {
   "total_papers": 7,
@@ -54,14 +127,11 @@ Retrieves all uploaded research papers and their extracted sections.
 
 ---
 
-### B. Pre-Warm Model on Paper Select (Instant Response Optimization)
-Call this as soon as the user clicks a paper in your sidebar/dropdown. It warms up the model in the background so queries execute with zero delay.
+### B. Pre-Warm Model on Paper Select
+Warms up the model in memory immediately when a user clicks a paper in your UI, ensuring subsequent queries feel instantaneous.
 
 - **Method:** `POST`
-- **URL:** `/api/select_paper`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
+- **URL:** `http://43.204.235.82:8000/api/select_paper`
 - **Body:**
 ```json
 {
@@ -71,14 +141,11 @@ Call this as soon as the user clicks a paper in your sidebar/dropdown. It warms 
 
 ---
 
-### C. Query Single Paper Section
-Performs strictly grounded factual analysis on a specific section of a paper.
+### C. Query Single Section
+Performs strictly grounded factual extraction on an isolated section.
 
 - **Method:** `POST`
-- **URL:** `/api/query`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
+- **URL:** `http://43.204.235.82:8000/api/query`
 - **Body:**
 ```json
 {
@@ -87,7 +154,7 @@ Performs strictly grounded factual analysis on a specific section of a paper.
   "question": "What was the exact accuracy and F1-score achieved by the model?"
 }
 ```
-- **Response Example:**
+- **Response:**
 ```json
 {
   "status": "success",
@@ -104,13 +171,10 @@ Performs strictly grounded factual analysis on a specific section of a paper.
 ---
 
 ### D. Cross-Paper Comparison
-Compares the same section across two different research papers.
+Performs comparative analysis between identical sections across two different papers.
 
 - **Method:** `POST`
-- **URL:** `/api/compare`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
+- **URL:** `http://43.204.235.82:8000/api/compare`
 - **Body:**
 ```json
 {
@@ -124,87 +188,13 @@ Compares the same section across two different research papers.
 ---
 
 ### E. Grounded Paper Recommendation
-Recommends the next relevant paper to read based purely on shared terminology in the dataset.
+Recommends the next relevant paper to explore based on shared terminology in the dataset.
 
 - **Method:** `POST`
-- **URL:** `/api/recommend`
-- **Headers:**
-  - `X-API-Key: qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1`
-  - `Content-Type: application/json`
+- **URL:** `http://43.204.235.82:8000/api/recommend`
 - **Body:**
 ```json
 {
   "current_paper": "sample_paper.docx"
-}
-```
-
----
-
-## 3. Important: Vercel / Next.js Setup (Avoid Mixed-Content)
-
-Because Vercel hosts your frontend over **HTTPS**, modern web browsers block requests sent directly to an `http://` backend ("Mixed Content Error").
-
-To solve this cleanly, add an API rewrite in your Next.js config so the frontend calls `/api/*` on its own domain, and Next.js proxies it server-side to the EC2 instance:
-
-### If using Next.js (`next.config.js` or `next.config.mjs`):
-```javascript
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/backend-api/:path*',
-        destination: 'http://43.204.235.82:8000/api/:path*',
-      },
-    ];
-  },
-};
-
-export default nextConfig;
-```
-
-### If using Vite / Plain Vercel (`vercel.json`):
-```json
-{
-  "rewrites": [
-    {
-      "source": "/backend-api/(.*)",
-      "destination": "http://43.204.235.82:8000/api/$1"
-    }
-  ]
-}
-```
-
----
-
-## 4. Frontend Example (React / TypeScript / JavaScript)
-
-```typescript
-const API_KEY = "qwen_live_QJzhiLUyxKa6BfMFnDVysKxSCJIXYEx1";
-
-// If using the rewrite proxy:
-const BASE_URL = "/backend-api"; 
-// Or if direct: "http://43.204.235.82:8000/api"
-
-export async function askQuestion(paperName: string, sectionName: string, question: string) {
-  const response = await fetch(`${BASE_URL}/query`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": API_KEY,
-    },
-    body: JSON.stringify({
-      paper_name: paperName,
-      section_name: sectionName,
-      question: question,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
-  }
-
-  const data = await response.json();
-  return data.answer; // Contains factual extraction or "Information not available in the provided document(s)."
 }
 ```

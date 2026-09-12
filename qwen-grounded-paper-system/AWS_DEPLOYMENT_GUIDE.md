@@ -162,18 +162,6 @@ Runs the live system with closed-domain grounding:
 python main.py run
 ```
 
-For the systemd API service, provide the API key at install time instead of
-placing it in the repository:
-
-```bash
-export QWEN_API_KEY="<generate-a-strong-api-key>"
-sudo --preserve-env=QWEN_API_KEY bash setup_service_remote.sh
-```
-
-The installer stores the value in root-readable `/etc/qwen-api.env`. Never
-commit `.api_key`, `.env` files, AWS credentials, or the generated service
-environment file.
-
 ---
 
 ## 4. How the Automated Self-Updating Dataset Works
