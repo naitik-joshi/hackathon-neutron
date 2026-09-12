@@ -10,7 +10,7 @@ Public: /, /research, /research/[slug], /publications, /publications/[slug]. Aut
 
 ## Database tables
 
-Migration: supabase/migrations/202609120001_initial_research.sql. Tables: profiles, research_areas, researchers, projects, publications, researcher_research_areas, researcher_projects, project_research_areas, publication_researchers, publication_projects. See data-model.md for relationships, indexes, lifecycle and deletion behavior. supabase/config.toml is CLI-generated configuration with provision-only auth settings; supabase/seed.sql is idempotent demonstration content.
+Migration: supabase/migrations/202609120001_initial_research.sql. Tables: profiles, research_areas, researchers, projects, publications, researcher_research_areas, researcher_projects, project_research_areas, publication_researchers, publication_projects. See data-model.md for relationships, indexes, lifecycle and deletion behavior. supabase/config.toml is retained CLI configuration; hosted Auth settings must be configured separately in the dashboard; supabase/seed.sql is idempotent demonstration content.
 
 ## Auth roles and RLS policies
 
@@ -18,11 +18,11 @@ Student: public discovery and private own profile only. Researcher: public disco
 
 ## Environment, seed and accounts
 
-Follow README local/hosted setup. Required values: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in ignored .env.local. No service-role key. Docker + npx supabase start/db reset applies local migrations and seed; hosted development uses link/db push and runs seed.sql in its SQL editor. Create confirmed researcher/admin accounts through Supabase Auth and promote their actual UUIDs in profiles using trusted SQL. Optional student keeps its default role. Exact SQL and commands are in README; verification steps are in testing.md.
+Follow the README hosted-only setup: `npm ci` → configure `.env.local` → `npx supabase link --project-ref YOUR_PROJECT_REF` when needed → `npx supabase db push` for coordinated migrations → `npm run dev`. Authenticate the CLI with `npx supabase login` if needed before linking. Required values: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY from the hosted development project in ignored .env.local. No service-role key. Confirm the linked project and coordinate with the database owner before pushing migrations. Run supabase/seed.sql in the hosted development project's SQL editor. Create confirmed researcher/admin accounts through hosted Supabase Auth and promote their actual UUIDs in profiles using trusted SQL. Optional student keeps its default role. Exact SQL and commands are in README; verification steps are in testing.md.
 
 ## Known limitations
 
-No configured Supabase project or running Docker daemon was available during bootstrap, so hosted Auth/cookie/Data API end-to-end checks remain pending. Embedded PostgreSQL tests verify actual SQL/RLS but not Auth transport. No signup/reset/OAuth flow. No edit/resubmit UI, review-note history, notification delivery, pagination beyond initial 50 public/100 private records, rich connected search, full researcher/project routes, Express Interest, or full CMS. Admin extension cards are deliberately shells. Directory records have no private/draft state. Database types are an explicit v0.1 contract; replace with generated schema types after connecting. No deployment or main-branch merge was performed.
+Hosted Auth/cookie/Data API end-to-end acceptance remains pending until verified against the configured hosted project. Docker-free PGlite PostgreSQL tests verify actual SQL/RLS but not Auth transport. No signup/reset/OAuth flow. No edit/resubmit UI, review-note history, notification delivery, pagination beyond initial 50 public/100 private records, rich connected search, full researcher/project routes, Express Interest, or full CMS. Admin extension cards are deliberately shells. Directory records have no private/draft state. Database types are an explicit v0.1 contract; replace with generated schema types after connecting. No deployment or main-branch merge was performed.
 
 ## Hot files
 

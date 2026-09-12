@@ -16,6 +16,8 @@ Student: public read only. Researcher: own submissions and permitted edits, neve
 
 ## Database
 
+Use hosted Supabase only during the hackathon. Developer workflow: `npm ci` → configure `.env.local` → `npx supabase link --project-ref YOUR_PROJECT_REF` when needed → `npx supabase db push` for coordinated migrations → `npm run dev`. Keep Supabase CLI configuration and migrations. Retain Docker-free PGlite tests; hosted acceptance remains pending until actually verified.
+
 Enable RLS on every new exposed table. Add policies and negative tests with schema changes. SQL migrations are immutable once shared; create a new timestamped migration. Explicitly coordinate migrations before editing. Generate/check database types after schema changes. Document public visibility and foreign-key deletion behavior. Do not use SECURITY DEFINER without a fixed search_path and narrow grants.
 
 ## Team / hot files

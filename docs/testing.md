@@ -2,7 +2,7 @@
 
 ## Automated checks
 
-Run `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. CI runs these on pushes and PRs using Node 22, without live credentials. PGlite is an embedded PostgreSQL runtime used only in tests; production remains Supabase PostgreSQL. Tests install a minimal auth.users/auth.uid contract, then execute the actual migration and seed unchanged with anon/authenticated roles. They do not emulate the Supabase HTTP API, cookies, refresh tokens or Auth service.
+Run `npm ci`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`. CI runs these on pushes and PRs using Node 22, without live credentials. PGlite is a Docker-free embedded PostgreSQL runtime used only in tests; it needs no Supabase service or credentials. The application uses hosted Supabase PostgreSQL. Tests install a minimal auth.users/auth.uid contract, then execute the actual migration and seed unchanged with anon/authenticated roles. They do not emulate the Supabase HTTP API, cookies, refresh tokens or Auth service.
 
 Bootstrap results: lint passed, TypeScript passed, production build passed, 11 tests passed. Database tests cover seed idempotency; metadata cannot elevate role; anonymous reads/writes; student cannot submit or promote; researcher ownership, locked submitted edits and cannot publish; private relationship visibility; admin review transition; change-request resubmission; publication timestamp; immediate anonymous visibility; all ten tables have RLS. Zod tests cover empty optional fields, invalid DOI/year/title/abstract, normalization and valid input.
 
@@ -10,9 +10,9 @@ Bootstrap results: lint passed, TypeScript passed, production build passed, 11 t
 
 With no credentials: homepage returns HTTP 200 and renders an honest setup state. Browser navigation to /researcher and /admin/submissions reaches /auth/sign-in?message=setup with no private content. Next streaming can deliver a redirect in the response body after HTTP 200; test the final browser URL rather than relying only on HEAD status. Desktop and 375px mobile homepage visually inspected; document scroll width equalled viewport width (375px), with no horizontal overflow. These checks do not substitute for signed-in integration testing.
 
-## Required hosted or full local Supabase acceptance (pending configuration)
+## Required hosted Supabase acceptance (pending verification)
 
-1. Apply migration and seed. Provision confirmed researcher, admin and optional student accounts as described in README.
+1. Follow the hosted-only workflow: `npm ci` → configure `.env.local` → `npx supabase link --project-ref YOUR_PROJECT_REF` when needed → `npx supabase db push` for coordinated migrations → `npm run dev`. Authenticate the CLI if needed and confirm the target project before pushing. Apply supabase/seed.sql in the hosted development project's SQL editor. Provision confirmed researcher, admin and optional student accounts as described in README.
 2. Use separate browser profiles/private sessions for anonymous, researcher and admin. Keep credentials out of screenshots.
 3. Anonymous: browse /research, /research/demo-artificial-intelligence, /publications and /publications/demo-accessible-learning-publication. Confirm DEMO DATA in every fictional entity preview/detail. Confirm /researcher and /admin redirect to sign-in.
 4. Researcher: sign in and confirm /researcher. Submit a title and abstract, leave DOI/year blank, and mark fictional content as DEMO DATA. Confirm feedback and Submitted status under /researcher/publications. Record its ID/slug for test evidence.
@@ -25,4 +25,4 @@ With no credentials: homepage returns HTTP 200 and renders an honest setup state
 
 ## Limits
 
-No hosted credentials were provided; Docker daemon was stopped. Full Supabase Auth/cookie and Data API integration remains unverified. Do not mark the hosted acceptance issue complete until these checks pass. Add meaningful tests whenever authorization or workflow behavior changes.
+Full hosted Supabase Auth/cookie and Data API acceptance remains pending until the checklist is actually verified against the configured hosted project. Passing PGlite tests does not complete hosted acceptance. Do not mark the hosted acceptance issue complete until these checks pass. Add meaningful tests whenever authorization or workflow behavior changes.

@@ -25,38 +25,34 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 No service-role key is needed. Never commit .env.local, passwords or tokens. Without values the app renders a setup state and protected routes redirect to sign-in; it does not substitute fictional arrays for database data.
 
+## Hosted Supabase development workflow
+
+Use the team's hosted Supabase **development** project throughout the hackathon. The workflow is `npm ci` → configure `.env.local` → link the hosted project when needed → apply coordinated migrations → `npm run dev`.
+
+When this checkout needs linking, authenticate the CLI with `npx supabase login` if needed, then run:
+
 ```sh
+npx supabase link --project-ref YOUR_PROJECT_REF
+```
+
+Before applying migrations, coordinate with the database owner and confirm the linked project is the intended hosted development project:
+
+```sh
+npx supabase db push
 npm run dev
 ```
 
-Open http://localhost:3000. Restart after changing environment values. Production builds embed public environment variables, so rebuild when changing projects.
+An already-linked checkout with no pending migrations only needs `npm run dev` after dependency and environment setup. Open http://localhost:3000. Restart after changing environment values. Production builds embed public environment variables, so rebuild when changing projects.
 
-## Database setup
+## Migrations and demo seed
 
-Choose a local development stack or an existing hosted **development** project.
+Keep `supabase/config.toml` and versioned SQL in `supabase/migrations/`. Linking and pushing migrations do not apply hosted Auth dashboard settings; configure those separately as described below.
 
-Local (requires running Docker and the Supabase CLI downloaded by npx):
-
-```sh
-npx supabase start
-npx supabase db reset
-```
-
-`db reset` resets only the local development database and applies migrations plus supabase/seed.sql. Do not use it on a shared or production database. Copy local URL and publishable key from the CLI/Studio into .env.local. The local API is normally http://127.0.0.1:54321 and Studio http://127.0.0.1:54323; use the actual CLI output. No passwords or Auth accounts are seeded.
-
-Hosted development project:
-
-```sh
-npx supabase login
-npx supabase link --project-ref YOUR_PROJECT_REF
-npx supabase db push
-```
-
-Inspect the target project before applying migrations. Run supabase/seed.sql in that development project's SQL editor to seed the visibly marked examples. Do not run db reset against hosted data. Seed is idempotent by stable IDs. After coordinated schema changes regenerate types with `npx supabase gen types typescript --linked > /tmp/database.types.ts`, compare against lib/supabase/database.types.ts, and preserve/relocate the application row aliases while replacing the schema contract.
+Run `supabase/seed.sql` in the hosted development project's SQL editor to seed the visibly marked examples. Seed is idempotent by stable IDs; no passwords or Auth accounts are seeded. After coordinated schema changes regenerate types with `npx supabase gen types typescript --linked > /tmp/database.types.ts`, compare against `lib/supabase/database.types.ts`, and preserve/relocate the application row aliases while replacing the schema contract.
 
 ## Authentication and role provisioning
 
-Password sign-in is implemented at /auth/sign-in. During the hackathon create confirmed test accounts in Supabase Dashboard → Authentication → Users (local Studio also works). Set your own secure passwords; never put them in Git. No public signup, email-confirmation callback, password-reset or OAuth flow is implemented. Local configuration disables self-service signup and requires confirmed email accounts. For hosted development, disable new user signup in Auth settings, require confirmed emails, and use passwords of at least eight characters.
+Password sign-in is implemented at /auth/sign-in. During the hackathon create confirmed test accounts in Supabase Dashboard → Authentication → Users. Set your own secure passwords; never put them in Git. No public signup, email-confirmation callback, password-reset or OAuth flow is implemented. In the hosted project, disable new user signup in Auth settings, require confirmed emails, and use passwords of at least eight characters.
 
 The Auth insert trigger creates profiles with role student regardless of user metadata. After creating accounts, use trusted SQL editor access and the **actual copied Auth UUIDs**:
 
@@ -97,4 +93,4 @@ AI coding tools are used during this hackathon. **All generated code is subject 
 
 ## Scope and verification
 
-The database-backed publication submission/review/publishing implementation and local SQL security tests exist. Hosted Supabase Auth/cookie integration still needs the configured project and real test accounts; see the explicit pending checklist in docs/testing.md. No claim is made that a hosted end-to-end demo has been run. Advanced search, full participation, events, notifications and AI remain backlog.
+The database-backed publication submission/review/publishing implementation and Docker-free PGlite SQL security tests exist. Hosted Supabase Auth/cookie integration still needs the configured project and real test accounts; see the explicit pending checklist in docs/testing.md. No claim is made that a hosted end-to-end demo has been run. Advanced search, full participation, events, notifications and AI remain backlog.
