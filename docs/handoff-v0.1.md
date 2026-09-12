@@ -6,7 +6,7 @@ Small Next.js foundation with a PostgreSQL-backed public → researcher submissi
 
 ## Routes implemented
 
-Public: /, /research, /research/[slug], /publications, /publications/[slug]. Auth: /auth/sign-in, /auth/forbidden. Researcher: /researcher, /researcher/publications, /researcher/publications/new. Admin: /admin, /admin/submissions, /admin/submissions/[id]. Loading/error/not-found states are shared. Admin overview contains nonfunctional labelled extension cards for Needs Attention, analytics, projects, researchers, events and opportunities.
+Public: `/`, `/research`, `/research/[slug]`, `/projects`, `/projects/[slug]`, `/publications`, `/publications/[slug]`. Auth/account: `/auth/sign-in`, `/auth/sign-up`, `/auth/forbidden`, `/account`. Researcher: `/researcher`, `/researcher/publications`, `/researcher/publications/new`, `/researcher/publications/[id]`. Admin: `/admin`, `/admin/submissions`, `/admin/submissions/[id]`. Loading/error/not-found states are shared. Admin overview contains nonfunctional labelled extension cards for Needs Attention, analytics, projects, researchers, events and opportunities.
 
 ## Database tables
 
@@ -22,7 +22,7 @@ Follow the README hosted-only setup: `npm ci` → configure `.env.local` → `np
 
 ## Known limitations
 
-Hosted Auth/cookie/Data API end-to-end acceptance remains pending until verified against the configured hosted project. Docker-free PGlite PostgreSQL tests verify actual SQL/RLS but not Auth transport. No signup/reset/OAuth flow. No edit/resubmit UI, review-note history, notification delivery, pagination beyond initial 50 public/100 private records, rich connected search, full researcher/project routes, Express Interest, or full CMS. Admin extension cards are deliberately shells. Directory records have no private/draft state. Database types are an explicit v0.1 contract; replace with generated schema types after connecting. No deployment or main-branch merge was performed.
+Hosted Auth/cookie/Data API end-to-end acceptance remains pending until verified against the configured hosted project. Docker-free PGlite PostgreSQL tests verify actual SQL/RLS but not Auth transport. Student email/password signup, researcher edit/resubmit, private review history, and admin review notes are wired. Password reset, OAuth, notification delivery, rich connected search, public researcher pages, full Express Interest UI, and a full CMS remain outside this slice. Admin extension cards are deliberately shells. Directory records have no private/draft state. Database types are an explicit v0.1 contract; compare them with generated hosted types after connecting.
 
 ## Hot files
 

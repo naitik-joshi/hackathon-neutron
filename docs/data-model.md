@@ -20,7 +20,7 @@ erDiagram
  projects ||--o{ publication_projects : produces
 ```
 
-Workflow: Draft → Submitted → Under Review → Changes Requested / Published / Rejected. Changes Requested → Submitted is allowed. Approval and publication are one explicit admin decision in v0.1; there is no separate approved enum. Publishing requires Under Review and sets published_at in the database. Researchers can insert Draft/Submitted and edit only their own Draft/Changes Requested records. Submitted, reviewed and published records are locked to researchers. UI provides submission and admin review/publishing; edit/resubmit UI is backlog.
+Workflow: Draft → Submitted → Under Review → Changes Requested / Published / Rejected. Changes Requested → Submitted is allowed. Approval and publication are one explicit admin decision in v0.1; there is no separate approved enum. Publishing requires Under Review and sets published_at in the database. Researchers can insert Draft/Submitted and edit only their own Draft/Changes Requested records. Submitted, reviewed and published records are locked to researchers. The private researcher detail route exposes edit/resubmit only for editable states and renders owner-scoped review history.
 
 RLS is enabled on all ten tables. Anonymous users read all admin-curated directory records and only published publications; this schema has no draft directory content. Students inherit public reads plus their own private profile. Researchers also read their own submissions. Admins manage all institutional rows and profiles. Self-service profile writes are deliberately absent to prevent role escalation. New Auth users always receive student, ignoring user metadata. Role provisioning is a trusted SQL/admin operation.
 

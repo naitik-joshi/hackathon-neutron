@@ -52,9 +52,11 @@ Run `supabase/seed.sql` in the hosted development project's SQL editor to seed t
 
 ## Authentication and role provisioning
 
-Password sign-in is implemented at /auth/sign-in. During the hackathon create confirmed test accounts in Supabase Dashboard → Authentication → Users. Set your own secure passwords; never put them in Git. No public signup, email-confirmation callback, password-reset or OAuth flow is implemented. In the hosted project, disable new user signup in Auth settings, require confirmed emails, and use passwords of at least eight characters.
+Password sign-in is implemented at `/auth/sign-in`, and public student registration is available at `/auth/sign-up`. Keep email/password signup enabled in the hosted project. If email confirmation is enabled, a new user sees an honest confirmation message and signs in after verifying their address; if Supabase returns a session immediately, the user is sent to `/account`. Password reset and OAuth are not implemented.
 
-The Auth insert trigger creates profiles with role student regardless of user metadata. After creating accounts, use trusted SQL editor access and the **actual copied Auth UUIDs**:
+Public registration never accepts a role or profile metadata. The Auth insert trigger creates every new profile as `student`, even if a caller attempts to send privileged metadata. Create researcher and admin test users through the trusted hosted Supabase workflow, set secure passwords, and never put credentials in Git.
+
+After creating accounts, use trusted SQL editor access and the **actual copied Auth UUIDs** to provision institutional roles:
 
 ```sql
 update public.profiles
@@ -93,4 +95,4 @@ AI coding tools are used during this hackathon. **All generated code is subject 
 
 ## Scope and verification
 
-The database-backed publication submission/review/publishing implementation and Docker-free PGlite SQL security tests exist. Hosted Supabase Auth/cookie integration still needs the configured project and real test accounts; see the explicit pending checklist in docs/testing.md. No claim is made that a hosted end-to-end demo has been run. Advanced search, full participation, events, notifications and AI remain backlog.
+The database-backed publication submission/review/publishing implementation, private review feedback, edit/resubmit interface, student signup, and Docker-free PGlite SQL security tests exist. Hosted Supabase Auth/cookie integration still needs the configured project and real test accounts; see the explicit pending checklist in `docs/testing.md`. No claim is made that a hosted end-to-end demo has been run. Advanced search, full participation, events, notifications and AI remain backlog.

@@ -40,22 +40,30 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend & Integration Primary
 
-**Current issue:** WEB-5  
-**Branch:** `feat/WEB-5-verify-supabase-journey`  
-**Status:** Not started / waiting for bootstrap merge
+**Current issue:** WEB-5 / WEB-10 / WEB-11 integration
+**Branch:** `dev`
+**Status:** Local integration complete; hosted acceptance pending
 
 ### Latest handoff
 - Work completed:
-  - v0.1 bootstrap review and integration planning.
+  - Audited the merged frontend/backend contracts and removed misleading project-specific claims that were not backed by schema fields.
+  - Added student-only registration, account-aware global navigation, responsive researcher/admin workspace navigation, and a role-aware account page.
+  - Wired ownership-scoped publication edit/resubmit, private researcher review history, and admin review notes for request-changes/reject/publish decisions.
+  - Applied the shared Stitch-inspired editorial UI foundation and a focused homepage pass using only database-backed records.
 - Areas touched:
-  - None yet from feature branch.
+  - `app/auth/`, `app/account/`, `app/researcher/`, `app/admin/`, shared layout/styles/navigation/UI.
+  - Publication and submission frontend integration, project data-fidelity fixes, auth validation tests, and handoff docs.
 - Checks:
-  - Bootstrap CI verified green before integration.
+  - `npm run check` passed (ESLint and TypeScript).
+  - `npm test` passed: 24/24 tests.
+  - Default Turbopack `npm run build` was blocked by this agent sandbox's worker-port restriction; `npm run build -- --webpack` passed and generated all routes.
+  - Local production smoke: public homepage/signup rendered from hosted data, signup mismatch feedback was announced, and signed-out researcher/admin routes redirected to sign-in.
 - Blockers / dependencies:
-  - Hosted Supabase project must be configured.
+  - Hosted migrations `202609120002_review_feedback.sql` and `202609120003_project_interests.sql` remain unapplied, so review-history and interest acceptance cannot pass against hosted Supabase yet.
+  - Hosted Auth/cookie/Data API acceptance remains pending; local checks and PGlite tests do not complete WEB-5.
 - Next:
-  - Verify the real researcher → admin → published-public journey.
-  - Then move to WEB-6 connected search.
+  - Coordinate the hosted migration push with Rabin, compare generated types, then run the complete anonymous/student/researcher/admin acceptance matrix in `docs/testing.md`.
+  - After WEB-5 evidence is recorded, continue WEB-6 connected search support without taking WEB-7/WEB-8 public page ownership.
 
 ---
 
