@@ -2,15 +2,17 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { listAreas, listPublications } from "@/features/research/queries";
+import { listProjects } from "@/features/projects/queries";
 import { AreaList } from "@/components/research/area-list";
 import { PublicationList } from "@/components/research/publication-list";
+import { ProjectCard } from "@/components/projects/project-card";
 import { SearchForm } from "@/components/research/search-form";
 import { SetupState } from "@/components/shared/empty-state";
 export default async function Home() {
   const configured = isSupabaseConfigured();
-  const [areas, publications] = configured
-    ? await Promise.all([listAreas(), listPublications("", 4)])
-    : [[], []];
+  const [areas, publications, projects] = configured
+    ? await Promise.all([listAreas(), listPublications("", 4), listProjects({ limit: 2 })])
+    : [[], [], []];
   return (
     <>
       <section className="mb-12 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
@@ -68,6 +70,25 @@ export default async function Home() {
           </Link>
         </div>
         {configured && <PublicationList items={publications} />}
+      </section>
+      <section className="my-12">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <h2 className="text-3xl">Active projects & labs</h2>
+          <Link href="/projects" className="text-link">
+            All research projects →
+          </Link>
+        </div>
+        {configured && projects.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2">
+            {projects.map((p) => (
+              <ProjectCard key={p.id} project={p} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-slate-600">
+            Research projects and labs will appear here as teams form.
+          </p>
+        )}
       </section>
       <section className="flex flex-wrap items-center justify-between gap-6 rounded-xl border border-blue-200 bg-blue-50 p-8">
         <div>

@@ -30,6 +30,7 @@ export default function RootLayout({
               className="flex flex-wrap gap-5 text-sm"
             >
               <Link href="/research">Explore research</Link>
+              <Link href="/projects">Projects</Link>
               <Link href="/publications">Publications</Link>
               <Link href="/researcher">Researcher area</Link>
               <Link href="/auth/sign-in">Sign in</Link>
