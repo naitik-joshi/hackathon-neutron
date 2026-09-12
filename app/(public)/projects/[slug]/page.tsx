@@ -8,6 +8,8 @@ import { ProjectTeam } from "@/components/projects/project-team";
 import { ProjectParticipationCallout } from "@/components/projects/project-participation-callout";
 import { PublicationList } from "@/components/research/publication-list";
 import { SetupState } from "@/components/shared/empty-state";
+import { getViewer } from "@/lib/auth/viewer";
+import { InterestForm } from "@/features/participation/interest-form";
 export async function generateMetadata({
   params,
 }: {
@@ -33,11 +35,15 @@ export default async function ProjectDetail({
         <SetupState />
       </div>
     );
-  const data = await getProjectBySlug((await params).slug);
+  const [data, viewer] = await Promise.all([
+    getProjectBySlug((await params).slug),
+    getViewer(),
+  ]);
   if (!data) notFound();
   const { project, areas, researchers, publications } = data;
   const canParticipate =
     project.status === "ongoing" || project.status === "proposed";
+  const cleanTitle = project.title.replace(/^DEMO DATA\s*[—–-]\s*/, "");
 
   return (
     <div className="page-shell space-y-8 break-words">
@@ -98,26 +104,36 @@ export default async function ProjectDetail({
       </section>
       <section
         id="get-involved"
-        className="scroll-mt-24 rounded-lg bg-[#0f2042] p-6 md:p-8 text-white space-y-4"
+        className="scroll-mt-24 space-y-4 pt-4 border-t border-slate-200"
       >
-        <h2 className="headline-md text-white">Get involved</h2>
-        <p className="max-w-2xl">
-          Explore the connected researchers and outputs to understand this
-          project. Online expressions of interest are not available in this
-          public interface yet.
-        </p>
-        <p className="text-sm text-slate-300">
-          Creating an account does not submit an application or confirm a place
-          on the project.
-        </p>
-        <div className="flex flex-wrap gap-3">
-          <Link href="/auth/sign-in" className="btn-academic-outline">
-            Sign in
-          </Link>
-          <Link href="/auth/sign-up" className="btn-academic-accent">
-            Create a student account
-          </Link>
+        <div className="space-y-1">
+          <span className="eyebrow block">Student Research Collaboration</span>
+          <h2 className="headline-md text-[#0F2042]">Get Involved</h2>
         </div>
+
+        {canParticipate ? (
+          <InterestForm
+            projectId={project.id}
+            projectTitle={cleanTitle}
+            projectSlug={project.slug}
+            isDemo={project.is_demo}
+            isAuthenticated={Boolean(viewer)}
+          />
+        ) : (
+          <div className="academic-card p-6 md:p-8 space-y-3 bg-[#FAFBFD]">
+            <h3 className="font-serif font-bold text-slate-900 text-lg">
+              Expressions of Interest Closed
+            </h3>
+            <p className="text-xs md:text-sm text-slate-600 leading-relaxed max-w-2xl">
+              This research project is currently {project.status}. Recruitment for student research assistants is closed for this cycle. You can inspect published datasets and outputs, or browse active projects.
+            </p>
+            <div className="pt-2">
+              <Link href="/projects" className="btn-academic-outline text-xs">
+                Browse active projects →
+              </Link>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
