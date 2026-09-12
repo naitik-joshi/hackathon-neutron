@@ -11,10 +11,11 @@
 - Added a Needs Your Action section limited to the signed-in researcher's changes-requested records, with feedback and edit/resubmit links.
 - Added recent own submissions, real profile identity, an optional linked public researcher profile, and intentional empty, loading and error states.
 - Removed unsupported grants, departments, senate membership, compute allocation, project progress, Slurm jobs, ethics codes, fellows, reviewers, deadlines, journal metadata and performance claims.
+- Restored the publication submission screen to the real title, abstract, optional DOI/year and DEMO DATA contract; removed the fabricated upload wizard, prefilled manuscript, fixed journal metadata and inactive resource controls.
 
 ## Files and boundaries
 
-- Added `features/researcher/`, `components/researcher/dashboard.tsx`, researcher route loading/error UI and focused tests.
+- Added `features/researcher/`, `components/researcher/dashboard.tsx`, researcher route loading/error UI and focused tests; simplified the researcher submission wrapper and form without changing its server action.
 - Updated the researcher overview and private publication anchors only.
 - No admin, operations, public discovery, Qwen, migration, Supabase utility, shared status or global-style files were changed.
 - No IJMR resource download was added because no approved resource is currently exposed through a verified application URL.
