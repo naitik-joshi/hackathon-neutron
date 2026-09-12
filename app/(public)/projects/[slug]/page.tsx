@@ -10,6 +10,8 @@ import { PublicationList } from "@/components/research/publication-list";
 import { SetupState } from "@/components/shared/empty-state";
 import { getViewer } from "@/lib/auth/viewer";
 import { InterestForm } from "@/features/participation/interest-form";
+import { expressInterest } from "@/features/participation/actions";
+import { buttonVariants } from "@/components/ui";
 export async function generateMetadata({
   params,
 }: {
@@ -44,6 +46,7 @@ export default async function ProjectDetail({
   const canParticipate =
     project.status === "ongoing" || project.status === "proposed";
   const cleanTitle = project.title.replace(/^DEMO DATA\s*[—–-]\s*/, "");
+  const submitInterest = expressInterest.bind(null, {});
 
   return (
     <div className="page-shell space-y-8 break-words">
@@ -58,7 +61,7 @@ export default async function ProjectDetail({
         {canParticipate && (
           <a
             href="#get-involved"
-            className="btn-academic-accent text-xs md:text-sm inline-flex items-center gap-2"
+            className={buttonVariants({ variant: "editorial" })}
           >
             <span>Get involved in this project</span>
             <span aria-hidden="true">↓</span>
@@ -107,8 +110,8 @@ export default async function ProjectDetail({
         className="scroll-mt-24 space-y-4 pt-4 border-t border-slate-200"
       >
         <div className="space-y-1">
-          <span className="eyebrow block">Student Research Collaboration</span>
-          <h2 className="headline-md text-[#0F2042]">Get Involved</h2>
+          <span className="section-kicker block">Student participation</span>
+          <h2 className="headline-md">Get involved</h2>
         </div>
 
         {canParticipate ? (
@@ -117,7 +120,8 @@ export default async function ProjectDetail({
             projectTitle={cleanTitle}
             projectSlug={project.slug}
             isDemo={project.is_demo}
-            isAuthenticated={Boolean(viewer)}
+            viewerRole={viewer?.role}
+            onSubmitAction={submitInterest}
           />
         ) : (
           <div className="academic-card p-6 md:p-8 space-y-3 bg-[#FAFBFD]">
@@ -125,10 +129,15 @@ export default async function ProjectDetail({
               Expressions of Interest Closed
             </h3>
             <p className="text-xs md:text-sm text-slate-600 leading-relaxed max-w-2xl">
-              This research project is currently {project.status}. Recruitment for student research assistants is closed for this cycle. You can inspect published datasets and outputs, or browse active projects.
+              This project is currently {project.status}, so it is not accepting
+              expressions of interest. You can inspect its published outputs or
+              browse other projects.
             </p>
             <div className="pt-2">
-              <Link href="/projects" className="btn-academic-outline text-xs">
+              <Link
+                href="/projects"
+                className={buttonVariants({ variant: "secondary" })}
+              >
                 Browse active projects →
               </Link>
             </div>

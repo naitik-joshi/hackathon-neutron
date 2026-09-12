@@ -2,7 +2,11 @@
 import { requireRole } from "@/lib/auth/guards";
 import { interestSchema } from "./validation";
 
-export type InterestActionState = { error?: string; success?: string };
+export type InterestActionState = {
+  error?: string;
+  success?: string;
+  code?: "already_submitted";
+};
 
 export async function expressInterest(
   _state: InterestActionState,
@@ -23,7 +27,10 @@ export async function expressInterest(
     .from("project_interests")
     .insert({ ...parsed.data, student_id: profile.id });
   if (error?.code === "23505")
-    return { success: "You have already expressed interest in this project." };
+    return {
+      success: "You have already expressed interest in this project.",
+      code: "already_submitted",
+    };
   if (error?.code === "23503")
     return { error: "This project is no longer available." };
   if (error)
