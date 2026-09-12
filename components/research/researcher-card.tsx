@@ -1,24 +1,61 @@
 import Link from "next/link";
-import { Card } from "@/components/ui";
+import { ArrowRight } from "lucide-react";
+import { InitialsAvatar } from "@/components/shared/initials-avatar";
 import { DemoBadge } from "@/components/shared/status-badge";
-import type { Researcher } from "@/lib/supabase/database.types";
-export function ResearcherCard({ researcher }: { researcher: Researcher }) {
+import type { Researcher, Area } from "@/lib/supabase/database.types";
+
+export function ResearcherCard({
+  researcher,
+}: {
+  researcher: Researcher & { areas?: Area[] };
+}) {
   return (
-    <Card className="space-y-3 min-w-0 break-words">
-      <DemoBadge demo={researcher.is_demo} />
-      <h2 className="headline-sm">{researcher.name}</h2>
-      {researcher.position && (
-        <p className="text-sm font-semibold">{researcher.position}</p>
-      )}
-      {researcher.bio && (
-        <p className="text-sm text-slate-600 line-clamp-3">{researcher.bio}</p>
-      )}
+    <article className="researcher-card interactive-surface">
+      <InitialsAvatar name={researcher.name} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <DemoBadge demo={researcher.is_demo} />
+          <p className="section-kicker">Researcher</p>
+        </div>
+        <h2 className="type-h3 mt-2 break-words">
+          <Link
+            href={`/researchers/${researcher.slug}`}
+            className="entity-title-link"
+          >
+            {researcher.name}
+          </Link>
+        </h2>
+        {researcher.position && (
+          <p className="mt-1 text-sm font-semibold text-[var(--color-ink-soft)]">
+            {researcher.position}
+          </p>
+        )}
+        {researcher.bio && (
+          <p className="mt-3 line-clamp-3 text-sm text-muted">
+            {researcher.bio}
+          </p>
+        )}
+        {researcher.areas && researcher.areas.length > 0 && (
+          <div
+            className="mt-4 flex flex-wrap gap-2"
+            aria-label="Research areas"
+          >
+            {researcher.areas.slice(0, 3).map((area) => (
+              <span key={area.id} className="entity-chip">
+                {area.name}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
       <Link
         href={`/researchers/${researcher.slug}`}
-        className="inline-block underline"
+        className="researcher-card-action"
+        aria-label={`View ${researcher.name}`}
       >
-        View researcher →
+        <span className="sr-only sm:not-sr-only">View profile</span>
+        <ArrowRight size={17} aria-hidden="true" />
       </Link>
-    </Card>
+    </article>
   );
 }
