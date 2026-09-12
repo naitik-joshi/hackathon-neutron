@@ -13,14 +13,20 @@ User=ubuntu
 WorkingDirectory=/home/ubuntu
 ExecStart=/home/ubuntu/venv/bin/python3 /home/ubuntu/api_server.py
 Restart=always
-# Set your private API key or let the server auto-generate one on first boot
-EnvironmentFile=-/home/ubuntu/.api_key_env
+# Required: QWEN_API_KEY=<rotated server-only secret>
+EnvironmentFile=/home/ubuntu/.api_key_env
 Environment=PYTHONUNBUFFERED=1
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/ubuntu/watch_papers /home/ubuntu/parsed_insights
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable --now qwen-api
+systemctl enable qwen-api
+systemctl restart qwen-api
 systemctl status qwen-api --no-pager

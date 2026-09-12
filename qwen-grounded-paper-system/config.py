@@ -4,6 +4,7 @@ Adheres strictly to AGENTS.md rules and Target Research Paper Template Schema.
 """
 
 from pathlib import Path
+import os
 import re
 
 # Workspace Directories
@@ -16,8 +17,8 @@ WATCH_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Local Ollama Configuration
-OLLAMA_BASE_URL = "http://127.0.0.1:11434"
-MODEL_NAME = "qwen2.5:3b"
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
+MODEL_NAME = os.environ.get("QWEN_MODEL", "qwen2.5:3b")
 TEMPERATURE = 0.0
 
 # Mandatory Grounding Response
