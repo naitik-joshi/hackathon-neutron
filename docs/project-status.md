@@ -63,21 +63,33 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** _Assign after context handoff_  
-**Branch:** _TBD_  
-**Status:** Context handoff
+**Current issue:** WEB-10 — Add researcher edit and resubmit screens (backend slice)
+
+**Branch:** `dev`
+
+**Status:** Backend complete / frontend handoff
 
 ### Latest handoff
 - Work completed:
-  - None yet.
+  - Added Zod-validated researcher resubmission behavior.
+  - Scoped updates atomically to the signed-in owner and Draft / Changes Requested states.
+  - Resubmission sets Submitted, after which further researcher edits are locked.
+  - Added action-level mutation tests and a direct RLS wrong-owner test.
 - Areas touched:
-  - None.
+  - `features/publications/`
+  - `lib/validation/publication.ts`
+  - Publication validation, mutation and database tests.
 - Checks:
-  - None.
+  - `npm run lint` passed.
+  - `npm run typecheck` passed.
+  - `npm test` passed (15 tests).
+  - `npm run build` passed.
 - Blockers / dependencies:
-  - Read project docs and wait for agreed first issue.
+  - WEB-5 hosted Supabase acceptance remains pending.
+  - Frontend owner still needs to connect the edit/resubmit screen to the new server action.
 - Next:
-  - Recommended lane: WEB-10 → WEB-11 → WEB-12.
+  - Hand off the WEB-10 action contract to the dashboard frontend owner.
+  - Coordinate a migration with Naitik before starting WEB-11 or WEB-12 schema work.
 
 ---
 

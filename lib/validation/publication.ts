@@ -1,5 +1,6 @@
 import { z } from "zod";
-export const publicationSchema = z.object({
+
+const editablePublicationFields = {
   title: z
     .string()
     .trim()
@@ -23,6 +24,17 @@ export const publicationSchema = z.object({
     z.literal("").transform(() => null),
     z.coerce.number().int().min(1900).max(2100),
   ]),
+};
+
+export const publicationSchema = z.object({
+  ...editablePublicationFields,
   is_demo: z.boolean(),
 });
+
+export const editPublicationSchema = z.object({
+  id: z.uuid(),
+  ...editablePublicationFields,
+});
+
+export type EditPublicationInput = z.infer<typeof editPublicationSchema>;
 export type ActionState = { error?: string };

@@ -145,6 +145,19 @@ test("PostgreSQL migration, RLS and publication lifecycle", async (t) => {
         await db.exec(
           `update publications set status='under_review' where id='${publication}'; update publications set status='changes_requested' where id='${publication}';`,
         );
+        await asUser(other);
+        await db.exec(
+          `update publications set title='Other owner edit' where id='${publication}'`,
+        );
+        await asUser(admin);
+        assert.match(
+          (
+            await db.query<{ title: string }>(
+              `select title from publications where id='${publication}'`,
+            )
+          ).rows[0].title,
+          /DEMO DATA/,
+        );
         await asUser(researcher);
         await assert.rejects(
           db.exec(

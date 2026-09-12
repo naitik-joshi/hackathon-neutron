@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { publicationSchema } from "../lib/validation/publication.ts";
+import {
+  editPublicationSchema,
+  publicationSchema,
+} from "../lib/validation/publication.ts";
 const valid = {
   title: "Research title",
   abstract: "An abstract with enough detail for a useful review.",
@@ -36,4 +39,20 @@ test("accept DOI and year and trim text", () => {
   });
   assert.equal(data.title, "Research title");
   assert.equal(data.year, 2026);
+});
+
+test("edit validation requires an id and does not accept workflow fields", () => {
+  const parsed = editPublicationSchema.parse({
+    ...valid,
+    id: "b0000000-0000-4000-8000-000000000001",
+    status: "published",
+  });
+
+  assert.equal(parsed.id, "b0000000-0000-4000-8000-000000000001");
+  assert.equal("status" in parsed, false);
+  assert.equal("is_demo" in parsed, false);
+  assert.equal(
+    editPublicationSchema.safeParse({ ...valid, id: "not-an-id" }).success,
+    false,
+  );
 });
