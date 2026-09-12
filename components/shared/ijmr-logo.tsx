@@ -19,6 +19,7 @@ export function BrandLogo({
           width={1080}
           height={427}
           priority={priority}
+          loading={priority ? "eager" : "lazy"}
           className="h-auto w-full"
         />
       </span>
