@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Orbit } from "lucide-react";
+import { Suspense } from "react";
+import { SiteHeader } from "@/components/navigation/site-header";
 import "./globals.css";
 export const metadata = {
   title: {
@@ -17,31 +18,14 @@ export default function RootLayout({
         <a href="#main" className="sr-only focus:not-sr-only">
           Skip to content
         </a>
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5 px-6 py-5">
-            <Link href="/" className="flex items-center gap-3 font-bold">
-              <Orbit className="text-blue-700" aria-hidden="true" />
-              <span>
-                Islington <span className="font-normal">/ R&D Hub</span>
-              </span>
-            </Link>
-            <nav
-              aria-label="Main navigation"
-              className="flex flex-wrap gap-5 text-sm"
-            >
-              <Link href="/research">Explore research</Link>
-              <Link href="/projects">Projects</Link>
-              <Link href="/publications">Publications</Link>
-              <Link href="/researcher">Researcher area</Link>
-              <Link href="/auth/sign-in">Sign in</Link>
-            </nav>
-          </div>
-        </header>
-        <main id="main" className="mx-auto min-h-[70vh] max-w-6xl px-6 py-12">
+        <Suspense fallback={<div className="h-[73px] border-b bg-white" />}>
+          <SiteHeader />
+        </Suspense>
+        <main id="main" className="page-shell min-h-[70vh]">
           {children}
         </main>
         <footer className="border-t border-slate-200 px-6 py-8 text-sm text-slate-600">
-          <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4">
+          <div className="page-shell flex flex-wrap justify-between gap-4 py-0">
             <p>Islington College · R&D Digital Hub · Hackathon 2026</p>
             <Link href="/research" className="text-link">
               Find your next research connection

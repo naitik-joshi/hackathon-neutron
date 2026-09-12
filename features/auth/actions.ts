@@ -1,17 +1,16 @@
 "use server";
-import { z } from "zod";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import type { ActionState } from "@/lib/validation/publication";
+import { signInSchema, signUpSchema, type AuthActionState } from "./validation";
+
 export async function signIn(
-  _state: ActionState,
+  _state: AuthActionState,
   form: FormData,
-): Promise<ActionState> {
-  const parsed = z
-    .object({ email: z.email().max(254), password: z.string().min(1).max(256) })
-    .safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { error: "Enter a valid email and password." };
+): Promise<AuthActionState> {
+  const parsed = signInSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success)
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
   if (!isSupabaseConfigured())
     return {
       error: "Sign in is not configured yet. Contact the project team.",
@@ -33,9 +32,46 @@ export async function signIn(
       ? "/admin"
       : profile?.role === "researcher"
         ? "/researcher"
-        : "/research",
+        : "/account",
   );
 }
+
+export async function signUp(
+  _state: AuthActionState,
+  form: FormData,
+): Promise<AuthActionState> {
+  const parsed = signUpSchema.safeParse({
+    email: form.get("email"),
+    password: form.get("password"),
+    confirmPassword: form.get("confirmPassword"),
+  });
+  if (!parsed.success)
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
+  if (!isSupabaseConfigured())
+    return {
+      error:
+        "Account creation is not configured yet. Contact the project team.",
+    };
+
+  const client = await createClient();
+  const { data, error } = await client.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
+  if (error)
+    return {
+      error:
+        "We could not create your account. Check the details or try signing in if you already registered.",
+    };
+
+  if (data.session) redirect("/account?created=1");
+
+  return {
+    success:
+      "Check your email to confirm your account, then return here to sign in.",
+  };
+}
+
 export async function signOut() {
   if (isSupabaseConfigured()) {
     const client = await createClient();

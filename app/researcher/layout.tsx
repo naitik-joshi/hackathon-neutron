@@ -1,26 +1,23 @@
-import Link from "next/link";
 import { requireRole } from "@/lib/auth/guards";
-import { signOut } from "@/features/auth/actions";
+import { WorkspaceNav } from "@/components/navigation/workspace-nav";
 export const dynamic = "force-dynamic";
 export default async function ResearcherLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireRole(["researcher"]);
+  const { profile } = await requireRole(["researcher"]);
   return (
     <>
-      <nav
-        aria-label="Researcher navigation"
-        className="mb-8 flex flex-wrap gap-5 text-sm"
-      >
-        <Link href="/researcher">Overview</Link>
-        <Link href="/researcher/publications">My publications</Link>
-        <Link href="/researcher/publications/new">New submission</Link>
-        <form action={signOut}>
-          <button className="text-link">Sign out</button>
-        </form>
-      </nav>
+      <WorkspaceNav
+        title="Researcher workspace"
+        identity={profile.display_name || "Researcher account"}
+        links={[
+          { href: "/researcher", label: "Overview" },
+          { href: "/researcher/publications", label: "My publications" },
+          { href: "/researcher/publications/new", label: "Submit publication" },
+        ]}
+      />
       {children}
     </>
   );
