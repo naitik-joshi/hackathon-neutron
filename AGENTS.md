@@ -4,7 +4,7 @@ Build an understandable connected research ecosystem for a four-person, 24-hour 
 
 ## Before coding
 
-Inspect existing patterns and docs/architecture.md. Reuse shared components. DO NOT redesign unrelated code while implementing a feature. Keep tasks small (30–90 minutes); avoid new infrastructure or abstractions without a concrete need.
+Inspect existing patterns and docs/architecture.md. When working in a team feature branch, also read docs/work-division.md and docs/project-status.md before coding. Reuse shared components. DO NOT redesign unrelated code while implementing a feature. Keep tasks small (30–90 minutes); avoid new infrastructure or abstractions without a concrete need.
 
 ## Stack and boundaries
 
@@ -21,6 +21,8 @@ Use hosted Supabase only during the hackathon. Developer workflow: `npm ci` → 
 Enable RLS on every new exposed table. Add policies and negative tests with schema changes. SQL migrations are immutable once shared; create a new timestamped migration. Explicitly coordinate migrations before editing. Generate/check database types after schema changes. Document public visibility and foreign-key deletion behavior. Do not use SECURITY DEFINER without a fixed search_path and narrow grants.
 
 ## Team / hot files
+
+Each developer owns their assigned area by default. Before modifying another member’s owned files or any shared/hot file, coordinate first. After completing or handing off a meaningful Linear task, update only your own section in docs/project-status.md.
 
 Coordinate before editing package.json, package-lock.json, app/layout.tsx, global CSS/design tokens, proxy.ts, lib/supabase/_, shared database types, or supabase/migrations/_. One owner per shared change. Feature folders/routes are safe parallel areas after ownership agreement. Keep main healthy; small PRs require another developer's review. Escalate blockers after 15 minutes; integrate every two hours. Do not spawn agents unless explicitly requested for the current task.
 
