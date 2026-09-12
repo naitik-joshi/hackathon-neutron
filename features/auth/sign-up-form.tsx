@@ -2,68 +2,75 @@
 
 import { useActionState } from "react";
 import { signUp } from "./actions";
-import { Button, Input } from "@/components/ui";
+import {
+  Button,
+  FieldError,
+  FieldHelp,
+  FormMessage,
+  Input,
+} from "@/components/ui";
+import { PasswordField } from "@/components/ui/password-field";
 
-export function SignUpForm() {
+export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
   const [state, action, pending] = useActionState(signUp, {});
 
   if (state.success) {
     return (
-      <div role="status" className="alert alert-success">
-        <p className="font-semibold">Your student account has been created.</p>
-        <p className="mt-1 text-sm">{state.success}</p>
-      </div>
+      <FormMessage tone="success" title="Check your email">
+        {state.success}
+      </FormMessage>
     );
   }
 
   return (
-    <form action={action} className="space-y-5">
+    <form action={action} className="space-y-5" noValidate>
+      {redirectTo && (
+        <input type="hidden" name="redirectTo" value={redirectTo} />
+      )}
       <div>
-        <label htmlFor="email">College email</label>
+        <label htmlFor="signup-email">Email</label>
         <Input
-          id="email"
+          id="signup-email"
           name="email"
           type="email"
           autoComplete="email"
+          inputMode="email"
           required
+          autoFocus
           aria-describedby={
             state.fieldErrors?.email ? "signup-email-error" : undefined
           }
           aria-invalid={Boolean(state.fieldErrors?.email)}
         />
         {state.fieldErrors?.email && (
-          <p id="signup-email-error" className="field-error">
+          <FieldError id="signup-email-error">
             {state.fieldErrors.email[0]}
-          </p>
+          </FieldError>
         )}
       </div>
       <div>
         <label htmlFor="new-password">Password</label>
-        <Input
+        <PasswordField
           id="new-password"
           name="password"
-          type="password"
           autoComplete="new-password"
           minLength={8}
           required
           aria-describedby="password-guidance signup-password-error"
           aria-invalid={Boolean(state.fieldErrors?.password)}
         />
-        <p id="password-guidance" className="field-help">
-          Use at least 8 characters.
-        </p>
+        <FieldHelp id="password-guidance">Use at least 8 characters.</FieldHelp>
         {state.fieldErrors?.password && (
-          <p id="signup-password-error" className="field-error">
+          <FieldError id="signup-password-error">
             {state.fieldErrors.password[0]}
-          </p>
+          </FieldError>
         )}
       </div>
       <div>
         <label htmlFor="confirm-password">Confirm password</label>
-        <Input
+        <PasswordField
           id="confirm-password"
           name="confirmPassword"
-          type="password"
           autoComplete="new-password"
           required
           aria-describedby={
@@ -74,23 +81,19 @@ export function SignUpForm() {
           aria-invalid={Boolean(state.fieldErrors?.confirmPassword)}
         />
         {state.fieldErrors?.confirmPassword && (
-          <p id="confirm-password-error" className="field-error">
+          <FieldError id="confirm-password-error">
             {state.fieldErrors.confirmPassword[0]}
-          </p>
+          </FieldError>
         )}
       </div>
       {state.error && (
-        <p role="alert" className="alert alert-error">
+        <FormMessage tone="error" title="Account was not created">
           {state.error}
-        </p>
+        </FormMessage>
       )}
-      <Button className="w-full" disabled={pending}>
-        {pending ? "Creating account…" : "Create student account"}
+      <Button className="w-full" disabled={pending} aria-disabled={pending}>
+        {pending ? "Creating student account…" : "Create student account"}
       </Button>
-      <p className="text-xs text-slate-500">
-        Registration creates a student account only. Researcher and admin access
-        is provisioned by the institution.
-      </p>
     </form>
   );
 }

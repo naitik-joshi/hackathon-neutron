@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { signInSchema, signUpSchema, type AuthActionState } from "./validation";
+import {
+  getPostSignInRedirect,
+  getPostSignUpRedirect,
+} from "@/lib/auth/redirects";
 
 export async function signIn(
   _state: AuthActionState,
@@ -28,11 +32,12 @@ export async function signIn(
     .eq("id", claims?.claims.sub ?? "")
     .maybeSingle();
   redirect(
-    profile?.role === "admin"
-      ? "/admin"
-      : profile?.role === "researcher"
-        ? "/researcher"
-        : "/account",
+    getPostSignInRedirect(
+      profile?.role === "admin" || profile?.role === "researcher"
+        ? profile.role
+        : "student",
+      form.get("redirectTo"),
+    ),
   );
 }
 
@@ -64,7 +69,7 @@ export async function signUp(
         "We could not create your account. Check the details or try signing in if you already registered.",
     };
 
-  if (data.session) redirect("/account?created=1");
+  if (data.session) redirect(getPostSignUpRedirect(form.get("redirectTo")));
 
   return {
     success:
