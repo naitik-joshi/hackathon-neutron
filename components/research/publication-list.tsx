@@ -50,19 +50,20 @@ export function PublicationList({
             <Link href={`/admin/submissions/${item.id}`} className="text-link">
               Review submission →
             </Link>
+          ) : mode === "researcher" ? (
+            <Link
+              href={`/researcher/publications/${item.id}`}
+              className="text-link"
+            >
+              {item.status === "draft" || item.status === "changes_requested"
+                ? "Review and resubmit →"
+                : "View submission and feedback →"}
+            </Link>
           ) : item.status === "published" ? (
             <Link href={`/publications/${item.slug}`} className="text-link">
               Read publication →
             </Link>
-          ) : (
-            <p className="text-sm text-slate-600">
-              {item.status === "changes_requested"
-                ? "Contact the administrator for requested changes; resubmission editing is coming next."
-                : item.status === "rejected"
-                  ? "Contact the administrator to discuss the review outcome."
-                  : "Your submission is private while the review is in progress."}
-            </p>
-          )}
+          ) : null}
         </Card>
       ))}
     </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useActionState } from "react";
 import { reviewPublication } from "./actions";
-import { Button } from "@/components/ui";
+import { Button, Textarea } from "@/components/ui";
 import type { PublicationStatus } from "@/lib/supabase/database.types";
 export function ReviewForm({
   id,
@@ -21,51 +21,54 @@ export function ReviewForm({
       )}
       {status === "under_review" && (
         <>
-          <p>
+          <p className="text-sm text-slate-600">
             Approve only after checking the title, abstract, attribution and any
             demo label. Publishing makes this record visible to everyone.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <div className="w-full">
+          <div className="space-y-4">
+            <div>
               <label htmlFor="review-note">
                 Review feedback (required for changes or rejection)
               </label>
-              <textarea
+              <Textarea
                 id="review-note"
                 name="note"
                 maxLength={4000}
                 rows={4}
-                className="mt-2 w-full rounded border p-3"
+                aria-describedby="review-note-help"
               />
-              <p className="text-sm">
-                Visible only to the submitter and administrators.
+              <p id="review-note-help" className="field-help">
+                Give a concrete next step. Feedback is private to the submitter
+                and administrators. A note is optional when publishing.
               </p>
             </div>
-            <Button name="decision" value="published" disabled={pending}>
-              Approve and publish
-            </Button>
-            <Button
-              name="decision"
-              value="changes_requested"
-              disabled={pending}
-              className="bg-slate-700 hover:bg-slate-800"
-            >
-              Request changes
-            </Button>
-            <Button
-              name="decision"
-              value="rejected"
-              disabled={pending}
-              className="bg-red-700 hover:bg-red-800"
-            >
-              Reject
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button name="decision" value="published" disabled={pending}>
+                Approve and publish
+              </Button>
+              <Button
+                name="decision"
+                value="changes_requested"
+                disabled={pending}
+                variant="secondary"
+              >
+                Request changes
+              </Button>
+              <Button
+                name="decision"
+                value="rejected"
+                disabled={pending}
+                variant="danger"
+              >
+                Reject
+              </Button>
+            </div>
           </div>
         </>
       )}
       {pending && <p role="status">Saving review decision…</p>}
       {state.error && (
-        <p role="alert" className="text-red-700">
+        <p role="alert" className="alert alert-error">
           {state.error}
         </p>
       )}
