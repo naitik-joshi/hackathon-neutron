@@ -1,12 +1,28 @@
 import { Search } from "lucide-react";
 import { Button, Input } from "@/components/ui";
-export function SearchForm({ query = "" }: { query?: string }) {
+export function SearchForm({
+  query = "",
+  action = "/publications",
+  label = "Find published research by title",
+  id = "research-query",
+}: {
+  query?: string;
+  action?: string;
+  label?: string;
+  id?: string;
+}) {
   return (
-    <form action="/publications" className="mb-8 max-w-2xl">
-      <label htmlFor="research-query">Find published research by title</label>
+    <form
+      action={action}
+      method="GET"
+      role="search"
+      aria-label={label}
+      className="mb-8 max-w-2xl"
+    >
+      <label htmlFor={id}>{label}</label>
       <div className="flex flex-col gap-2 sm:flex-row">
         <Input
-          id="research-query"
+          id={id}
           name="q"
           type="search"
           defaultValue={query}
