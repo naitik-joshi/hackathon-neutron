@@ -1,4 +1,5 @@
 # Data model and RLS assumptions
+
 PostgreSQL supports foreign keys, transactional publishing and many-to-many queries in this relationship-heavy domain.
 
 profiles stores a private Auth-linked display name and role; deleting an Auth user cascades to their profile. researchers is an independently curated public identity, optionally linked one-to-one to a profile (SET NULL on deletion). research_areas groups ideas. projects stores proposed/ongoing/completed/archived public projects. publications stores abstract, DOI, year, immutable slug/attribution and review state; deleted submitters become NULL so outputs survive. Entity IDs are UUIDs; slugs are unique. Relationship pairs are composite primary keys with reverse indexes and cascading deletion. Core entities have creation/update timestamps.

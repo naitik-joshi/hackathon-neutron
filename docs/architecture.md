@@ -1,4 +1,5 @@
 # Architecture
+
 ```mermaid
 flowchart TD
  Browser --> Next[Next.js App Router]
@@ -12,6 +13,7 @@ flowchart TD
  Supabase --> Auth[Supabase Auth]
  Supabase -. future .-> Storage
 ```
+
 Client components handle pending forms and recoverable errors. Server Components render data; Server Actions validate inputs, verify identity and roles, then write through the user's Supabase session. No duplicate REST layer. PostgreSQL owns durable records, relationships, permissions and workflow invariants. Supabase Auth owns passwords and signed identity. Proxy refreshes cookies; server guards and RLS authorize requests independently.
 
 Separate browser/server clients follow the [official Supabase SSR pattern](https://supabase.com/docs/guides/auth/server-side/creating-a-client?framework=nextjs). getClaims validates identity; profiles supplies the current role. Never trust user-editable metadata. Authenticated pages are dynamic; do not cache personalized responses at a CDN. Missing configuration produces a setup state, never fake records. No service-role credential is used.
