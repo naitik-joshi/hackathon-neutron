@@ -15,7 +15,7 @@ export default async function MyPublications({
     .limit(100);
   if (error) throw new Error("Could not load submissions");
   return (
-    <>
+    <div className="page-shell space-y-6 pb-16">
       <PageHeader
         eyebrow="Researcher / Publications"
         title="Your submissions"
@@ -35,6 +35,6 @@ export default async function MyPublications({
         </p>
       )}
       <PublicationList items={data} mode="researcher" />
-    </>
+    </div>
   );
 }

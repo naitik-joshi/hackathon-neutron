@@ -14,7 +14,8 @@ import { getEnrichedInterestInbox } from "@/features/participation/queries";
 
 export const metadata = {
   title: "Project Interest Inbox | IJMR Admin",
-  description: "Institutional repository of student research project applications and participation requests.",
+  description:
+    "Private inbox for student expressions of interest in research projects.",
 };
 
 export default async function AdminInterestsPage({
@@ -50,12 +51,17 @@ export default async function AdminInterestsPage({
       <nav aria-label="Breadcrumb" className="text-xs text-slate-500">
         <ol className="flex items-center gap-2">
           <li>
-            <Link href="/admin" className="hover:text-slate-900 transition-colors">
+            <Link
+              href="/admin"
+              className="hover:text-slate-900 transition-colors"
+            >
               Dashboard
             </Link>
           </li>
           <li>/</li>
-          <li className="font-semibold text-slate-800">Project Interest Inbox</li>
+          <li className="font-semibold text-slate-800">
+            Project Interest Inbox
+          </li>
         </ol>
       </nav>
 
@@ -69,7 +75,7 @@ export default async function AdminInterestsPage({
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-mono text-[0.68rem] uppercase font-bold tracking-wider text-slate-500">
-                  Student Participation Ledger
+                  Student participation
                 </span>
                 <span className="pill-badge pill-review text-xs font-semibold">
                   Admin Only
@@ -83,7 +89,9 @@ export default async function AdminInterestsPage({
         </div>
 
         <p className="text-xs md:text-sm text-slate-600 max-w-3xl leading-relaxed">
-          Confidential institutional records of student applications, research queries, and collaboration inquiries across Islington College R&D initiatives. Review candidate proposals and coordinate directly with applicants.
+          Private expressions of interest submitted by students for research
+          projects. Review the recorded message and contact details before
+          following up.
         </p>
 
         {/* Telemetry Strip */}
@@ -96,7 +104,7 @@ export default async function AdminInterestsPage({
               {totalInquiries}
             </div>
             <span className="text-[0.65rem] text-slate-400 font-mono">
-              Recorded in ledger
+              Recorded interests
             </span>
           </div>
 
@@ -114,7 +122,7 @@ export default async function AdminInterestsPage({
 
           <div className="rounded border border-slate-200 bg-[#FAFBFD] p-3.5">
             <span className="text-slate-500 text-[0.65rem] font-mono uppercase block">
-              Student Applicants
+              Interested students
             </span>
             <div className="font-serif text-2xl font-bold text-[#0F2042] mt-1">
               {uniqueStudents}
@@ -153,7 +161,7 @@ export default async function AdminInterestsPage({
             type="search"
             name="q"
             defaultValue={q}
-            placeholder="Search candidate, email, project, or keyword..."
+            placeholder="Search student, email, project, or keyword..."
             className="w-full pl-10 pr-4 py-2 text-xs md:text-sm rounded border border-slate-200 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-800 focus:border-slate-800"
           />
         </form>
@@ -161,7 +169,10 @@ export default async function AdminInterestsPage({
         {q && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-500">
-              Filtering by: <strong className="text-slate-800 font-mono">&ldquo;{q}&rdquo;</strong>
+              Filtering by:{" "}
+              <strong className="text-slate-800 font-mono">
+                &ldquo;{q}&rdquo;
+              </strong>
             </span>
             <Link
               href="/admin/interests"
@@ -182,12 +193,15 @@ export default async function AdminInterestsPage({
           </h2>
           <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
             {q
-              ? "No student applications matched your search terms. Try searching by applicant name, contact email, or project title."
-              : "No student project interests have been submitted yet. When students express interest in research projects, their applications will be logged here."}
+              ? "No expressions of interest matched your search terms. Try searching by student name, contact email, or project title."
+              : "No project interests have been submitted yet. New expressions of interest will appear here."}
           </p>
           {q && (
             <div className="pt-2">
-              <Link href="/admin/interests" className="btn-academic-outline text-xs">
+              <Link
+                href="/admin/interests"
+                className="btn-academic-outline text-xs"
+              >
                 View All Inquiries
               </Link>
             </div>
@@ -223,7 +237,10 @@ export default async function AdminInterestsPage({
                           className="font-serif font-semibold text-slate-900 hover:text-[#0F2042] hover:underline inline-flex items-center gap-1 text-sm md:text-base"
                         >
                           <span>{cleanProjectTitle}</span>
-                          <ExternalLink size={13} className="text-slate-400 shrink-0" />
+                          <ExternalLink
+                            size={13}
+                            className="text-slate-400 shrink-0"
+                          />
                         </Link>
                       ) : (
                         <span className="font-serif font-semibold text-slate-900 text-sm md:text-base">
@@ -244,20 +261,23 @@ export default async function AdminInterestsPage({
                   >
                     <Calendar size={13} className="text-slate-400" />
                     <span>
-                      {new Date(interest.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                      {new Date(interest.created_at).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        },
+                      )}
                     </span>
                   </time>
                 </div>
 
-                {/* Candidate & Contact Metadata */}
+                {/* Student and contact metadata */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-[#FAFBFD] p-3 rounded border border-slate-200">
                   <div className="flex items-center gap-2">
                     <User size={14} className="text-slate-400 shrink-0" />
-                    <span className="text-slate-500">Applicant:</span>
+                    <span className="text-slate-500">Student:</span>
                     <strong className="text-slate-900">
                       {interest.student?.display_name || "Enrolled Student"}
                     </strong>
@@ -295,10 +315,13 @@ export default async function AdminInterestsPage({
                 <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-[0.7rem] text-slate-500 font-mono">
                   <div className="flex items-center gap-1.5">
                     <ShieldCheck size={13} className="text-[#0F766E]" />
-                    <span>Private ledger record • ID: {interest.id.slice(0, 8)}</span>
+                    <span>
+                      Private interest record • ID: {interest.id.slice(0, 8)}
+                    </span>
                   </div>
                   <span>
-                    Contact directly via email to coordinate lab interview or onboarding.
+                    Contact directly by email if the project team wants to
+                    follow up.
                   </span>
                 </div>
               </article>
@@ -315,7 +338,9 @@ export default async function AdminInterestsPage({
             Institutional Policy & Workflow Governance:
           </strong>
           <p className="leading-relaxed">
-            Participation requests are submitted by authenticated students expressing interest in joining active research lab initiatives. Under the hub&apos;s privacy model, records are strictly confidential to institutional administrators and are retained for academic coordination. Follow up directly with candidates using their registered contact email.
+            These records are submitted by authenticated students expressing
+            interest in a project. They are available only to administrators;
+            use the supplied contact email for appropriate follow-up.
           </p>
         </div>
       </section>

@@ -942,6 +942,103 @@ label {
   padding: 1.25rem;
 }
 
+/* Authenticated workspace shell */
+.workspace-shell {
+  margin-inline: auto;
+  display: grid;
+  width: min(100% - 2rem, var(--container-wide));
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding-block: clamp(1.5rem, 4vw, 3.5rem);
+}
+
+.workspace-content {
+  min-width: 0;
+}
+
+.workspace-content > .page-shell,
+.workspace-content > .page-shell-tight {
+  width: 100%;
+  padding-block: 0;
+}
+
+.workspace-nav {
+  display: grid;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-navy);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  padding: 1rem;
+  box-shadow: var(--shadow-rest);
+}
+
+.workspace-links {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-block: 0.25rem;
+}
+
+.workspace-link,
+.workspace-public-link,
+.workspace-signout {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.8rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.workspace-link:hover,
+.workspace-public-link:hover,
+.workspace-signout:hover {
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
+}
+
+.workspace-link-active {
+  background: var(--color-navy);
+  color: var(--color-text-on-dark);
+}
+
+.workspace-public-link {
+  color: var(--color-action);
+}
+
+.workspace-signout {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .workspace-shell {
+    grid-template-columns: minmax(13.5rem, 16rem) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .workspace-nav {
+    position: sticky;
+    top: 6.5rem;
+    align-items: stretch;
+    padding: 1.25rem;
+  }
+
+  .workspace-links {
+    display: grid;
+    overflow: visible;
+    border-block: 1px solid var(--color-border);
+    padding-block: 0.75rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

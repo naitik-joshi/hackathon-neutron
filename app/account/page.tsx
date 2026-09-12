@@ -23,7 +23,7 @@ export default async function AccountPage({
     profile.role === "student" ? "Explore projects" : "Open your workspace";
 
   return (
-    <>
+    <div className="page-shell-tight">
       {(await searchParams).created === "1" && (
         <div role="status" className="alert alert-success mb-7 flex gap-3">
           <CheckCircle2 aria-hidden="true" className="mt-0.5 shrink-0" />
@@ -52,6 +52,6 @@ export default async function AccountPage({
           {workspaceLabel}
         </Link>
       </Card>
-    </>
+    </div>
   );
 }

@@ -39,7 +39,11 @@ export default async function SubmissionsPage({
     { id: "active", label: "Active Queue", count: counts.active },
     { id: "submitted", label: "Awaiting Triage", count: counts.submitted },
     { id: "under_review", label: "Under Review", count: counts.underReview },
-    { id: "changes_requested", label: "Revisions", count: counts.changesRequested },
+    {
+      id: "changes_requested",
+      label: "Revisions",
+      count: counts.changesRequested,
+    },
     { id: "published", label: "Published", count: counts.published },
     { id: "all", label: "All Records", count: counts.all },
   ];
@@ -61,14 +65,15 @@ export default async function SubmissionsPage({
               Manuscript Review Queue
             </h1>
             <p className="mt-1 text-sm text-[#64748b]">
-              Adjudicate submitted manuscripts, formulate change requests, and issue binding institutional publishing decisions.
+              Review submitted publications, request changes, and publish
+              records through the supported workflow.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eff6ff] border border-[#bfdbfe] px-3 py-1 text-xs font-semibold text-[#1e40af]">
               <ShieldCheck className="h-3.5 w-3.5" />
-              COPE Single-Blind Audited
+              Database-backed workflow
             </span>
           </div>
         </div>
@@ -78,38 +83,62 @@ export default async function SubmissionsPage({
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Active Queue</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Active Queue
+            </span>
             <FileCheck2 className="h-4 w-4 text-[#002147]" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-[#0f172a]">{counts.active}</div>
-          <div className="mt-1 text-xs text-[#64748b]">Requires editorial action</div>
+          <div className="mt-2 text-2xl font-bold text-[#0f172a]">
+            {counts.active}
+          </div>
+          <div className="mt-1 text-xs text-[#64748b]">
+            Requires editorial action
+          </div>
         </div>
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Awaiting Triage</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Awaiting Triage
+            </span>
             <Clock className="h-4 w-4 text-[#ea580c]" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-[#0f172a]">{counts.submitted}</div>
-          <div className="mt-1 text-xs text-[#ea580c] font-medium">Newly submitted</div>
+          <div className="mt-2 text-2xl font-bold text-[#0f172a]">
+            {counts.submitted}
+          </div>
+          <div className="mt-1 text-xs text-[#ea580c] font-medium">
+            Newly submitted
+          </div>
         </div>
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Under Peer Review</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Under Peer Review
+            </span>
             <AlertCircle className="h-4 w-4 text-[#0284c7]" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-[#0f172a]">{counts.underReview}</div>
-          <div className="mt-1 text-xs text-[#0284c7] font-medium">Active adjudication</div>
+          <div className="mt-2 text-2xl font-bold text-[#0f172a]">
+            {counts.underReview}
+          </div>
+          <div className="mt-1 text-xs text-[#0284c7] font-medium">
+            Active review
+          </div>
         </div>
 
         <div className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between text-[#64748b]">
-            <span className="text-xs font-medium uppercase tracking-wider">Revisions Pending</span>
+            <span className="text-xs font-medium uppercase tracking-wider">
+              Revisions Pending
+            </span>
             <CheckCircle2 className="h-4 w-4 text-amber-600" />
           </div>
-          <div className="mt-2 text-2xl font-bold text-[#0f172a]">{counts.changesRequested}</div>
-          <div className="mt-1 text-xs text-amber-700 font-medium">Author revisions</div>
+          <div className="mt-2 text-2xl font-bold text-[#0f172a]">
+            {counts.changesRequested}
+          </div>
+          <div className="mt-1 text-xs text-amber-700 font-medium">
+            Author revisions
+          </div>
         </div>
       </div>
 
@@ -149,7 +178,9 @@ export default async function SubmissionsPage({
             </span>
             {filterTabs.map((tab) => {
               const isActive = currentStatus === tab.id;
-              const searchParam = query ? `&q=${encodeURIComponent(query)}` : "";
+              const searchParam = query
+                ? `&q=${encodeURIComponent(query)}`
+                : "";
               const href = `/admin/submissions?status=${tab.id}${searchParam}`;
 
               return (
@@ -165,7 +196,9 @@ export default async function SubmissionsPage({
                   <span>{tab.label}</span>
                   <span
                     className={`rounded px-1 text-[10px] font-mono ${
-                      isActive ? "bg-slate-700 text-blue-200" : "bg-slate-200/70 text-slate-600"
+                      isActive
+                        ? "bg-slate-700 text-blue-200"
+                        : "bg-slate-200/70 text-slate-600"
                     }`}
                   >
                     {tab.count}
@@ -215,7 +248,7 @@ export default async function SubmissionsPage({
                     <StatusBadge status={item.status} />
                     {item.year && (
                       <span className="text-xs text-[#64748b] font-medium">
-                        Target: Vol {item.year}.1
+                        Year {item.year}
                       </span>
                     )}
                     <span className="text-xs text-[#94a3b8]">
@@ -267,7 +300,7 @@ export default async function SubmissionsPage({
                       {item.status === "submitted"
                         ? "Start Triage"
                         : item.status === "under_review"
-                          ? "Adjudicate Verdict"
+                          ? "Review submission"
                           : item.status === "changes_requested"
                             ? "Inspect Feedback"
                             : "View Dossier"}

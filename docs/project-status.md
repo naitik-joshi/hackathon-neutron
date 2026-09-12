@@ -72,13 +72,22 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** Public-site integration audit (user reassigned to Rabin); WEB-11 / WEB-12 hosted follow-up
+**Current issue:** WEB-30 — grounded assistant integration and authenticated-workspace polish
 
-**Branch:** `rabin-01`
+**Branch:** `rabin-02`
 
-**Status:** Public code audit and local checks complete; browser/hosted acceptance pending
+**Status:** WEB-30 integrated locally; hosted Supabase acceptance passed; Qwen HTTPS hardening and final compare-proxy recheck remain
 
 ### Latest handoff
+- WEB-30 integration (2026-09-13):
+  - Added server-only Qwen configuration/client/error handling, strict Zod request contracts, bounded bodies, timeouts, no-store responses and best-effort per-route rate limits behind five same-origin Next.js handlers.
+  - Added one global public Research Paper Assistant with ephemeral grounded conversation, source paper/section presentation, exact-title publication context matching, deterministic recommendations, compare mode, keyboard/Escape support and offline recovery.
+  - Added **Analyze this paper** to public publication detail; it opens the same assistant and auto-selects only an exact normalized indexed title.
+  - Added a shared responsive researcher/admin workspace shell and removed unsupported policy/licensing/editorial claims from admin copy without changing workflow logic or database schema.
+  - Touched `lib/qwen/`, `app/api/research-assistant/`, `components/assistant/`, workspace navigation/layout styles, public publication detail, private workspace presentation/copy, `.env.example`, focused tests and integration documentation.
+  - `npm run lint`, `npm run typecheck`, `npm test` (47/47), `npm run build` and `git diff --check` passed. Anonymous desktop/mobile assistant and unavailable-state behavior were browser-checked; no horizontal overflow at 375/768/1024/1440.
+  - Live same-origin checks passed for papers, query and recommend. Direct EC2 verification passed compare; the Next.js compare request exceeded its former 120-second timeout, so the proxy timeout is now 165 seconds while remaining below the backend's 180-second limit. A final live compare-proxy recheck remains.
+  - Hosted Supabase acceptance (2026-09-13): the remote schema already contained all three migrations, 12 tables and the `review_publication` RPC; generated hosted types matched the checked-in contract. The supplied authenticated/anonymous RLS and workflow matrix passed 26/26, and all five public routes returned 200 without login. No migration or shared type change was required.
 - Qwen grounded-paper backend (2026-09-12):
   - Fixed and deployed the authenticated API contract for papers, grounded query, comparison and deterministic related-paper recommendation; eight papers are indexed on the active EC2 service.
   - Rotated the newly disclosed API key again without logging it, moved systemd to an environment file, disabled browser credential entry/wildcard CORS, added input limits and structured offline/error states, and hardened the service sandbox. No main-site UI was changed.
@@ -106,18 +115,12 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
   - `npm test` passed (17 tests).
   - `npm run build` passed.
 - Blockers / dependencies:
-  - Read-only hosted dashboard and Data API checks on 2026-09-12 confirm that `publication_reviews`, `project_interests`, and `review_publication` do not exist in the team project yet.
-  - Hosted migration application, generated hosted-type comparison and WEB-5 acceptance remain pending.
-  - Supabase CLI deployment check failed because no access token/login is configured. Backend-only commit `f2bb051` excludes the existing frontend form edit.
-  - Frontend owner must render private review history and wire WEB-13 interest form; WEB-10 edit UI remains pending.
+  - Qwen still uses plain HTTP on public port 8000. Trusted HTTPS and security-group restriction require explicit approval for the AWS network change.
+  - Re-run compare through the Next.js proxy after the timeout adjustment; the direct EC2 compare contract already passes.
+  - Frontend owner still owns any remaining WEB-10/WEB-13 presentation wiring.
 - Next:
-  - Naitik/database owner: review the additive migrations and confirm the shared development project is the deployment target.
-  - Rabin: run `npx supabase login`, then `npx supabase link --project-ref mgjplkvuldnvbpqmrpgb`.
-  - Rabin and Naitik: inspect pending migrations and run `npx supabase db push`; do not paste the SQL manually or modify an already-shared migration.
-  - Rabin: verify the hosted schema contains `publication_reviews`, `project_interests`, and `review_publication`, then generate and compare hosted database types.
-  - Rabin/Naitik: run signed-in hosted acceptance with student, researcher and admin accounts, including anonymous/wrong-role/other-owner negative cases under WEB-5.
-  - Keep WEB-11 and WEB-12 open until deployment and hosted authorization checks pass; frontend integration remains WEB-10/WEB-13/WEB-14 ownership.
-  - Use `docs/backend-handoff.md` for frontend integration contracts and privacy behavior.
+  - Complete Qwen HTTPS termination, close public port 8000, update the server-only backend URL and run the final five-route same-origin smoke test.
+  - Use `docs/backend-handoff.md` for the verified workflow/privacy contracts.
 
 ---
 

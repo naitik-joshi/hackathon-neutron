@@ -44,6 +44,12 @@ Each route should end with one clear next path. Examples include browsing connec
 
 CSS is sufficient for the current interaction system, so WEB-29 adds no motion dependency or client-side animation layer. Hover and press feedback uses short 140–220ms transitions on interactive elements only. Focus remains visible. Under `prefers-reduced-motion: reduce`, nonessential animation and transitions are disabled. Information never depends on movement.
 
+## Authenticated workspaces and research assistant
+
+Researcher and admin routes share one responsive workspace shell: compact horizontal navigation on smaller screens and a sticky editorial side rail on desktop. Workspace pages use the public ink, paper, navy, teal and ruby tokens with denser rows and restrained panels. Active navigation uses `aria-current`, and every workspace retains a route back to public research and sign-out.
+
+The Research Paper Assistant is one global, keyboard-operable dialog rather than separate route widgets. Its navy editorial header, paper selector, source metadata and quiet status treatment identify it as an indexed-research tool—not a general chatbot. Publication detail pages may open it with exact deterministic paper context; assistant failure never replaces page content.
+
 ## Responsive and accessible behavior
 
 Public layouts are designed for 375px, 768px, 1024px, and 1440px widths. Long titles wrap, filters stack before space becomes constrained, relationship paths remain reachable, and primary actions maintain practical touch targets. Use semantic headings, landmarks, native controls, descriptive navigation labels, accessible form labels, and text alongside color for state. All public journeys must work by keyboard with a logical focus order and no traps.
