@@ -1,5 +1,5 @@
 "use server";
-import { z } from "zod";
+import { reviewSchema } from "./validation";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireRole } from "@/lib/auth/guards";
@@ -9,27 +9,17 @@ export async function reviewPublication(
   form: FormData,
 ): Promise<ActionState> {
   const { client } = await requireRole(["admin"]);
-  const parsed = z
-    .object({
-      id: z.uuid(),
-      decision: z.enum([
-        "under_review",
-        "published",
-        "changes_requested",
-        "rejected",
-      ]),
-    })
-    .safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { error: "Invalid review request." };
-  const { id, decision } = parsed.data;
-  const expected = decision === "under_review" ? "submitted" : "under_review";
-  const { data, error } = await client
-    .from("publications")
-    .update({ status: decision })
-    .eq("id", id)
-    .eq("status", expected)
-    .select("slug")
-    .maybeSingle();
+  const parsed = reviewSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success)
+    return {
+      error: parsed.error.issues.map((issue) => issue.message).join(" "),
+    };
+  const { id, decision, note } = parsed.data;
+  const { data, error } = await client.rpc("review_publication", {
+    p_id: id,
+    p_decision: decision,
+    p_note: note,
+  });
   if (error || !data)
     return {
       error:
@@ -39,7 +29,7 @@ export async function reviewPublication(
   revalidatePath(`/admin/submissions/${id}`);
   revalidatePath("/researcher/publications");
   revalidatePath("/publications");
-  revalidatePath(`/publications/${data.slug}`);
+  revalidatePath(`/publications/${data}`);
   revalidatePath("/");
   redirect(`/admin/submissions/${id}?updated=1`);
 }

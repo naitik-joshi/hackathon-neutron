@@ -63,21 +63,39 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** _Assign after context handoff_  
-**Branch:** _TBD_  
-**Status:** Context handoff
+**Current issue:** WEB-11 / WEB-12 — Review feedback and expression-of-interest backend
+
+**Branch:** `rabin`
+
+**Status:** Local backend verified; hosted migrations and frontend integration pending
 
 ### Latest handoff
 - Work completed:
-  - None yet.
+  - Added private review history and an atomic admin review RPC with reviewer attribution.
+  - Added validated student interest submissions, database deduplication, and owner/admin-only reads.
+  - Migration and shared-type ownership explicitly approved by the user on 2026-09-12.
+  - Added backend handoff contracts and RLS/transaction/validation/deletion tests.
 - Areas touched:
-  - None.
+  - `features/submissions/`, `features/participation/`, shared database types.
+  - Two additive migrations, `tests/backend-workflows.test.ts`, `docs/backend-handoff.md`.
 - Checks:
-  - None.
+  - `npm run lint` passed.
+  - `npm run typecheck` passed.
+  - `npm test` passed (17 tests).
+  - `npm run build` passed.
 - Blockers / dependencies:
-  - Read project docs and wait for agreed first issue.
+  - Read-only hosted dashboard and Data API checks on 2026-09-12 confirm that `publication_reviews`, `project_interests`, and `review_publication` do not exist in the team project yet.
+  - Hosted migration application, generated hosted-type comparison and WEB-5 acceptance remain pending.
+  - Supabase CLI deployment check failed because no access token/login is configured. Backend-only commit `f2bb051` excludes the existing frontend form edit.
+  - Frontend owner must render private review history and wire WEB-13 interest form; WEB-10 edit UI remains pending.
 - Next:
-  - Recommended lane: WEB-10 → WEB-11 → WEB-12.
+  - Naitik/database owner: review the additive migrations and confirm the shared development project is the deployment target.
+  - Rabin: run `npx supabase login`, then `npx supabase link --project-ref mgjplkvuldnvbpqmrpgb`.
+  - Rabin and Naitik: inspect pending migrations and run `npx supabase db push`; do not paste the SQL manually or modify an already-shared migration.
+  - Rabin: verify the hosted schema contains `publication_reviews`, `project_interests`, and `review_publication`, then generate and compare hosted database types.
+  - Rabin/Naitik: run signed-in hosted acceptance with student, researcher and admin accounts, including anonymous/wrong-role/other-owner negative cases under WEB-5.
+  - Keep WEB-11 and WEB-12 open until deployment and hosted authorization checks pass; frontend integration remains WEB-10/WEB-13/WEB-14 ownership.
+  - Use `docs/backend-handoff.md` for frontend integration contracts and privacy behavior.
 
 ---
 
