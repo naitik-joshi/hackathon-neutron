@@ -63,33 +63,34 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** WEB-10 — Add researcher edit and resubmit screens (backend slice)
+**Current issue:** WEB-11 / WEB-12 — Review feedback and expression-of-interest backend
 
-**Branch:** `dev`
+**Branch:** `rabin`
 
-**Status:** Backend complete / frontend handoff
+**Status:** Local backend verified; hosted migrations and frontend integration pending
 
 ### Latest handoff
 - Work completed:
-  - Added Zod-validated researcher resubmission behavior.
-  - Scoped updates atomically to the signed-in owner and Draft / Changes Requested states.
-  - Resubmission sets Submitted, after which further researcher edits are locked.
-  - Added action-level mutation tests and a direct RLS wrong-owner test.
+  - Added private review history and an atomic admin review RPC with reviewer attribution.
+  - Added validated student interest submissions, database deduplication, and owner/admin-only reads.
+  - Migration and shared-type ownership explicitly approved by the user on 2026-09-12.
+  - Added backend handoff contracts and RLS/transaction/validation/deletion tests.
 - Areas touched:
-  - `features/publications/`
-  - `lib/validation/publication.ts`
-  - Publication validation, mutation and database tests.
+  - `features/submissions/`, `features/participation/`, shared database types.
+  - Two additive migrations, `tests/backend-workflows.test.ts`, `docs/backend-handoff.md`.
 - Checks:
   - `npm run lint` passed.
   - `npm run typecheck` passed.
-  - `npm test` passed (15 tests).
+  - `npm test` passed (17 tests).
   - `npm run build` passed.
 - Blockers / dependencies:
-  - WEB-5 hosted Supabase acceptance remains pending.
-  - Frontend owner still needs to connect the edit/resubmit screen to the new server action.
+  - Read-only hosted probe confirms connection works; new tables return PGRST205 (migrations not yet available).
+  - Hosted migration application, generated hosted-type comparison and WEB-5 acceptance remain pending.
+  - Supabase CLI deployment check failed: no access token/login configured. Backend-only commit excludes the existing frontend form edit.
+  - Frontend owner must render private review history and wire WEB-13 interest form; WEB-10 edit UI remains pending.
 - Next:
-  - Hand off the WEB-10 action contract to the dashboard frontend owner.
-  - Coordinate a migration with Naitik before starting WEB-11 or WEB-12 schema work.
+  - Apply approved migrations with the database owner, compare generated types, then run signed-in hosted acceptance.
+  - Use `docs/backend-handoff.md` for frontend integration contracts and privacy behavior.
 
 ---
 

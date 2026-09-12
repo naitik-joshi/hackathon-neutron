@@ -41,6 +41,23 @@ export type Project = Stamps & {
   is_demo: boolean;
 };
 export type Profile = Stamps & { display_name: string; role: Role };
+export type PublicationReview = {
+  id: string;
+  publication_id: string;
+  reviewer_id: string | null;
+  decision: PublicationStatus;
+  note: string;
+  created_at: string;
+};
+export type ProjectInterest = {
+  id: string;
+  project_id: string;
+  student_id: string;
+  contact_email: string;
+  message: string;
+  is_demo: boolean;
+  created_at: string;
+};
 type Table<Row, Required extends keyof Row = never> = {
   Row: Row;
   Insert: Partial<Row> & Pick<Row, Required>;
@@ -55,6 +72,14 @@ export type Database = {
       researchers: Table<Researcher, "name" | "slug" | "bio" | "position">;
       projects: Table<Project, "title" | "slug" | "summary">;
       publications: Table<Publication, "title" | "slug" | "abstract">;
+      publication_reviews: Table<
+        PublicationReview,
+        "publication_id" | "decision"
+      >;
+      project_interests: Table<
+        ProjectInterest,
+        "project_id" | "student_id" | "contact_email" | "message"
+      >;
       researcher_research_areas: Table<
         { researcher_id: string; research_area_id: string },
         "researcher_id" | "research_area_id"
@@ -79,6 +104,10 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       current_app_role: { Args: Record<string, never>; Returns: Role | null };
+      review_publication: {
+        Args: { p_id: string; p_decision: PublicationStatus; p_note?: string };
+        Returns: string;
+      };
     };
     Enums: {
       app_role: Role;
