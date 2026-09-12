@@ -120,9 +120,7 @@ All parsed documents are deterministically organized into the following canonica
 ### Phase 2: Upload Local Dataset to S3
 From your local machine in PowerShell:
 ```powershell
-# Set credentials
-$env:AWS_ACCESS_KEY_ID = "YOUR_ACCESS_KEY"
-$env:AWS_SECRET_ACCESS_KEY = "YOUR_SECRET_KEY"
+# Authenticate with AWS SSO or an assumed role; do not paste long-lived keys.
 $env:AWS_DEFAULT_REGION = "us-east-1"
 
 # Upload all files from ./watch_papers into s3://my-research-papers-dataset-2026/papers/
@@ -148,7 +146,7 @@ python s3_sync.py upload --bucket my-research-papers-dataset-2026 --prefix paper
    ```
 4. Transfer code and setup environment:
    ```bash
-   mkdir -p ~/app && cd ~/app
+   cd /home/ubuntu
    python3 -m venv venv
    source venv/bin/activate
    pip install -r requirements.txt
@@ -201,7 +199,7 @@ Measures factual accuracy, hard negative rejection, and inference latency across
 ```powershell
 python benchmark_grounding.py
 ```
-*Expected output: 100% factual positive accuracy, 0.0% hallucination rate, ~600–700ms average latency.*
+Record the observed accuracy, hard-negative behavior and latency from the current deployment. Do not claim perfect grounding or fixed latency without repeatable evaluation evidence.
 
 ### Method 2: Live In-Flight Mutation Test (`test_live_mutation.py`)
 Modifies a paper's metrics on disk while the system is running and verifies that the in-memory store and Ollama responses update dynamically:
