@@ -26,6 +26,18 @@ Deleting a publication cascades its review history. Deleting a reviewer profile 
 
 Apply coordinated migrations to the team's hosted development project, then compare generated Supabase types with the explicit checked-in schema contract. Local PGlite tests execute all migrations and exercise review rollback, stale decisions, role restrictions, privacy after publication, deduplication, validation constraints and deletion behavior. Hosted Auth/cookie/Data API acceptance and generated hosted-type comparison remain pending until run against the configured project. Frontend feedback rendering and WEB-13 integration remain handoff work.
 
-2026-09-12 verification: lint, typecheck, all 17 tests, and production build passed. A read-only hosted probe using the saved publishable configuration reached projects successfully (0 public rows); both new tables returned PGRST205, confirming they are not available in the hosted API yet. No hosted schema changes were applied by this task.
+2026-09-12 verification: lint, typecheck, all 17 tests, and production build passed. A read-only hosted dashboard check showed only the original 10 tables and four original functions. Direct Data API checks returned PGRST205 for `publication_reviews` and `project_interests`, and PGRST202 for `review_publication`. The backend objects therefore do not exist in the hosted team project yet. No hosted schema changes were applied by this task.
 
 Backend delivery branch: `rabin`. Required checks passed again before commit. Hosted deployment is blocked by missing Supabase CLI authentication (`LegacyPlatformAuthRequiredError`). Run `npx supabase login` locally, then link the intended team development project and inspect pending migrations before `npx supabase db push`. The publishable app key cannot apply schema migrations. Hosted type generation/comparison and signed-in acceptance remain outstanding.
+
+### Explicit backend next steps
+
+1. Get confirmation from Naitik, the shared database owner, that `mgjplkvuldnvbpqmrpgb` is the correct development project and that no teammate is deploying migrations concurrently.
+2. Authenticate the Supabase CLI with `npx supabase login` and link with `npx supabase link --project-ref mgjplkvuldnvbpqmrpgb`.
+3. Inspect the linked migration state. Apply the approved additive migrations in filename order with `npx supabase db push`: `202609120002_review_feedback.sql`, then `202609120003_project_interests.sql`. Do not edit a migration after it has been shared.
+4. Confirm the hosted project now exposes both tables and exposes `review_publication` to authenticated users only. Confirm RLS is enabled and anonymous reads reveal no private records.
+5. Generate hosted Supabase types and compare them with `lib/supabase/database.types.ts`; coordinate any shared-type correction with Naitik.
+6. Run the WEB-5 hosted acceptance matrix: admin review with feedback; researcher reads only their own feedback; student creates one interest; duplicate stays single; anonymous, wrong-role, spoofed-owner and other-user access fails; normal public research remains readable without login.
+7. Record the hosted results in Rabin's section of `docs/project-status.md` and Linear. Only then mark WEB-11/WEB-12 ready for integration.
+
+Frontend work is a dependency, not part of this backend follow-up: WEB-10 must wire edit/resubmit, WEB-11 must render private feedback and collect review notes, WEB-13 must wire the interest form, and WEB-14 may surface private role-relevant next actions.
