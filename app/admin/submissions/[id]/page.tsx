@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-
+import { ExternalLink, CheckCircle2 } from "lucide-react";
 import { requireRole } from "@/lib/auth/guards";
 import { ReviewForm } from "@/features/submissions/review-form";
 
