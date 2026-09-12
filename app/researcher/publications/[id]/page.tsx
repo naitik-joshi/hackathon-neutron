@@ -72,9 +72,11 @@ export default async function ResearcherPublicationPage({
               </div>
             </dl>
           </Card>
-          <ReviewHistory reviews={reviews} />
+          <div id="review-history" className="scroll-mt-28">
+            <ReviewHistory reviews={reviews} />
+          </div>
         </div>
-        <Card>
+        <Card id="edit-resubmit" className="scroll-mt-28">
           {editable ? (
             <>
               <p className="eyebrow">Next action</p>
