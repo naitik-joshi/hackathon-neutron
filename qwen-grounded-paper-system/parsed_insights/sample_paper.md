@@ -1,0 +1,99 @@
+# Document Analysis Insight: sample_paper.docx
+- **Extracted Sections**: 18
+- **Schema Compliance**: Header block, Abstract, Keywords, 1. Introduction, 2. Literature and Related Work, 3. Methodology / Approach, 4. Results and Discussion, 5. Conclusion, Disclosure Statement, Ethical Approval, Consent to Participate / Consent to Publish, Data Availability Statement, Use of Artificial Intelligence (AI) Tools, Authors’ Contributions, Funding, Competing Interests, Acknowledgements, References
+
+---
+
+## Header block
+Comparative Analysis of Closed-Domain Neural Reasoning Architectures in Academic Ingestion
+
+A Systematic Evaluation of Strict Boundary Grounding and Section-Isolated Prompting
+
+Aarav Sharma¹, Priya Patel², Dr. Elena Rostova¹*
+
+¹ Institute of Advanced Technology, Kathmandu, Nepal
+
+² Department of Artificial Intelligence, Oxford University, Oxford, United Kingdom
+
+Submitted on: September 12, 2026
+
+Correspondence: e.rostova@instadvtech.edu
+
+## Abstract
+Modern retrieval-augmented generation architectures frequently exhibit hallucinations and unwarranted extrapolation when operating on specialized scientific corpora. In this investigation, we present a deterministic section-isolated ingestion framework designed to enforce strict closed-domain grounding over peer-reviewed academic literature. By partitioning incoming documents into canonical template hierarchies and coupling local transformer inference with zero-temperature execution, our approach enforces an uncompromising negative constraint. We evaluated the architecture against a suite of 250 domain-specific queries across 50 technical papers. Empirical benchmarks demonstrate an overall factual retrieval precision of 98.4%, with an inference latency of 42.1 milliseconds per isolated query. Crucially, the system attained an absolute 0.0% false-positive extrapolation rate on absent claims, strictly emitting the designated unavailable indicator. These results establish that combining deterministic document parsing with hard-constrained local inference reliably eliminates hallucinations in academic audit pipelines.
+
+## Keywords
+closed-domain grounding; neural reasoning; deterministic parsing; document ingestion; zero-temperature inference
+
+## 1. Introduction
+Automated extraction and factual auditing of academic literature require absolute fidelity to the source text (Lewis et al., 2020). Traditional generative language models often introduce synthetic claims or merge external pre-training knowledge with document facts, rendering them unreliable for rigorous compliance and peer review workflows. To mitigate this vulnerability, recent research has prioritized closed-domain verification where inference is strictly bounded by document boundaries (Vaswani et al., 2017). The primary objective of this paper is to evaluate whether deterministic section isolation combined with zero-temperature local inference can guarantee zero hallucination in research paper auditing. The remainder of this paper is organized as follows: Section 2 examines related literature; Section 3 details our methodology; Section 4 analyzes empirical findings; and Section 5 concludes the study.
+
+## 2. Literature and Related Work
+Retrieval-Augmented Generation (RAG) frameworks have emerged as standard paradigms for document-based question answering (Lewis et al., 2020). However, typical dense retrieval systems inject chunking boundary noise and may include out-of-context text fragments.
+
+2.1 Retrieval Grounding and Hallucination Control
+
+Controlling hallucinations in large language models requires structural constraints at both retrieval and generation stages (Smith, 2023). Previous studies by Jones and Lee (2022) highlighted that open-ended decoding prompts allow models to extrapolate speculative hypotheses when answers are absent.
+
+2.2 Deterministic Sectional Ingestion
+
+Deterministic parsing ensures that document hierarchical structure is preserved without semantic distortion. By aligning document headings with an established template schema, questions targeting a specific analytical phase can be strictly isolated to the relevant section.
+
+## 3. Methodology / Approach
+Our ingestion pipeline consists of three core components: a deterministic document parser, a thread-safe in-memory store, and a zero-temperature local Ollama bridge hosting the Qwen 2.5:3B model. The parser utilizes python-docx to traverse document elements and applies regular expressions against canonical schema headings. Upon detecting a new document, the system generates structured JSON and Markdown summaries within ./parsed_insights. For question answering, queries follow the strict syntax '<paper> | <section> | <query>'. The bridge extracts only the requested section text and transmits it alongside an invariant negative constraint.
+
+## 4. Results and Discussion
+Experimental evaluations were conducted across 250 evaluation probes. Table 1 summarizes the performance metrics observed across three benchmark categories: Factual Extraction, Boundary Invariance, and Absent Claim Rejection.
+
+Table 1. Quantitative Performance Evaluation of the Ingestion Pipeline
+
+Metric | Baseline RAG | Unconstrained Qwen | Our Grounded System
+
+Factual Accuracy | 81.2% | 87.5% | 96.8%
+
+F1-Score | 84.0% | 89.1% | 98.4%
+
+Hallucination Rate | 14.3% | 9.8% | 0.00%
+
+4.1 Latency and Efficiency Analysis
+
+The mean end-to-end latency for single-section retrieval and local inference was measured at 42.1 milliseconds on standard consumer hardware. Memory overhead for caching 100 indexed research articles remained below 34 megabytes, demonstrating high runtime efficiency.
+
+## 5. Conclusion
+This work demonstrates that strict closed-domain grounding in academic document analysis can be reliably achieved through deterministic section isolation and local zero-temperature model execution. By constraining context to individual sections and requiring an exact unavailable indicator for absent claims, we eliminate false-positive extrapolations while maintaining high retrieval precision. Future work will extend this framework to multi-modal diagram analysis.
+
+## Disclosure Statement
+The authors have no financial or non-financial disclosures to share for this article.
+
+## Ethical Approval
+Not applicable. This study does not involve human participants, medical data, or animal experimentation.
+
+## Consent to Participate / Consent to Publish
+Not applicable.
+
+All authors have reviewed the manuscript and provided consent for publication.
+
+## Data Availability Statement
+All benchmarking code, evaluation scripts, and sample documents are publicly accessible via the project repository.
+
+## Use of Artificial Intelligence (AI) Tools
+The authors utilized generative AI tools exclusively for grammatical proofreading. No scientific findings or conceptual formulations were generated by AI.
+
+## Authors’ Contributions
+A. Sharma formulated the architecture and wrote the manuscript. P. Patel implemented the parser and automated test harness. E. Rostova directed the investigation and verified the experimental methodology.
+
+## Funding
+This research was funded by the National Science and Technology Innovation Grant (Grant No. NSTI-2026-0914).
+
+## Competing Interests
+The authors declare that they have no competing interests.
+
+## Acknowledgements
+Acknowledgements: The authors acknowledge the Computing Resource Center for providing infrastructure and technical support.
+
+## References
+Lewis, P., Perez, E., Piktus, A., Petroni, F., Karpukhin, V., Goyal, N., ... & Kiela, D. (2020). Retrieval-augmented generation for knowledge-intensive NLP tasks. Advances in Neural Information Processing Systems, 33, pp. 9459-9474.
+
+Smith, J. (2023). Controlling hallucinations in local language model architectures. Journal of Computational Linguistics, 15(2), pp. 112-128. https://doi.org/10.1016/j.cl.2023.04.001
+
+Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., ... & Polosukhin, I. (2017). Attention is all you need. Advances in Neural Information Processing Systems, 30, pp. 5998-6008.

@@ -40,30 +40,31 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend & Integration Primary
 
-**Current issue:** WEB-17 / WEB-22 — Research Operations Intelligence
+**Current issue:** WEB-17 / WEB-22 integration, with WEB-14 next
 **Branch:** `feat/WEB-17-needs-attention`
-**Status:** Local implementation complete; hosted acceptance pending
+**Status:** Local implementation and current admin UI integration complete; hosted acceptance pending
 
 ### Latest handoff
 - Work completed:
   - WEB-17: added deterministic stale-review, inactive-changes-requested, and stale-ongoing-project rules with configurable demo thresholds and normalized severity/action results.
+  - Configured 7-day stale-review, 14-day changes-requested, and 60-day stale-ongoing-project demonstration thresholds; these are not institutional policy.
   - WEB-17: added a compact admin Needs Attention list with record links and an honest empty state.
   - WEB-22: added exact database-backed counts for published publications, pending/reviewing submissions, projects, changes requested, and records needing attention.
+  - Integrated the attention engine into Millind's latest database-backed admin dashboard without replacing its KPIs, review queue, recent submissions, or interest inbox.
   - Kept the operations API presentation-independent for later WEB-14 dashboard use.
 - Areas touched:
   - `features/operations/`, `components/admin/`, `app/admin/page.tsx`.
   - `tests/operations.test.ts`, `docs/research-operations.md`.
 - Checks:
   - `npm run check` passed (ESLint and TypeScript).
-  - `npm test` passed: 28/28 tests.
+  - `npm test` passed: 32/32 tests.
   - Default `npm run build` hit the known agent-environment Turbopack worker-port restriction.
   - `npm run build -- --webpack` passed and generated all routes.
 - Blockers / dependencies:
   - Hosted Supabase authorization and live-count acceptance were not performed. WEB-17 and WEB-22 remain pending hosted verification.
   - Shared review/interest migrations and WEB-5 acceptance remain separate pending work.
 - Next:
-  - Review and integrate WEB-17/WEB-22, then verify the admin overview with a hosted admin session after the coordinated migration/WEB-5 work is ready.
-  - Safest next backend issue: WEB-23 researcher profile update review-flow design, beginning with a schema/authorization proposal before any migration.
+  - Complete WEB-14 integration review, then verify the admin overview with a hosted admin session after the coordinated migration/WEB-5 work is ready.
 
 ---
 
@@ -71,13 +72,20 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** WEB-11 / WEB-12 — Review feedback and expression-of-interest backend
+**Current issue:** Public-site integration audit (user reassigned to Rabin); WEB-11 / WEB-12 hosted follow-up
 
-**Branch:** `rabin`
+**Branch:** `rabin-01`
 
-**Status:** Local backend verified; hosted migrations and frontend integration pending
+**Status:** Public code audit and local checks complete; browser/hosted acceptance pending
 
 ### Latest handoff
+- Public-site audit (2026-09-12, carried out by Rabin):
+  - Inspected all 11 public route patterns against current `dev` baseline `e05a583`; repaired slug links, real area connections, published-only detail/metadata, honest search filters and account-aware navigation.
+  - Removed unsupported metrics, journal/indexing claims, fabricated project details and placeholder events/opportunities. Preserved visible DEMO DATA and shared components.
+  - Touched public routes, public navigation/footer/cards, narrow root layout copy, research query/filter helpers and focused tests. No AI, admin/dashboard, migrations, environment or credentials changed.
+  - `npm run check` passed; `npm test` passed (28/28); default `npm run build` passed. Full responsive/browser and live hosted role-matrix checks were not run in this time-boxed pass.
+  - Full findings and next ownership actions: `docs/public-site-audit.md`. No push, merge, Linear mutation or hosted migration performed.
+  - Next: Naitik/Sambhav review and verify 375px/tablet/desktop; Millind wire WEB-13 interest UI; Rabin/Naitik coordinate hosted backend acceptance below. WEB-6 unified search remains separate.
 - Work completed:
   - Added private review history and an atomic admin review RPC with reviewer attribution.
   - Added validated student interest submissions, database deduplication, and owner/admin-only reads.
@@ -111,21 +119,29 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Frontend Primary — Public Discovery
 
-**Current issue:** _Assign after context handoff_  
-**Branch:** _TBD_  
-**Status:** Context handoff
+**Current issue:** WEB-7 / WEB-8
+**Branch:** `feat/WEB-7-area-connections` / `feat/WEB-8-researcher-pages`
+**Status:** Completed WEB-7 and WEB-8. Ready for review/integration.
 
 ### Latest handoff
 - Work completed:
-  - None yet.
+  - Added area relationship queries to fetch projects, researchers, and published publications.
+  - Connected `/research/[slug]` page to real data.
+  - Created `ResearcherCard` component and reused existing components.
+  - Implemented public researcher profile routes `/researchers/[slug]`.
+  - Linked `ProjectTeam` component to public researcher profiles.
 - Areas touched:
-  - None.
+  - `app/(public)/research/[slug]/page.tsx`
+  - `app/(public)/researchers/[slug]/page.tsx`
+  - `features/research/queries.ts`
+  - `components/research/researcher-card.tsx`
+  - `components/projects/project-team.tsx`
 - Checks:
-  - None.
+  - `npm run check` passed on both branches.
 - Blockers / dependencies:
-  - Read project docs and inspect existing public patterns.
+  - Ready for Naitik to review and integrate into `dev`.
 - Next:
-  - Recommended lane: WEB-7 → WEB-8.
+  - Help with public discovery polish after WEB-7 and WEB-8 are integrated.
 
 ---
 
@@ -133,28 +149,33 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Frontend Primary — Dashboards & Participation
 
-**Current issue:** WEB-9  
-**Branch:** `frontend/MPhase0`  
-**Status:** Complete / Ready for Review & Handoff
+**Current issue:** WEB-14 — Admin Editorial Panel & Research Operations  
+**Branch:** `admin/sprint`  
+**Status:** Complete / Ready for Review & Integration
 
 ### Latest handoff
 - Work completed:
-  - Implemented public project query layer in `features/projects/queries.ts` (`listProjects`, `getProjectBySlug`).
-  - Created reusable project UI components: `ProjectCard`, `ProjectFilterBar`, `ProjectLifecycle`, `ProjectTeam`, `ProjectPublications`, and `ProjectStatusBadge`.
-  - Implemented public project directory page at `/projects` with real-time status filtering and search.
-  - Implemented public project detail page at `/projects/[slug]` with research lifecycle tracker, team sidebar, outputs list, and Get Involved participation callout.
-  - Added PostgreSQL/PGlite security and relation tests in `tests/projects.test.ts`.
+  - Phase 1: Real database-backed admin dashboard overview (`/admin`) computing live operational KPIs (triage, peer review, revisions, published records, student interest count) and displaying real submissions requiring editorial action.
+  - Phase 2: Manuscript review queue (`/admin/submissions`) with real-time status filter tabs (`Active Queue`, `Awaiting Triage`, `Under Review`, `Revisions`, `Published`, `All Records`), title/abstract search, and submitter profile resolution.
+  - Phase 3: State-aware submission review dossier (`/admin/submissions/[id]`) integrating submitter profile, co-authors, affiliated projects, private review history (`getPublicationReviews`), and formal editorial review actions (`under_review`, `published`, `changes_requested`, `rejected`).
+  - Phase 4: Student participation & project interest inbox (`/admin/interests`) integrating `getInterestInbox()` with enriched project and student profile metadata.
+  - Phase 5: Responsive and accessibility validation across desktop, tablet, and 375px mobile widths, ensuring semantic headings, accessible forms, and clear `DEMO DATA` labeling.
 - Areas touched:
-  - `app/(public)/projects/**`
-  - `components/projects/**`
-  - `features/projects/**`
-  - `tests/projects.test.ts`
+  - `app/admin/layout.tsx`
+  - `app/admin/page.tsx`
+  - `app/admin/submissions/page.tsx`
+  - `app/admin/submissions/[id]/page.tsx`
+  - `app/admin/interests/page.tsx`
+  - `features/submissions/admin-queries.ts`
+  - `features/submissions/review-form.tsx`
+  - `features/participation/queries.ts`
 - Checks:
-  - `npm run check` (0 errors, 0 warnings).
-  - `npm test` (all 15 tests passing, including new project RLS tests).
-  - `npm run build` (Next.js production build succeeded with `/projects` and `/projects/[slug]`).
+  - `npm run lint` passed (0 errors, 0 warnings).
+  - `npm run typecheck` passed.
+  - `npm test` passed (24/24 tests passing).
+  - `npm run build` passed (Next.js production build succeeded with all admin routes).
 - Blockers / dependencies:
-  - Ready for Sambhav (WEB-7 and WEB-8) to connect research area pages and public researcher profile routes.
+  - Ready for Naitik to review and integrate into `dev`.
+  - Local PGlite and backend tests verified; hosted Supabase acceptance pending deployment of migrations `202609120002_review_feedback.sql` and `202609120003_project_interests.sql`.
 - Next:
-  - Hand off context to Sambhav for WEB-7 / WEB-8.
-  - Coordinate with Rabin on WEB-12 (expression of interest backend) to connect WEB-13 (Get Involved form submission).
+  - Coordinate branch review and integration into `dev`.

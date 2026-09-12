@@ -1,0 +1,33 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Large Model Binary Weights (Use Ollama or HuggingFace LFS)
+*.safetensors
+*.bin
+*.pt
+*.onnx
+
+# Security & Private Credentials
+*.pem
+*.key
+.api_key
+.env
+.env.*
+!.env.example
+
+# Temporary and Cache directories
+.cache/
+scratch/
+.system_generated/
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db

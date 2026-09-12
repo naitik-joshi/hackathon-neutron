@@ -1,37 +1,35 @@
-import Link from "next/link";
 import { Suspense } from "react";
 import { SiteHeader } from "@/components/navigation/site-header";
+import { SiteFooter } from "@/components/shared/site-footer";
 import "./globals.css";
 export const metadata = {
   title: {
     default: "Islington R&D Digital Hub",
-    template: "%s | Islington R&D",
+    template: "%s | Islington R&D Digital Hub",
   },
-  description: "Discover research. Understand ideas. Connect and participate.",
+  description:
+    "Explore connected research areas, researchers, projects and published outputs. Public research is accessible without login.",
 };
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen flex flex-col bg-[#FAFBFD] text-[#0B1C30]">
         <a href="#main" className="sr-only focus:not-sr-only">
           Skip to content
         </a>
-        <Suspense fallback={<div className="h-[73px] border-b bg-white" />}>
+        <div className="announcement-banner text-center">
+          Discover → Understand → Connect → Participate · Public research, open
+          to everyone
+        </div>
+        <Suspense fallback={<div className="h-16 border-b bg-white" />}>
           <SiteHeader />
         </Suspense>
-        <main id="main" className="page-shell min-h-[70vh]">
+        <main id="main" className="flex-1">
           {children}
         </main>
-        <footer className="border-t border-slate-200 px-6 py-8 text-sm text-slate-600">
-          <div className="page-shell flex flex-wrap justify-between gap-4 py-0">
-            <p>Islington College · R&D Digital Hub · Hackathon 2026</p>
-            <Link href="/research" className="text-link">
-              Find your next research connection
-            </Link>
-          </div>
-        </footer>
+        <SiteFooter />
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { User } from "lucide-react";
 import { Card } from "@/components/ui";
 import { DemoBadge } from "@/components/shared/status-badge";
@@ -45,7 +46,9 @@ export function ProjectTeam({ researchers }: { researchers: Researcher[] }) {
                   {initials || <User size={14} />}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">{name}</p>
+                  <Link href={`/researchers/${member.slug}`} className="text-sm font-semibold text-slate-900 hover:text-indigo-700 hover:underline">
+                    {name}
+                  </Link>
                   <p className="text-xs text-slate-500">
                     {member.position.replace(/^DEMO DATA — /, "")}
                   </p>
@@ -56,9 +59,6 @@ export function ProjectTeam({ researchers }: { researchers: Researcher[] }) {
           );
         })}
       </div>
-      <p className="mt-4 border-t border-slate-100 pt-4 text-xs text-slate-500">
-        Public researcher profiles are being prepared.
-      </p>
     </Card>
   );
 }
