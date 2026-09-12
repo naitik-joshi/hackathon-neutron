@@ -12,6 +12,7 @@ import {
   Info,
 } from "lucide-react";
 import { Button, Input, Textarea } from "@/components/ui";
+import { validateInterestInput } from "./validation";
 
 export type FormStatus =
   | "idle"
@@ -28,6 +29,9 @@ export type InterestFormProps = {
   isAuthenticated?: boolean;
   initialEmail?: string;
   initialStatus?: FormStatus;
+  alreadySubmitted?: boolean;
+  serverError?: string;
+  serverSuccess?: string;
   /**
    * Optional Server Action or callback integration point for Naitik.
    * If provided, the form will invoke this action upon client validation.
@@ -45,12 +49,25 @@ export function InterestForm({
   isAuthenticated = false,
   initialEmail = "",
   initialStatus = "idle",
+  alreadySubmitted = false,
+  serverError,
+  serverSuccess,
   onSubmitAction,
 }: InterestFormProps) {
+  const computedInitialStatus: FormStatus = alreadySubmitted
+    ? "already_submitted"
+    : serverError
+      ? "error"
+      : serverSuccess
+        ? "success"
+        : initialStatus;
+
   const [email, setEmail] = useState(initialEmail);
   const [message, setMessage] = useState("");
-  const [status, setStatus] = useState<FormStatus>(initialStatus);
-  const [serverMessage, setServerMessage] = useState<string | null>(null);
+  const [status, setStatus] = useState<FormStatus>(computedInitialStatus);
+  const [serverMessage, setServerMessage] = useState<string | null>(
+    serverError || serverSuccess || null,
+  );
   const [errors, setErrors] = useState<{ email?: string; message?: string }>({});
 
   const emailId = useId();
@@ -64,28 +81,9 @@ export function InterestForm({
   const currentLength = message.trim().length;
 
   const validate = (): boolean => {
-    const newErrors: { email?: string; message?: string } = {};
-
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      newErrors.email = "Please provide your contact email address.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      newErrors.email = "Please enter a valid email address.";
-    } else if (trimmedEmail.length > 254) {
-      newErrors.email = "Email address cannot exceed 254 characters.";
-    }
-
-    const trimmedMessage = message.trim();
-    if (!trimmedMessage) {
-      newErrors.message = "Please describe your interest in joining this project.";
-    } else if (trimmedMessage.length < minMessageLength) {
-      newErrors.message = `Explain your interest in at least ${minMessageLength} characters (${minMessageLength - trimmedMessage.length} more needed).`;
-    } else if (trimmedMessage.length > maxMessageLength) {
-      newErrors.message = `Your statement exceeds the maximum limit of ${maxMessageLength} characters.`;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const result = validateInterestInput({ email, message });
+    setErrors(result.errors);
+    return result.isValid;
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
