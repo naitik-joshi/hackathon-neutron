@@ -26,6 +26,21 @@ export function ReviewForm({
             demo label. Publishing makes this record visible to everyone.
           </p>
           <div className="flex flex-wrap gap-3">
+            <div className="w-full">
+              <label htmlFor="review-note">
+                Review feedback (required for changes or rejection)
+              </label>
+              <textarea
+                id="review-note"
+                name="note"
+                maxLength={4000}
+                rows={4}
+                className="mt-2 w-full rounded border p-3"
+              />
+              <p className="text-sm">
+                Visible only to the submitter and administrators.
+              </p>
+            </div>
             <Button name="decision" value="published" disabled={pending}>
               Approve and publish
             </Button>
