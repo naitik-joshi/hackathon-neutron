@@ -46,7 +46,11 @@ CSS is sufficient for the current interaction system, so WEB-29 adds no motion d
 
 ## Authenticated workspaces and research assistant
 
-Researcher and admin routes share one responsive workspace shell: compact horizontal navigation on smaller screens and a sticky editorial side rail on desktop. Workspace pages use the public ink, paper, navy, teal and ruby tokens with denser rows and restrained panels. Active navigation uses `aria-current`, and every workspace retains a route back to public research and sign-out.
+Student, researcher, and admin routes share one responsive workspace shell. At desktop, a sticky role rail separates account identity, destinations, public research, and sign-out. At smaller widths, a compact workspace bar opens a keyboard-accessible disclosure menu; Escape closes it and returns focus to its trigger. Active navigation uses `aria-current`.
+
+Private routes use a denser application rhythm than public editorial routes. `workspace-page`, `workspace-page-header`, `workspace-section`, `workspace-panel`, `workspace-record`, and `workspace-status-strip` establish consistent margins, type, spacing, record rows, and compact metrics. Serif type identifies a page; sans-serif type carries operational headings, labels, records, and controls. Ruby is reserved for priority or action-required cues. Status text always accompanies color.
+
+Researcher and admin workflows should read as queues and records rather than generic card dashboards. Put changes requested or operational attention first, then current status, then recent records. Generated manuscript codes, institutional-sounding governance claims, reviewer identities, deadlines, and other unsupported workflow details do not belong in private UI.
 
 The Research Paper Assistant is one global, keyboard-operable dialog rather than separate route widgets. Its navy editorial header, paper selector, source metadata and quiet status treatment identify it as an indexed-research tool—not a general chatbot. Publication detail pages may open it with exact deterministic paper context; assistant failure never replaces page content.
 

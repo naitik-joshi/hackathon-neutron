@@ -17,6 +17,45 @@ export async function getMyInterests() {
   return data;
 }
 
+export type MyInterestSummary = {
+  id: string;
+  contactEmail: string;
+  message: string;
+  isDemo: boolean;
+  createdAt: string;
+  project: { title: string; slug: string } | null;
+};
+
+export async function getMyInterestSummaries(): Promise<MyInterestSummary[]> {
+  const interests = await getMyInterests();
+  if (interests.length === 0) return [];
+
+  const { client } = await requireRole(["student", "researcher", "admin"]);
+  const projectIds = Array.from(
+    new Set(interests.map((interest) => interest.project_id)),
+  );
+  const { data: projects, error } = await client
+    .from("projects")
+    .select("id,title,slug")
+    .in("id", projectIds);
+  if (error) throw new Error("Could not load the projects for your interests.");
+
+  const projectsById = new Map(
+    (projects ?? []).map((project) => [project.id, project]),
+  );
+  return interests.map((interest) => {
+    const project = projectsById.get(interest.project_id);
+    return {
+      id: interest.id,
+      contactEmail: interest.contact_email,
+      message: interest.message,
+      isDemo: interest.is_demo,
+      createdAt: interest.created_at,
+      project: project ? { title: project.title, slug: project.slug } : null,
+    };
+  });
+}
+
 export async function getInterestInbox() {
   const { client } = await requireRole(["admin"]);
   const { data, error } = await client
@@ -47,7 +86,9 @@ export type EnrichedProjectInterest = {
   } | null;
 };
 
-export async function getEnrichedInterestInbox(): Promise<EnrichedProjectInterest[]> {
+export async function getEnrichedInterestInbox(): Promise<
+  EnrichedProjectInterest[]
+> {
   const { client } = await requireRole(["admin"]);
   const { data: rawInterests, error } = await client
     .from("project_interests")
