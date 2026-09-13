@@ -360,8 +360,8 @@ export function ResearchPaperAssistant() {
         aria-labelledby="research-assistant-title"
         className="fixed bottom-0 left-0 right-0 top-auto m-0 max-h-[92dvh] w-full max-w-none overflow-hidden rounded-t-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-0 text-[var(--color-text)] shadow-[var(--shadow-raised)] backdrop:bg-[rgb(11_28_48_/_0.45)] sm:bottom-6 sm:left-auto sm:right-6 sm:max-h-[min(48rem,calc(100dvh-3rem))] sm:w-[min(30rem,calc(100vw-3rem))] sm:rounded-[var(--radius-lg)]"
       >
-        <div className="flex max-h-[inherit] flex-col">
-          <header className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-navy)] px-5 py-4 text-white">
+        <div className="flex h-[92dvh] max-h-[inherit] flex-col sm:h-[min(48rem,calc(100dvh-3rem))]">
+          <header className="flex shrink-0 items-start justify-between gap-4 border-b border-[var(--color-border)] bg-[var(--color-navy)] px-5 py-4 text-white">
             <div>
               <p className="text-xs font-semibold text-[var(--color-text-on-dark-muted)]">
                 Grounded research tool
@@ -383,238 +383,243 @@ export function ResearchPaperAssistant() {
             </button>
           </header>
 
-          <div className="border-b border-[var(--color-border)] px-5 py-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm text-muted">
-                Answers use the selected indexed research paper.
-              </p>
-              <Badge
-                className={
-                  availability === "ready"
-                    ? "border-[var(--color-success-border)] bg-[var(--color-success-soft)] text-[var(--color-success)]"
-                    : "border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
-                }
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="border-b border-[var(--color-border)] px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-sm text-muted">
+                  Answers use the selected indexed research paper.
+                </p>
+                <Badge
+                  className={
+                    availability === "ready"
+                      ? "border-[var(--color-success-border)] bg-[var(--color-success-soft)] text-[var(--color-success)]"
+                      : "border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
+                  }
+                >
+                  {assistantAvailabilityLabel[availability]}
+                </Badge>
+              </div>
+              <div
+                className="mt-3 grid grid-cols-2 gap-2"
+                role="group"
+                aria-label="Assistant mode"
               >
-                {assistantAvailabilityLabel[availability]}
-              </Badge>
+                <Button
+                  type="button"
+                  variant={mode === "ask" ? "primary" : "secondary"}
+                  onClick={() => setMode("ask")}
+                >
+                  <BookOpenText size={16} aria-hidden="true" /> Ask
+                </Button>
+                <Button
+                  type="button"
+                  variant={mode === "compare" ? "primary" : "secondary"}
+                  onClick={() => setMode("compare")}
+                >
+                  <GitCompareArrows size={16} aria-hidden="true" /> Compare
+                </Button>
+              </div>
             </div>
+
             <div
-              className="mt-3 grid grid-cols-2 gap-2"
-              role="group"
-              aria-label="Assistant mode"
+              ref={transcriptRef}
+              className="max-h-64 overflow-y-auto break-words px-5 py-4"
             >
-              <Button
-                type="button"
-                variant={mode === "ask" ? "primary" : "secondary"}
-                onClick={() => setMode("ask")}
-              >
-                <BookOpenText size={16} aria-hidden="true" /> Ask
-              </Button>
-              <Button
-                type="button"
-                variant={mode === "compare" ? "primary" : "secondary"}
-                onClick={() => setMode("compare")}
-              >
-                <GitCompareArrows size={16} aria-hidden="true" /> Compare
-              </Button>
-            </div>
-          </div>
-
-          <div
-            ref={transcriptRef}
-            className="min-h-40 flex-1 overflow-y-auto px-5 py-4"
-          >
-            {messages.length === 0 ? (
-              <div className="rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] p-4 text-sm text-muted">
-                <p className="font-semibold text-[var(--color-ink)]">
-                  Start with one focused question.
-                </p>
-                <p className="mt-1">
-                  Each answer is independently grounded to the selected paper
-                  and section.
-                </p>
-              </div>
-            ) : (
-              <ol className="space-y-4" aria-live="polite">
-                {messages.map((message) => (
-                  <li
-                    key={message.id}
-                    className={message.role === "user" ? "ml-8" : "mr-5"}
-                  >
-                    <div
-                      className={
-                        message.role === "user"
-                          ? "rounded-[var(--radius-md)] bg-[var(--color-navy)] p-3 text-sm text-white"
-                          : "rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-3 text-sm"
-                      }
-                    >
-                      <p className="whitespace-pre-wrap">{message.text}</p>
-                    </div>
-                    {message.role === "assistant" && message.paper && (
-                      <p className="mt-1.5 text-xs text-muted">
-                        {message.hardNegative
-                          ? "No supporting passage found"
-                          : "Grounded to"}
-                        : {message.paper}
-                        {message.section ? ` · ${message.section}` : ""}
-                      </p>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            )}
-            {pending && (
-              <p
-                role="status"
-                className="mt-4 flex items-center gap-2 text-sm text-muted"
-              >
-                <LoaderCircle
-                  className="animate-spin"
-                  size={16}
-                  aria-hidden="true"
-                />
-                Checking the selected paper…
-              </p>
-            )}
-          </div>
-
-          <form
-            onSubmit={mode === "ask" ? submitQuestion : submitComparison}
-            className="border-t border-[var(--color-border)] bg-[var(--color-canvas)] px-5 py-4"
-          >
-            <label htmlFor="assistant-paper">Paper</label>
-            <Select
-              id="assistant-paper"
-              value={selectedName}
-              onChange={(event) => {
-                setSelectedName(event.target.value);
-                setSection("");
-                setRecommendation(null);
-                setContextMatched(false);
-              }}
-              disabled={loadingPapers || papers.length === 0}
-            >
-              <option value="">
-                {papers.length === 0
-                  ? paperError
-                    ? "Paper index unavailable"
-                    : loadingPapers
-                      ? "Loading indexed papers"
-                      : "No indexed papers available"
-                  : "Choose an indexed paper"}
-              </option>
-              {papers.map((paper) => (
-                <option key={paper.filename} value={paper.filename}>
-                  {paper.title}
-                </option>
-              ))}
-            </Select>
-            {contextMatched && (
-              <p className="mt-1.5 text-xs font-semibold text-[var(--color-success)]">
-                Using this publication
-              </p>
-            )}
-
-            {mode === "compare" && (
-              <div className="mt-3">
-                <label htmlFor="assistant-compare-paper">Compare with</label>
-                <Select
-                  id="assistant-compare-paper"
-                  value={comparePaper}
-                  onChange={(event) => setComparePaper(event.target.value)}
-                >
-                  <option value="">Choose a second paper</option>
-                  {papers
-                    .filter((paper) => paper.filename !== selectedName)
-                    .map((paper) => (
-                      <option key={paper.filename} value={paper.filename}>
-                        {paper.title}
-                      </option>
-                    ))}
-                </Select>
-              </div>
-            )}
-
-            {selectedPaper && (
-              <div className="mt-3">
-                <label htmlFor="assistant-section">Section</label>
-                <Select
-                  id="assistant-section"
-                  value={section}
-                  onChange={(event) => setSection(event.target.value)}
-                >
-                  <option value="">Choose automatically</option>
-                  {selectedPaper.sections.map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
-
-            <div className="mt-3">
-              <label htmlFor="assistant-question">
-                {mode === "ask" ? "Question" : "Comparison question"}
-              </label>
-              {mode === "ask" ? (
-                <Input
-                  ref={questionRef}
-                  id="assistant-question"
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  minLength={3}
-                  maxLength={2000}
-                  placeholder="What does this paper report?"
-                  disabled={pending || !selectedName}
-                />
+              {messages.length === 0 ? (
+                <div className="rounded-[var(--radius-md)] bg-[var(--color-surface-muted)] p-4 text-sm text-muted">
+                  <p className="font-semibold text-[var(--color-ink)]">
+                    Start with one focused question.
+                  </p>
+                  <p className="mt-1">
+                    Each answer is independently grounded to the selected paper
+                    and section.
+                  </p>
+                </div>
               ) : (
-                <Textarea
-                  id="assistant-question"
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  minLength={3}
-                  maxLength={2000}
-                  placeholder="How do the reported findings differ?"
-                  className="min-h-24"
-                  disabled={pending || !selectedName || !comparePaper}
-                />
+                <ol className="space-y-4" aria-live="polite">
+                  {messages.map((message) => (
+                    <li
+                      key={message.id}
+                      className={message.role === "user" ? "ml-8" : "mr-5"}
+                    >
+                      <div
+                        className={
+                          message.role === "user"
+                            ? "rounded-[var(--radius-md)] bg-[var(--color-navy)] p-3 text-sm text-white"
+                            : "rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white p-3 text-sm"
+                        }
+                      >
+                        <p className="whitespace-pre-wrap">{message.text}</p>
+                      </div>
+                      {message.role === "assistant" && message.paper && (
+                        <p className="mt-1.5 text-xs text-muted">
+                          {message.hardNegative
+                            ? "No supporting passage found"
+                            : "Grounded to"}
+                          : {message.paper}
+                          {message.section ? ` · ${message.section}` : ""}
+                        </p>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              )}
+              {pending && (
+                <p
+                  role="status"
+                  className="mt-4 flex items-center gap-2 text-sm text-muted"
+                >
+                  <LoaderCircle
+                    className="animate-spin"
+                    size={16}
+                    aria-hidden="true"
+                  />
+                  Checking the selected paper…
+                </p>
               )}
             </div>
 
-            {(error || paperError) && (
-              <div
-                role="alert"
-                className="mt-3 flex items-start justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] p-3 text-sm text-[var(--color-danger)]"
+            <form
+              id="research-assistant-form"
+              onSubmit={mode === "ask" ? submitQuestion : submitComparison}
+              className="border-t border-[var(--color-border)] bg-[var(--color-canvas)] px-5 py-4"
+            >
+              <label htmlFor="assistant-paper">Paper</label>
+              <Select
+                id="assistant-paper"
+                value={selectedName}
+                onChange={(event) => {
+                  setSelectedName(event.target.value);
+                  setSection("");
+                  setRecommendation(null);
+                  setContextMatched(false);
+                }}
+                disabled={loadingPapers || papers.length === 0}
               >
-                <p>{error || paperError}</p>
-                <button
-                  type="button"
-                  onClick={() => void loadAssistant()}
-                  className="inline-flex shrink-0 items-center gap-1 font-semibold"
-                >
-                  <RefreshCw size={14} aria-hidden="true" /> Retry
-                </button>
-              </div>
-            )}
-
-            {mode === "ask" && recommendation && (
-              <div className="mt-3 border-l-2 border-[var(--color-action)] pl-3 text-xs text-muted">
-                <p className="font-semibold text-[var(--color-ink)]">
-                  Related indexed research
+                <option value="">
+                  {papers.length === 0
+                    ? paperError
+                      ? "Paper index unavailable"
+                      : loadingPapers
+                        ? "Loading indexed papers"
+                        : "No indexed papers available"
+                    : "Choose an indexed paper"}
+                </option>
+                {papers.map((paper) => (
+                  <option key={paper.filename} value={paper.filename}>
+                    {paper.title}
+                  </option>
+                ))}
+              </Select>
+              {contextMatched && (
+                <p className="mt-1.5 text-xs font-semibold text-[var(--color-success)]">
+                  Using this publication
                 </p>
-                <p className="mt-1">{recommendation.title}</p>
-                {recommendation.shared_keywords.length > 0 && (
-                  <p className="mt-1">
-                    Shared terms: {recommendation.shared_keywords.join(", ")}
-                  </p>
+              )}
+
+              {mode === "compare" && (
+                <div className="mt-3">
+                  <label htmlFor="assistant-compare-paper">Compare with</label>
+                  <Select
+                    id="assistant-compare-paper"
+                    value={comparePaper}
+                    onChange={(event) => setComparePaper(event.target.value)}
+                  >
+                    <option value="">Choose a second paper</option>
+                    {papers
+                      .filter((paper) => paper.filename !== selectedName)
+                      .map((paper) => (
+                        <option key={paper.filename} value={paper.filename}>
+                          {paper.title}
+                        </option>
+                      ))}
+                  </Select>
+                </div>
+              )}
+
+              {selectedPaper && (
+                <div className="mt-3">
+                  <label htmlFor="assistant-section">Section</label>
+                  <Select
+                    id="assistant-section"
+                    value={section}
+                    onChange={(event) => setSection(event.target.value)}
+                  >
+                    <option value="">Choose automatically</option>
+                    {selectedPaper.sections.map((name) => (
+                      <option key={name} value={name}>
+                        {name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              )}
+
+              <div className="mt-3">
+                <label htmlFor="assistant-question">
+                  {mode === "ask" ? "Question" : "Comparison question"}
+                </label>
+                {mode === "ask" ? (
+                  <Input
+                    ref={questionRef}
+                    id="assistant-question"
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value)}
+                    minLength={3}
+                    maxLength={2000}
+                    placeholder="What does this paper report?"
+                    disabled={pending || !selectedName}
+                  />
+                ) : (
+                  <Textarea
+                    id="assistant-question"
+                    value={question}
+                    onChange={(event) => setQuestion(event.target.value)}
+                    minLength={3}
+                    maxLength={2000}
+                    placeholder="How do the reported findings differ?"
+                    className="min-h-24"
+                    disabled={pending || !selectedName || !comparePaper}
+                  />
                 )}
               </div>
-            )}
 
+              {(error || paperError) && (
+                <div
+                  role="alert"
+                  className="mt-3 flex items-start justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] p-3 text-sm text-[var(--color-danger)]"
+                >
+                  <p>{error || paperError}</p>
+                  <button
+                    type="button"
+                    onClick={() => void loadAssistant()}
+                    className="inline-flex shrink-0 items-center gap-1 font-semibold"
+                  >
+                    <RefreshCw size={14} aria-hidden="true" /> Retry
+                  </button>
+                </div>
+              )}
+
+              {mode === "ask" && recommendation && (
+                <div className="mt-3 border-l-2 border-[var(--color-action)] pl-3 text-xs text-muted">
+                  <p className="font-semibold text-[var(--color-ink)]">
+                    Related indexed research
+                  </p>
+                  <p className="mt-1">{recommendation.title}</p>
+                  {recommendation.shared_keywords.length > 0 && (
+                    <p className="mt-1">
+                      Shared terms: {recommendation.shared_keywords.join(", ")}
+                    </p>
+                  )}
+                </div>
+              )}
+            </form>
+          </div>
+          <footer className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-canvas)] px-5 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
             <Button
               type="submit"
-              className="mt-4 w-full"
+              form="research-assistant-form"
+              className="w-full"
               disabled={
                 pending ||
                 availability !== "ready" ||
@@ -632,9 +637,28 @@ export function ResearchPaperAssistant() {
               ) : (
                 <Send size={17} aria-hidden="true" />
               )}
-              {mode === "ask" ? "Analyze paper" : "Compare papers"}
+              {pending
+                ? mode === "ask"
+                  ? "Analyzing…"
+                  : "Comparing…"
+                : mode === "ask"
+                  ? "Analyze paper"
+                  : "Compare papers"}
             </Button>
-          </form>
+            {!pending &&
+              availability === "ready" &&
+              (!selectedName ||
+                (mode === "compare" && !comparePaper) ||
+                question.trim().length < 3) && (
+                <p className="mt-2 text-xs text-muted">
+                  {!selectedName
+                    ? "Choose a paper to begin."
+                    : mode === "compare" && !comparePaper
+                      ? "Choose a second paper to compare."
+                      : "Enter a question of at least 3 characters."}
+                </p>
+              )}
+          </footer>
         </div>
       </dialog>
     </>

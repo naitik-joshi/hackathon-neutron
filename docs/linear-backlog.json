@@ -240,7 +240,7 @@
       "milestone": "Demo Ready",
       "ownerRole": "Backend/Integration",
       "description": "Prove the integrated hackathon workflow and prepare a fallback demonstration.",
-      "scope": "docs/demo-plan.md, docs/handoff-v0.1.md",
+      "scope": "docs/demo-script.md, docs/final-acceptance.md",
       "acceptanceCriteria": [
         "Run lint, types, tests and production build on frozen main.",
         "Rehearse anonymous → researcher → admin → anonymous in separate sessions.",
@@ -420,7 +420,7 @@
       "milestone": "Discovery Works",
       "ownerRole": "Public UI/UX",
       "description": "Explore a grounded assistant that points back to published evidence.",
-      "scope": "docs/product-vision.md, docs/architecture.md",
+      "scope": "README.md, docs/architecture.md",
       "acceptanceCriteria": [
         "Specify citations, refusal/unknown behavior and public data boundary.",
         "Create a small reviewable interaction sketch.",
@@ -460,7 +460,7 @@
       "milestone": "Participation Works",
       "ownerRole": "Backend/Integration",
       "description": "Plan a partner directory and one useful integration without expanding bootstrap.",
-      "scope": "docs/data-model.md, docs/roadmap.md",
+      "scope": "docs/data-model.md, docs/final-build-plan.md",
       "acceptanceCriteria": [
         "Document partner relationships and public/private fields.",
         "Identify one integration with source ownership and failure behavior.",
