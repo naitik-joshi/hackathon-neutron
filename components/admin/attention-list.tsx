@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
-import { Badge, Card, buttonVariants } from "@/components/ui";
+import { Badge, buttonVariants } from "@/components/ui";
 import type {
   AttentionItem,
   AttentionSeverity,
@@ -14,85 +14,91 @@ const severityStyles: Record<AttentionSeverity, string> = {
 
 export function AttentionList({ items }: { items: AttentionItem[] }) {
   return (
-    <section id="needs-attention" aria-labelledby="needs-attention-title">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <section
+      id="needs-attention"
+      className="workspace-section"
+      aria-labelledby="needs-attention-title"
+    >
+      <div className="workspace-section-heading">
         <div>
-          <p className="eyebrow">Configured freshness checks</p>
-          <h2 id="needs-attention-title" className="mt-1 text-2xl">
+          <p className="workspace-overline">Priority</p>
+          <h2 id="needs-attention-title" className="workspace-section-title">
             Needs attention
           </h2>
         </div>
         <Badge>{items.length} records</Badge>
       </div>
-
       {items.length === 0 ? (
-        <Card className="flex items-start gap-3 border-emerald-200 bg-emerald-50/50">
+        <div className="workspace-panel flex items-start gap-3 border-[var(--color-success-border)] bg-[var(--color-success-soft)] p-5">
           <CheckCircle2
             aria-hidden="true"
-            className="mt-0.5 shrink-0 text-emerald-700"
-            size={20}
+            className="mt-0.5 shrink-0 text-[var(--color-success)]"
+            size={19}
           />
           <div>
-            <h3 className="text-lg">Nothing currently needs attention.</h3>
-            <p className="mt-1 text-sm text-slate-600">
+            <h3 className="font-sans text-sm font-bold">
+              Nothing currently needs attention
+            </h3>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
               No record has crossed the configured hackathon freshness windows.
             </p>
           </div>
-        </Card>
+        </div>
       ) : (
-        <ol className="grid gap-4">
+        <ol className="workspace-panel">
           {items.map((item) => (
-            <li key={item.key}>
-              <Card className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-start gap-3">
-                  <AlertTriangle
-                    aria-hidden="true"
-                    className="mt-1 shrink-0 text-slate-500"
-                    size={19}
-                  />
-                  <div className="min-w-0">
-                    <div className="mb-2 flex flex-wrap items-center gap-2">
-                      <Badge className={severityStyles[item.severity]}>
-                        {item.severity} priority
-                      </Badge>
-                      <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                        {item.entityType}
-                      </span>
-                    </div>
-                    <h3 className="truncate text-lg">{item.title}</h3>
-                    <p className="mt-1 text-sm text-slate-600">{item.reason}</p>
-                    <time
-                      className="mt-2 block text-xs text-slate-500"
-                      dateTime={item.timestamp}
-                    >
-                      Last updated{" "}
-                      {new Date(item.timestamp).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                        timeZone: "UTC",
-                      })}
-                    </time>
+            <li
+              key={item.key}
+              className="workspace-record sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+            >
+              <div className="flex min-w-0 items-start gap-3">
+                <AlertTriangle
+                  aria-hidden="true"
+                  className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+                  size={18}
+                />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge className={severityStyles[item.severity]}>
+                      {item.severity} priority
+                    </Badge>
+                    <span className="text-xs font-semibold capitalize text-[var(--color-text-muted)]">
+                      {item.entityType}
+                    </span>
                   </div>
+                  <h3 className="mt-2 break-words font-sans text-base font-bold text-[var(--color-ink)]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                    {item.reason}
+                  </p>
+                  <time
+                    className="mt-2 block text-xs text-[var(--color-text-subtle)]"
+                    dateTime={item.timestamp}
+                  >
+                    Updated{" "}
+                    {new Date(item.timestamp).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      timeZone: "UTC",
+                    })}
+                  </time>
                 </div>
-                <Link
-                  href={item.href}
-                  className={buttonVariants({
-                    variant: "secondary",
-                    className: "shrink-0",
-                  })}
-                >
-                  Inspect record
-                </Link>
-              </Card>
+              </div>
+              <Link
+                href={item.href}
+                className={buttonVariants({ variant: "secondary" })}
+              >
+                Inspect record
+              </Link>
             </li>
           ))}
         </ol>
       )}
-
-      <p className="mt-4 text-xs text-slate-500">
-        These are configurable demo defaults for hackathon operations, not
-        institutional policy or service-level commitments.
+      <p className="text-xs text-[var(--color-text-subtle)]">
+        Freshness windows are hackathon demonstration defaults, not
+        institutional policy.
       </p>
     </section>
   );
