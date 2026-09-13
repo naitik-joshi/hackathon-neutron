@@ -82,11 +82,12 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 ### Latest handoff
 
+- PDF runtime repair (2026-09-13): externalized server-only PDF.js so its worker resolves correctly under Next.js/Turbopack, replaced the generic error with explicit no-text/malformed/limit states, added IJMR journal-layout title/section extraction and kept every detected PDF field editable. The exact `IJRM_Pant1.pdf` from the reported failure passed the Next.js development route with 62,093 extracted characters. No OCR was added.
 - Researcher access and article intake (2026-09-13):
   - Added student-owned researcher access requests, an admin review queue, atomic database-backed approval/promotion, and guarded role management for existing self-registered accounts. New accounts still always start as students; the app never creates or exposes credentials.
   - Added upload-first publication intake using the supplied institutional template for DOCX and text-based PDF: authenticated researcher-only extraction, editable optional fields, server re-validation, private `ResearchFileData` upload, and publication/document metadata insertion with cleanup on failure. Image-only PDFs are rejected without OCR.
   - Added migration `202609130001_researcher_access_document_intake.sql`, Storage policies, shared database types, focused parser/validation/PostgreSQL RLS tests, admin/account wiring, and updated data-model documentation. No Qwen, search, or public publication-page redesign was included.
-  - Checks passed: `npm run lint`, `npm run typecheck`, `npm test` (63/63), and `npm run build`; the supplied blank template was correctly rejected as an uncompleted article, PDF text extraction was verified against an existing research PDF, and malformed PDF content was rejected.
+  - Checks passed: `npm run lint`, `npm run typecheck`, `npm test` (64/64), and `npm run build`; the supplied blank template was correctly rejected as an uncompleted article, PDF text extraction was verified against an existing research PDF, and malformed/scanned PDF states were covered.
   - Dependency/blocker: coordinate and apply the new migration to hosted Supabase before using the routes; confirm the existing private bucket is exactly `ResearchFileData`, then complete one real researcher-request approval plus DOCX and PDF submission smoke tests. No hosted database change was made in this branch.
 - WEB-30 integration (2026-09-13):
   - Added server-only Qwen configuration/client/error handling, strict Zod request contracts, bounded bodies, timeouts, no-store responses and best-effort per-route rate limits behind five same-origin Next.js handlers.

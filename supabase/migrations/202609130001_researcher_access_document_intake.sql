@@ -175,6 +175,20 @@ do $$
 begin
   if exists (
     select 1 from information_schema.tables
+    where table_schema = 'storage' and table_name = 'buckets'
+  ) then
+    update storage.buckets
+    set public = false,
+        file_size_limit = 10485760,
+        allowed_mime_types = array[
+          'application/pdf',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]::text[]
+    where id = 'ResearchFileData';
+  end if;
+
+  if exists (
+    select 1 from information_schema.tables
     where table_schema = 'storage' and table_name = 'objects'
   ) then
     execute $policy$
@@ -188,14 +202,13 @@ begin
     $policy$;
     execute $policy$
       create policy research_documents_read
-      on storage.objects for select to anon, authenticated
+      on storage.objects for select to authenticated
       using (
         bucket_id = 'ResearchFileData' and (
-          exists (
-            select 1 from public.publications p
-            where p.document_path = name and p.status = 'published'
+          (
+            (select public.current_app_role()) = 'researcher' and
+            (storage.foldername(name))[1] = (select auth.uid())::text
           ) or
-          (storage.foldername(name))[1] = (select auth.uid())::text or
           (select public.current_app_role()) = 'admin'
         )
       )

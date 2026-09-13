@@ -4,6 +4,7 @@ import {
 } from "@/features/publications/document-schema";
 import {
   authorizeResearcherApi,
+  documentExtractionErrorMessage,
   extractPublicationFromDocument,
   requestBodyTooLarge,
 } from "@/features/publications/server-intake";
@@ -46,12 +47,9 @@ export async function POST(request: Request) {
       .filter(([, value]) => !value)
       .map(([field]) => field);
     return Response.json({ fields, missingFields });
-  } catch {
+  } catch (error) {
     return Response.json(
-      {
-        error:
-          "This file could not be read as a text-based DOCX or PDF. Use the official article template and try again.",
-      },
+      { error: documentExtractionErrorMessage(error, file) },
       { status: 422 },
     );
   }

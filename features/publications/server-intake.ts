@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Database, Profile } from "@/lib/supabase/database.types";
 import { getResearchDocumentDetails } from "./document-schema";
-import { extractPdfText } from "./pdf-text";
+import { extractPdfText, PdfTextError, pdfTextErrorMessage } from "./pdf-text";
 import { parseArticleTemplate } from "./template-parser";
 
 type ResearcherAuth = {
@@ -71,6 +71,16 @@ export async function extractPublicationFromDocument(file: File) {
       ? await extractPdfText(buffer)
       : (await mammoth.extractRawText({ buffer })).value;
   return parseArticleTemplate(text);
+}
+
+export function documentExtractionErrorMessage(error: unknown, file: File) {
+  if (
+    file.name.toLowerCase().endsWith(".pdf") &&
+    error instanceof PdfTextError
+  ) {
+    return pdfTextErrorMessage(error);
+  }
+  return "This DOCX could not be read. Use a valid document based on the official article template.";
 }
 
 export function requestBodyTooLarge(request: Request, maxBytes: number) {

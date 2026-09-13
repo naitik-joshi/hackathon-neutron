@@ -102,11 +102,14 @@ export function SubmissionForm() {
       }
       setFields(result.fields);
       setExtracted(true);
+      const isPdf = file.name.toLowerCase().endsWith(".pdf");
       setMessage({
         tone: result.missingFields?.length ? "warning" : "success",
-        text: result.missingFields?.length
-          ? "Extraction finished. Some optional fields were not found; review and edit the fields below."
-          : "Extraction finished. Review and edit the fields below before submitting.",
+        text: isPdf
+          ? "PDF fields are extracted as a starting point. Review every detected field before submission."
+          : result.missingFields?.length
+            ? "Extraction finished. Some optional fields were not found; review and edit the fields below."
+            : "Extraction finished. Review and edit the fields below before submitting.",
       });
     } catch {
       setMessage({

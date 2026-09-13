@@ -8,11 +8,14 @@ export type ExtractedPublication = PublicationDocumentMetadata & {
 const headings = {
   abstract: /^abstract$/i,
   keywords: /^keywords\s*:/i,
-  introduction: /^1\.\s*introduction\b/i,
-  literatureReview: /^2\.\s*literature and related work\b/i,
-  methodology: /^3\.\s*methodology\s*\/\s*approach\b/i,
-  resultsAndDiscussion: /^4\.\s*results and discussion\b/i,
-  conclusion: /^5\.\s*conclusion\b/i,
+  introduction: /^(?:1\.\s*)?introduction$/i,
+  literatureReview:
+    /^(?:2\.\s*)?(?:literature and related work|literature review(?: and related work)?|related work)$/i,
+  methodology:
+    /^(?:3\.\s*)?(?:methodology\s*\/\s*approach|methodology|research methodology|review methodology)$/i,
+  resultsAndDiscussion:
+    /^(?:4\.\s*)?(?:results and discussion|results|discussion)$/i,
+  conclusion: /^(?:5\.\s*)?conclusions?$/i,
   disclosureStatement: /^disclosure statement$/i,
   ethicalApproval: /^ethical approval\s*:/i,
   consentToParticipate: /^consent to participate\s*:/i,
@@ -83,6 +86,63 @@ function inlineOrFollowing(
   return inline || contentBetween(lines, indexes, start, end);
 }
 
+function inferJournalHeader(lines: string[], abstractIndex: number) {
+  const articleTypeIndex = lines.findIndex(
+    (line, index) =>
+      index < abstractIndex &&
+      /^(?:original research|research|review|case study) article$/i.test(line),
+  );
+  if (articleTypeIndex < 0) return null;
+
+  const doiIndex = lines.findIndex(
+    (line, index) =>
+      index > articleTypeIndex &&
+      index < abstractIndex &&
+      /^doi\s*:/i.test(line),
+  );
+  const titleStart = (doiIndex >= 0 ? doiIndex : articleTypeIndex) + 1;
+  const correspondenceIndex = lines.findIndex(
+    (line, index) =>
+      index > titleStart &&
+      index < abstractIndex &&
+      /^\*?\s*correspondence\s*:/i.test(line),
+  );
+  const headerEnd =
+    correspondenceIndex >= 0 ? correspondenceIndex : abstractIndex;
+  const affiliationStart = lines.findIndex(
+    (line, index) =>
+      index > titleStart && index < headerEnd && /^\d+\s+\p{L}/u.test(line),
+  );
+  const authorSearchEnd = affiliationStart >= 0 ? affiliationStart : headerEnd;
+  const authorStart = lines.findIndex(
+    (line, index) =>
+      index >= titleStart &&
+      index < authorSearchEnd &&
+      /(?:\b\d+,\*|\s[¹²³⁴⁵⁶⁷⁸⁹](?:\s|,)|\s,\s)/u.test(line),
+  );
+  if (authorStart < 0) return null;
+
+  const title = clean(lines.slice(titleStart, authorStart).join(" "));
+  const authors = clean(
+    lines
+      .slice(authorStart, affiliationStart >= 0 ? affiliationStart : headerEnd)
+      .join(" "),
+  );
+  const affiliations =
+    affiliationStart >= 0
+      ? clean(lines.slice(affiliationStart, headerEnd).join("\n"))
+      : "";
+  const correspondence =
+    correspondenceIndex >= 0
+      ? valueAfterLabel(
+          lines[correspondenceIndex],
+          /^\*?\s*correspondence\s*:/i,
+        )
+      : "";
+
+  return { title, authors, affiliations, correspondence };
+}
+
 export function parseArticleTemplate(rawText: string): ExtractedPublication {
   const lines = rawText
     .replace(/\r/g, "")
@@ -100,10 +160,14 @@ export function parseArticleTemplate(rawText: string): ExtractedPublication {
   }
 
   const titleLine = lines.find((line) => /^full article title\s*:/i.test(line));
-  const title = titleLine
+  const labeledTitle = titleLine
     ? valueAfterLabel(titleLine, /^full article title\s*:/i)
     : "";
   const abstractIndex = indexes.get("abstract") ?? lines.length;
+  const journalHeader = labeledTitle
+    ? null
+    : inferJournalHeader(lines, abstractIndex);
+  const title = labeledTitle || journalHeader?.title || "";
   const submittedIndex = lines.findIndex((line) =>
     /^submitted on\s*:/i.test(line),
   );
@@ -114,9 +178,14 @@ export function parseArticleTemplate(rawText: string): ExtractedPublication {
   const peopleEnd = [submittedIndex, correspondenceIndex, abstractIndex]
     .filter((index) => index >= 0)
     .sort((a, b) => a - b)[0];
-  const people = lines.slice(titleIndex + 1, peopleEnd);
-  const authors = isTemplateText(people[0] || "") ? "" : people[0] || "";
-  const affiliations = clean(people.slice(1).join("\n"));
+  const people = titleLine ? lines.slice(titleIndex + 1, peopleEnd) : [];
+  const templateAuthors = isTemplateText(people[0] || "")
+    ? ""
+    : people[0] || "";
+  const templateAffiliations = clean(people.slice(1).join("\n"));
+  const authors = templateAuthors || journalHeader?.authors || "";
+  const affiliations =
+    templateAffiliations || journalHeader?.affiliations || "";
   const keywordsLine = lines.find((line) => /^keywords\s*:/i.test(line));
 
   return {
@@ -130,7 +199,7 @@ export function parseArticleTemplate(rawText: string): ExtractedPublication {
     correspondence:
       correspondenceIndex >= 0
         ? valueAfterLabel(lines[correspondenceIndex], /^correspondence\s*:/i)
-        : "",
+        : journalHeader?.correspondence || "",
     abstract: contentBetween(lines, indexes, "abstract", "keywords"),
     keywords: keywordsLine
       ? valueAfterLabel(keywordsLine, /^keywords\s*:/i)

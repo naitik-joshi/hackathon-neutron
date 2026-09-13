@@ -23,6 +23,17 @@ export function getResearchDocumentDetails(file: File): {
   return null;
 }
 
+export function sanitizeDocumentName(name: string) {
+  const basename = name.split(/[\\/]/).pop() || "research-paper";
+  return (
+    basename
+      .replace(/[\u0000-\u001f\u007f]/g, "")
+      .replace(/[^\p{L}\p{N}._() -]/gu, "-")
+      .trim()
+      .slice(0, 255) || "research-paper"
+  );
+}
+
 const optionalText = (max: number) =>
   z
     .string()

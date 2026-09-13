@@ -4,9 +4,14 @@ import { readFile } from "node:fs/promises";
 import { parseArticleTemplate } from "../features/publications/template-parser.ts";
 import {
   publicationDocumentMetadataSchema,
+  sanitizeDocumentName,
   validateResearchDocumentFile,
 } from "../features/publications/document-schema.ts";
-import { extractPdfText } from "../features/publications/pdf-text.ts";
+import {
+  extractPdfText,
+  PdfTextError,
+  pdfTextErrorMessage,
+} from "../features/publications/pdf-text.ts";
 
 const article = `
 Full Article Title: Grounded Research Discovery in Practice
@@ -144,6 +149,10 @@ test("document metadata and file constraints reject unsafe input", () => {
     ) || "",
     /\.docx or \.pdf/,
   );
+  assert.equal(
+    sanitizeDocumentName("../private/<draft>\u0000.pdf"),
+    "-draft-.pdf",
+  );
 });
 
 test("PDF extraction reads text from an existing research paper", async () => {
@@ -154,10 +163,24 @@ test("PDF extraction reads text from an existing research paper", async () => {
     ),
   );
   const text = await extractPdfText(source);
+  const parsed = parseArticleTemplate(text);
   assert.match(text, /Abstract/i);
   assert.ok(text.length > 1000);
+  assert.equal(
+    parsed.title,
+    "Machine Learning Based Postpartum Depression Risk Prediction: A Case Study on a Bangladeshi Dataset with Transferability Discussions for Nepal",
+  );
+  assert.match(parsed.abstract, /Postpartum depression/);
+  assert.match(parsed.introduction || "", /machine learning/i);
 });
 
 test("malformed PDF content is rejected during server extraction", async () => {
   await assert.rejects(extractPdfText(Buffer.from("not a PDF")));
+});
+
+test("scanned PDF failures use the honest no-text message", () => {
+  assert.equal(
+    pdfTextErrorMessage(new PdfTextError("NO_TEXT")),
+    "This PDF does not contain enough extractable text.",
+  );
 });

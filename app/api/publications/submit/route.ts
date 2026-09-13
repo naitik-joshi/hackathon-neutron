@@ -4,10 +4,12 @@ import {
   RESEARCH_DOCUMENT_BUCKET,
   getResearchDocumentDetails,
   metadataFromForm,
+  sanitizeDocumentName,
   validateResearchDocumentFile,
 } from "@/features/publications/document-schema";
 import {
   authorizeResearcherApi,
+  documentExtractionErrorMessage,
   extractPublicationFromDocument,
   requestBodyTooLarge,
 } from "@/features/publications/server-intake";
@@ -65,19 +67,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const extracted = await extractPublicationFromDocument(file);
-    if (extracted.title.length < 3 || extracted.abstract.length < 20) {
-      return Response.json(
-        {
-          error:
-            "The uploaded document must contain a completed Full Article Title and Abstract from the official template.",
-        },
-        { status: 422 },
-      );
-    }
-  } catch {
+    await extractPublicationFromDocument(file);
+  } catch (error) {
     return Response.json(
-      { error: "The uploaded DOCX or PDF document could not be verified." },
+      { error: documentExtractionErrorMessage(error, file) },
       { status: 422 },
     );
   }
@@ -120,7 +113,7 @@ export async function POST(request: Request) {
     submitted_by: auth.profile.id,
     status: "submitted",
     document_path: documentPath,
-    document_name: file.name.slice(0, 255),
+    document_name: sanitizeDocumentName(file.name),
     document_mime_type: document.contentType,
     document_metadata: metadata.data,
   });
