@@ -1,10 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { parseArticleTemplate } from "../features/publications/template-parser.ts";
 import {
   publicationDocumentMetadataSchema,
-  validateDocxFile,
+  validateResearchDocumentFile,
 } from "../features/publications/document-schema.ts";
+import { extractPdfText } from "../features/publications/pdf-text.ts";
 
 const article = `
 Full Article Title: Grounded Research Discovery in Practice
@@ -122,10 +124,40 @@ test("document metadata and file constraints reject unsafe input", () => {
     }).success,
     false,
   );
-  assert.match(
-    validateDocxFile(
-      new File(["not a document"], "paper.pdf", { type: "application/pdf" }),
-    ) || "",
-    /\.docx/,
+  assert.equal(
+    validateResearchDocumentFile(
+      new File(["document"], "paper.docx", {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      }),
+    ),
+    null,
   );
+  assert.equal(
+    validateResearchDocumentFile(
+      new File(["%PDF"], "paper.pdf", { type: "application/pdf" }),
+    ),
+    null,
+  );
+  assert.match(
+    validateResearchDocumentFile(
+      new File(["text"], "paper.txt", { type: "text/plain" }),
+    ) || "",
+    /\.docx or \.pdf/,
+  );
+});
+
+test("PDF extraction reads text from an existing research paper", async () => {
+  const source = await readFile(
+    new URL(
+      "../qwen-grounded-paper-system/watch_papers/IJMR_Aditi.pdf",
+      import.meta.url,
+    ),
+  );
+  const text = await extractPdfText(source);
+  assert.match(text, /Abstract/i);
+  assert.ok(text.length > 1000);
+});
+
+test("malformed PDF content is rejected during server extraction", async () => {
+  await assert.rejects(extractPdfText(Buffer.from("not a PDF")));
 });

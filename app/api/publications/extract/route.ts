@@ -1,10 +1,10 @@
 import {
   MAX_DOCUMENT_BYTES,
-  validateDocxFile,
+  validateResearchDocumentFile,
 } from "@/features/publications/document-schema";
 import {
   authorizeResearcherApi,
-  extractPublicationFromDocx,
+  extractPublicationFromDocument,
   requestBodyTooLarge,
 } from "@/features/publications/server-intake";
 
@@ -28,11 +28,11 @@ export async function POST(request: Request) {
   const file = form.get("file");
   if (!(file instanceof File)) {
     return Response.json(
-      { error: "Choose a Word .docx document." },
+      { error: "Choose a .docx or .pdf article document." },
       { status: 400 },
     );
   }
-  const fileError = validateDocxFile(file);
+  const fileError = validateResearchDocumentFile(file);
   if (fileError) {
     return Response.json(
       { error: fileError },
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const fields = await extractPublicationFromDocx(file);
+    const fields = await extractPublicationFromDocument(file);
     const missingFields = Object.entries(fields)
       .filter(([, value]) => !value)
       .map(([field]) => field);
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     return Response.json(
       {
         error:
-          "This file could not be read as a Word document. Use the official article template and try again.",
+          "This file could not be read as a text-based DOCX or PDF. Use the official article template and try again.",
       },
       { status: 422 },
     );

@@ -4,6 +4,24 @@ export const RESEARCH_DOCUMENT_BUCKET = "ResearchFileData";
 export const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 export const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+export const PDF_MIME = "application/pdf";
+
+export type ResearchDocumentKind = "docx" | "pdf";
+
+export function getResearchDocumentDetails(file: File): {
+  kind: ResearchDocumentKind;
+  extension: ResearchDocumentKind;
+  contentType: string;
+} | null {
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".docx")) {
+    return { kind: "docx", extension: "docx", contentType: DOCX_MIME };
+  }
+  if (name.endsWith(".pdf")) {
+    return { kind: "pdf", extension: "pdf", contentType: PDF_MIME };
+  }
+  return null;
+}
 
 const optionalText = (max: number) =>
   z
@@ -76,20 +94,22 @@ export function metadataFromForm(form: FormData) {
   );
 }
 
-export function validateDocxFile(file: File) {
-  if (!file.name.toLowerCase().endsWith(".docx")) {
-    return "Upload a .docx file based on the article template.";
-  }
+export function validateResearchDocumentFile(file: File) {
+  const details = getResearchDocumentDetails(file);
+  if (!details)
+    return "Upload a .docx or .pdf file based on the article template.";
   if (file.size === 0) return "The uploaded document is empty.";
   if (file.size > MAX_DOCUMENT_BYTES) {
     return "The document must be 10 MB or smaller.";
   }
   if (
     file.type &&
-    file.type !== DOCX_MIME &&
+    file.type !== details.contentType &&
     file.type !== "application/octet-stream"
   ) {
-    return "The uploaded file must be a Word .docx document.";
+    return details.kind === "pdf"
+      ? "The selected .pdf file does not have a valid PDF content type."
+      : "The selected .docx file does not have a valid Word content type.";
   }
   return null;
 }

@@ -80,7 +80,7 @@ export function SubmissionForm() {
   async function extractDocument() {
     const file = fileInput.current?.files?.[0];
     if (!file) {
-      setMessage({ tone: "error", text: "Choose a Word .docx file first." });
+      setMessage({ tone: "error", text: "Choose a .docx or .pdf file first." });
       return;
     }
     setBusy("extract");
@@ -161,8 +161,9 @@ export function SubmissionForm() {
           1. Upload the article
         </legend>
         <p className="text-sm text-[var(--color-text-muted)]">
-          Start with a completed .docx based on the official article template.
-          The file stays private until an administrator publishes the record.
+          Start with a completed .docx or text-based .pdf using the official
+          article template. The file stays private until an administrator
+          publishes the record.
         </p>
         <div>
           <label htmlFor="article-file">Article document *</label>
@@ -171,7 +172,7 @@ export function SubmissionForm() {
             id="article-file"
             name="file"
             type="file"
-            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".docx,.pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/pdf"
             required
             onChange={() => {
               setExtracted(false);
@@ -179,7 +180,8 @@ export function SubmissionForm() {
             }}
           />
           <p className="mt-2 text-xs text-[var(--color-text-muted)]">
-            Word .docx only, maximum 10 MB.
+            Word .docx or text-based PDF, maximum 10 MB. Scanned image-only PDFs
+            cannot be extracted.
           </p>
         </div>
         <Button

@@ -1,14 +1,14 @@
 import { publicationSchema } from "@/lib/validation/publication";
 import {
-  DOCX_MIME,
   MAX_DOCUMENT_BYTES,
   RESEARCH_DOCUMENT_BUCKET,
+  getResearchDocumentDetails,
   metadataFromForm,
-  validateDocxFile,
+  validateResearchDocumentFile,
 } from "@/features/publications/document-schema";
 import {
   authorizeResearcherApi,
-  extractPublicationFromDocx,
+  extractPublicationFromDocument,
   requestBodyTooLarge,
 } from "@/features/publications/server-intake";
 
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const fileError = validateDocxFile(file);
+  const fileError = validateResearchDocumentFile(file);
   if (fileError) {
     return Response.json(
       { error: fileError },
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const extracted = await extractPublicationFromDocx(file);
+    const extracted = await extractPublicationFromDocument(file);
     if (extracted.title.length < 3 || extracted.abstract.length < 20) {
       return Response.json(
         {
@@ -77,17 +77,24 @@ export async function POST(request: Request) {
     }
   } catch {
     return Response.json(
-      { error: "The uploaded Word document could not be verified." },
+      { error: "The uploaded DOCX or PDF document could not be verified." },
       { status: 422 },
     );
   }
 
+  const document = getResearchDocumentDetails(file);
+  if (!document) {
+    return Response.json(
+      { error: "Unsupported document format." },
+      { status: 422 },
+    );
+  }
   const id = crypto.randomUUID();
-  const documentPath = `${auth.profile.id}/${id}.docx`;
+  const documentPath = `${auth.profile.id}/${id}.${document.extension}`;
   const upload = await auth.client.storage
     .from(RESEARCH_DOCUMENT_BUCKET)
     .upload(documentPath, file, {
-      contentType: DOCX_MIME,
+      contentType: document.contentType,
       upsert: false,
     });
   if (upload.error) {
@@ -114,7 +121,7 @@ export async function POST(request: Request) {
     status: "submitted",
     document_path: documentPath,
     document_name: file.name.slice(0, 255),
-    document_mime_type: DOCX_MIME,
+    document_mime_type: document.contentType,
     document_metadata: metadata.data,
   });
   if (error) {

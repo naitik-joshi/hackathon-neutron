@@ -5,6 +5,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Database, Profile } from "@/lib/supabase/database.types";
+import { getResearchDocumentDetails } from "./document-schema";
+import { extractPdfText } from "./pdf-text";
 import { parseArticleTemplate } from "./template-parser";
 
 type ResearcherAuth = {
@@ -60,10 +62,15 @@ export async function authorizeResearcherApi(): Promise<
   return { client, profile };
 }
 
-export async function extractPublicationFromDocx(file: File) {
+export async function extractPublicationFromDocument(file: File) {
   const buffer = Buffer.from(await file.arrayBuffer());
-  const result = await mammoth.extractRawText({ buffer });
-  return parseArticleTemplate(result.value);
+  const details = getResearchDocumentDetails(file);
+  if (!details) throw new Error("UNSUPPORTED_DOCUMENT_TYPE");
+  const text =
+    details.kind === "pdf"
+      ? await extractPdfText(buffer)
+      : (await mammoth.extractRawText({ buffer })).value;
+  return parseArticleTemplate(text);
 }
 
 export function requestBodyTooLarge(request: Request, maxBytes: number) {
