@@ -78,7 +78,7 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Branch:** `rabin-03`
 
-**Status:** Local implementation complete and verified; new hosted Supabase migration not yet applied
+**Status:** WEB-32 merged in PR #20 and hosted migration applied; demo-account acceptance remains
 
 ### Latest handoff
 
@@ -88,7 +88,7 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
   - Added upload-first publication intake using the supplied institutional template for DOCX and text-based PDF: authenticated researcher-only extraction, editable optional fields, server re-validation, private `ResearchFileData` upload, and publication/document metadata insertion with cleanup on failure. Image-only PDFs are rejected without OCR.
   - Added migration `202609130001_researcher_access_document_intake.sql`, Storage policies, shared database types, focused parser/validation/PostgreSQL RLS tests, admin/account wiring, and updated data-model documentation. No Qwen, search, or public publication-page redesign was included.
   - Checks passed: `npm run lint`, `npm run typecheck`, `npm test` (64/64), and `npm run build`; the supplied blank template was correctly rejected as an uncompleted article, PDF text extraction was verified against an existing research PDF, and malformed/scanned PDF states were covered.
-  - Dependency/blocker: coordinate and apply the new migration to hosted Supabase before using the routes; confirm the existing private bucket is exactly `ResearchFileData`, then complete one real researcher-request approval plus DOCX and PDF submission smoke tests. No hosted database change was made in this branch.
+  - Hosted acceptance: PR #20 merged into `dev` at `67b5fcd`; migration `202609130001` was applied and confirmed in hosted migration history. Anonymous zero-item listing and public-object HEAD probes were denied, anonymous access-request reads exposed no rows, and published metadata remained publicly readable. Complete one real admin-approved demo researcher request plus authenticated owner/other-researcher/admin storage checks and DOCX/PDF submissions before marking WEB-32 Done.
 - WEB-30 integration (2026-09-13):
   - Added server-only Qwen configuration/client/error handling, strict Zod request contracts, bounded bodies, timeouts, no-store responses and best-effort per-route rate limits behind five same-origin Next.js handlers.
   - Added one global public Research Paper Assistant with ephemeral grounded conversation, source paper/section presentation, exact-title publication context matching, deterministic recommendations, compare mode, keyboard/Escape support and offline recovery.

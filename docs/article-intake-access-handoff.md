@@ -12,9 +12,9 @@ PDF.js is externalized from the Next.js server bundle in `next.config.ts` so its
 
 Both API routes return JSON with `error` on failure. Expected statuses are 400 for a missing/invalid form, 401 for no session, 403 for the wrong role, 413 for size limits, 422 for invalid fields or a malformed/uncompleted template, 503 for unavailable configuration/storage, and 201 for a successful submission.
 
-## Hosted Supabase requirement
+## Hosted Supabase status
 
-The local migration `202609130001_researcher_access_document_intake.sql` has not been applied to the hosted project. Coordinate with the database owner, verify no migration deployment is in progress, and then apply it with the normal linked Supabase workflow. Do not edit the migration after it is shared.
+Migration `202609130001_researcher_access_document_intake.sql` was applied to the linked hosted project on 2026-09-13 and confirmed in hosted migration history. It is now shared and immutable; any follow-up database change must use a new timestamped migration.
 
 Before application testing, confirm that the existing bucket ID is exactly `ResearchFileData`. The migration explicitly keeps it private, limits uploads to 10 MB DOCX/PDF files, and adds owner-researcher/admin object policies when the Supabase Storage schema is present. It does not create, rename, empty, or publicly expose the bucket. Published publication metadata remains public, but source files do not become anonymous downloads.
 
@@ -29,4 +29,4 @@ Before application testing, confirm that the existing bucket ID is exactly `Rese
 7. Publish through the existing review workflow. Confirm normal publication information remains public without login while the source document remains unavailable anonymously.
 8. Regenerate hosted database types and compare them with `lib/supabase/database.types.ts`.
 
-Local checks passed: lint, TypeScript, all 64 tests, and the webpack production build. Supabase Storage policy behavior and full browser submission remain pending hosted acceptance because local PGlite intentionally does not emulate Storage internals.
+Local checks passed: lint, TypeScript, all 64 tests, and the webpack production build. Hosted anonymous checks denied a zero-item bucket listing and public-object HEAD request, exposed no researcher-access rows, and preserved public published-metadata reads. Authenticated owner/other-researcher/admin Storage checks plus real DOCX/PDF submissions and access approval remain pending because disposable demo sessions were unavailable in this run.
