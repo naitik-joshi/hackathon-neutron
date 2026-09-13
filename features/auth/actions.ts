@@ -49,6 +49,7 @@ export async function signUp(
     email: form.get("email"),
     password: form.get("password"),
     confirmPassword: form.get("confirmPassword"),
+    intent: form.get("intent") || "student",
   });
   if (!parsed.success)
     return { fieldErrors: parsed.error.flatten().fieldErrors };
@@ -62,6 +63,9 @@ export async function signUp(
   const { data, error } = await client.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: {
+      data: { account_intent: parsed.data.intent },
+    },
   });
   if (error)
     return {

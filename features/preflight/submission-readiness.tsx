@@ -14,12 +14,17 @@ export function SubmissionReadiness({
   title,
   abstract,
   currentPublicationId,
+  referencesText: suppliedReferences,
+  showReferenceInput = true,
 }: {
   title: string;
   abstract: string;
   currentPublicationId?: string;
+  referencesText?: string;
+  showReferenceInput?: boolean;
 }) {
-  const [referencesText, setReferencesText] = useState("");
+  const [draftReferences, setDraftReferences] = useState("");
+  const referencesText = suppliedReferences ?? draftReferences;
   const [result, setResult] = useState<PublicationPreflightResult>();
   const [resultFingerprint, setResultFingerprint] = useState<string>();
   const [error, setError] = useState<string>();
@@ -75,29 +80,36 @@ export function SubmissionReadiness({
         </Button>
       </div>
 
-      <div className="mt-5">
-        <label
-          htmlFor={`preflight-references-${currentPublicationId ?? "new"}`}
-        >
-          References for readiness check
-        </label>
-        <Textarea
-          id={`preflight-references-${currentPublicationId ?? "new"}`}
-          value={referencesText}
-          onChange={(event) => setReferencesText(event.target.value)}
-          maxLength={30000}
-          placeholder="Paste one reference per line"
-          className="min-h-32"
-          aria-describedby={`preflight-references-help-${currentPublicationId ?? "new"}`}
-        />
-        <p
-          id={`preflight-references-help-${currentPublicationId ?? "new"}`}
-          className="mt-2 text-xs leading-5 text-[var(--color-text-muted)]"
-        >
-          References are analyzed for readiness only and are not stored with
-          this submission.
+      {showReferenceInput ? (
+        <div className="mt-5">
+          <label
+            htmlFor={`preflight-references-${currentPublicationId ?? "new"}`}
+          >
+            References for readiness check
+          </label>
+          <Textarea
+            id={`preflight-references-${currentPublicationId ?? "new"}`}
+            value={referencesText}
+            onChange={(event) => setDraftReferences(event.target.value)}
+            maxLength={30000}
+            placeholder="Paste one reference per line"
+            className="min-h-32"
+            aria-describedby={`preflight-references-help-${currentPublicationId ?? "new"}`}
+          />
+          <p
+            id={`preflight-references-help-${currentPublicationId ?? "new"}`}
+            className="mt-2 text-xs leading-5 text-[var(--color-text-muted)]"
+          >
+            References are analyzed for readiness only and are not stored with
+            this submission.
+          </p>
+        </div>
+      ) : (
+        <p className="mt-5 text-sm text-[var(--color-text-muted)]">
+          This check uses the references extracted from the uploaded article and
+          edited in the form above.
         </p>
-      </div>
+      )}
 
       <div aria-live="polite" aria-atomic="true" className="mt-4">
         {pending ? (

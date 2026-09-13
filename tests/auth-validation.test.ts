@@ -7,9 +7,11 @@ test("student signup validates email, password and confirmation", () => {
     email: " student@example.com ",
     password: "research8",
     confirmPassword: "research8",
+    intent: "student",
   };
   const parsed = signUpSchema.parse(valid);
   assert.equal(parsed.email, "student@example.com");
+  assert.equal(parsed.intent, "student");
 
   for (const patch of [
     { email: "not-an-email" },
@@ -26,8 +28,22 @@ test("public signup input cannot carry an application role", () => {
     password: "research8",
     confirmPassword: "research8",
     role: "admin",
+    intent: "researcher",
   });
   assert.equal("role" in parsed, false);
+  assert.equal(parsed.intent, "researcher");
+});
+
+test("signup rejects role-like account intents", () => {
+  assert.equal(
+    signUpSchema.safeParse({
+      email: "person@example.com",
+      password: "research8",
+      confirmPassword: "research8",
+      intent: "admin",
+    }).success,
+    false,
+  );
 });
 
 test("sign in validates credentials without accepting role", () => {

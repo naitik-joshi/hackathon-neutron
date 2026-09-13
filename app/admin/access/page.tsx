@@ -5,6 +5,8 @@ import {
   ResearcherRequestReview,
 } from "@/features/access/admin-access-controls";
 import { getAdminAccessData } from "@/features/access/queries";
+import { AdminInviteForm } from "@/features/access/admin-invite-form";
+import { isSupabaseAdminConfigured } from "@/lib/supabase/admin";
 
 export const metadata = {
   title: "Account access | Islington R&D Digital Hub",
@@ -41,6 +43,24 @@ export default async function AdminAccessPage() {
           Admin overview
         </Link>
       </header>
+
+      <section
+        className="workspace-section"
+        aria-labelledby="admin-invite-title"
+      >
+        <div className="workspace-section-heading">
+          <div>
+            <h2 id="admin-invite-title" className="workspace-section-title">
+              Add an administrator
+            </h2>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+              Send a Supabase Auth invitation or explicitly promote an existing
+              account. Administrators never create or view passwords.
+            </p>
+          </div>
+        </div>
+        <AdminInviteForm configured={isSupabaseAdminConfigured()} />
+      </section>
 
       <section
         className="workspace-section"

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
 import {
+  administratorInviteSchema,
   profileRoleSchema,
   researcherAccessRequestSchema,
   researcherAccessReviewSchema,
@@ -37,6 +38,36 @@ test("researcher access input and admin decisions are validated", () => {
   );
   assert.equal(
     profileRoleSchema.safeParse({ user_id: applicant, role: "owner" }).success,
+    false,
+  );
+});
+
+test("administrator invitations require valid input and explicit promotion confirmation", () => {
+  assert.equal(
+    administratorInviteSchema.safeParse({
+      email: "new-admin@example.com",
+      display_name: "Demo Admin",
+      mode: "invite",
+      confirmed: undefined,
+    }).success,
+    true,
+  );
+  assert.equal(
+    administratorInviteSchema.safeParse({
+      email: "existing@example.com",
+      display_name: "",
+      mode: "promote",
+      confirmed: undefined,
+    }).success,
+    false,
+  );
+  assert.equal(
+    administratorInviteSchema.safeParse({
+      email: "not-an-email",
+      display_name: "",
+      mode: "invite",
+      confirmed: "on",
+    }).success,
     false,
   );
 });

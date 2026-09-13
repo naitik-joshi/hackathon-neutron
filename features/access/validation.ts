@@ -28,4 +28,26 @@ export const profileRoleSchema = z.object({
   role: z.enum(["student", "researcher", "admin"]),
 });
 
+export const administratorInviteSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email("Enter a valid email address.")
+      .max(254),
+    display_name: z.string().trim().max(160).default(""),
+    mode: z.enum(["invite", "promote"]).default("invite"),
+    confirmed: z.preprocess((value) => value === "on", z.boolean()),
+  })
+  .superRefine((value, context) => {
+    if (value.mode === "promote" && !value.confirmed) {
+      context.addIssue({
+        code: "custom",
+        path: ["confirmed"],
+        message: "Confirm the existing-account role change.",
+      });
+    }
+  });
+
 export type AccessActionState = { error?: string; success?: string };

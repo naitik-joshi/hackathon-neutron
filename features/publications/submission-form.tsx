@@ -362,6 +362,8 @@ export function SubmissionForm() {
           <SubmissionReadiness
             title={fields.title}
             abstract={fields.abstract}
+            referencesText={fields.references}
+            showReferenceInput={false}
           />
           <p className="flex gap-2 text-sm leading-6 text-slate-600">
             <FileText aria-hidden="true" className="mt-1 shrink-0" size={16} />
