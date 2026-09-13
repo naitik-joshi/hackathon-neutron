@@ -1,0 +1,91 @@
+"use server";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { signInSchema, signUpSchema, type AuthActionState } from "./validation";
+import {
+  getPostSignInRedirect,
+  getPostSignUpRedirect,
+} from "@/lib/auth/redirects";
+
+export async function signIn(
+  _state: AuthActionState,
+  form: FormData,
+): Promise<AuthActionState> {
+  const parsed = signInSchema.safeParse(Object.fromEntries(form));
+  if (!parsed.success)
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
+  if (!isSupabaseConfigured())
+    return {
+      error: "Sign in is not configured yet. Contact the project team.",
+    };
+  const client = await createClient();
+  const { error } = await client.auth.signInWithPassword(parsed.data);
+  if (error)
+    return {
+      error: "Sign in failed. Check your email and password, then try again.",
+    };
+  const { data: claims } = await client.auth.getClaims();
+  const { data: profile } = await client
+    .from("profiles")
+    .select("role")
+    .eq("id", claims?.claims.sub ?? "")
+    .maybeSingle();
+  redirect(
+    getPostSignInRedirect(
+      profile?.role === "admin" || profile?.role === "researcher"
+        ? profile.role
+        : "student",
+      form.get("redirectTo"),
+    ),
+  );
+}
+
+export async function signUp(
+  _state: AuthActionState,
+  form: FormData,
+): Promise<AuthActionState> {
+  const parsed = signUpSchema.safeParse({
+    email: form.get("email"),
+    password: form.get("password"),
+    confirmPassword: form.get("confirmPassword"),
+    intent: form.get("intent") || "student",
+  });
+  if (!parsed.success)
+    return { fieldErrors: parsed.error.flatten().fieldErrors };
+  if (!isSupabaseConfigured())
+    return {
+      error:
+        "Account creation is not configured yet. Contact the project team.",
+    };
+
+  const client = await createClient();
+  const { data, error } = await client.auth.signUp({
+    email: parsed.data.email,
+    password: parsed.data.password,
+    options: {
+      data: { account_intent: parsed.data.intent },
+    },
+  });
+  if (error)
+    return {
+      error:
+        "We could not create your account. Check the details or try signing in if you already registered.",
+    };
+
+  if (data.session) redirect(getPostSignUpRedirect(form.get("redirectTo")));
+
+  return {
+    success:
+      "Check your email to confirm your account, then return here to sign in.",
+  };
+}
+
+export async function signOut() {
+  if (isSupabaseConfigured()) {
+    const client = await createClient();
+    const { error } = await client.auth.signOut();
+    if (error) throw new Error("Sign out failed. Please try again.");
+  }
+  redirect("/auth/sign-in");
+}
