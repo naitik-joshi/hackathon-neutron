@@ -20,6 +20,10 @@ import {
 import { Badge, Button, Input, Select, Textarea } from "@/components/ui";
 import { OPEN_RESEARCH_ASSISTANT_EVENT } from "./analyze-publication-button";
 import { matchPaperByTitle } from "@/lib/qwen/context";
+import {
+  assistantAvailabilityLabel,
+  getAssistantAvailability,
+} from "@/lib/qwen/availability";
 import type {
   CompareResponse,
   PapersResponse,
@@ -39,11 +43,25 @@ type AssistantMessage = {
   hardNegative?: boolean;
 };
 
+class AssistantRequestError extends Error {
+  constructor(
+    message: string,
+    readonly serviceUnavailable: boolean,
+  ) {
+    super(message);
+  }
+}
+
 async function readJson<T>(response: Response): Promise<T> {
   const body = (await response.json()) as T | QwenErrorBody;
   if (!response.ok) {
     const error = (body as QwenErrorBody).error;
-    throw new Error(error?.message || "The research assistant is unavailable.");
+    throw new AssistantRequestError(
+      error?.message || "The research assistant is unavailable.",
+      response.status >= 500 ||
+        error?.code === "SERVICE_UNAVAILABLE" ||
+        error?.code === "MODEL_UNAVAILABLE",
+    );
   }
   return body as T;
 }
@@ -70,6 +88,7 @@ export function ResearchPaperAssistant() {
   const [loadingPapers, setLoadingPapers] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [paperError, setPaperError] = useState<string | null>(null);
   const [health, setHealth] = useState<"checking" | "healthy" | "degraded">(
     "checking",
   );
@@ -78,10 +97,17 @@ export function ResearchPaperAssistant() {
     () => papers.find((paper) => paper.filename === selectedName),
     [papers, selectedName],
   );
+  const availability = getAssistantAvailability({
+    health,
+    loadingPapers,
+    paperCount: papers.length,
+    paperIndexFailed: Boolean(paperError),
+  });
 
   const loadAssistant = useCallback(async () => {
     setLoadingPapers(true);
     setError(null);
+    setPaperError(null);
     const [papersResult, healthResult] = await Promise.allSettled([
       fetch("/api/research-assistant/papers", { cache: "no-store" }).then(
         (response) => readJson<PapersResponse>(response),
@@ -93,6 +119,9 @@ export function ResearchPaperAssistant() {
 
     if (papersResult.status === "fulfilled") {
       setPapers(papersResult.value.papers);
+      if (papersResult.value.papers.length === 0) {
+        setPaperError("No indexed papers are available right now.");
+      }
       if (pendingTitleRef.current) {
         const match = matchPaperByTitle(
           papersResult.value.papers,
@@ -103,7 +132,8 @@ export function ResearchPaperAssistant() {
         pendingTitleRef.current = null;
       }
     } else {
-      setError(
+      setPapers([]);
+      setPaperError(
         papersResult.reason instanceof Error
           ? papersResult.reason.message
           : "The indexed paper list is unavailable.",
@@ -230,6 +260,12 @@ export function ResearchPaperAssistant() {
         },
       ]);
     } catch (caught) {
+      if (
+        caught instanceof AssistantRequestError &&
+        caught.serviceUnavailable
+      ) {
+        setHealth("degraded");
+      }
       setError(
         caught instanceof Error
           ? caught.message
@@ -286,6 +322,12 @@ export function ResearchPaperAssistant() {
       ]);
       setQuestion("");
     } catch (caught) {
+      if (
+        caught instanceof AssistantRequestError &&
+        caught.serviceUnavailable
+      ) {
+        setHealth("degraded");
+      }
       setError(
         caught instanceof Error
           ? caught.message
@@ -348,16 +390,12 @@ export function ResearchPaperAssistant() {
               </p>
               <Badge
                 className={
-                  health === "healthy"
+                  availability === "ready"
                     ? "border-[var(--color-success-border)] bg-[var(--color-success-soft)] text-[var(--color-success)]"
                     : "border-[var(--color-warning-border)] bg-[var(--color-warning-soft)] text-[var(--color-warning)]"
                 }
               >
-                {health === "checking"
-                  ? "Checking model"
-                  : health === "healthy"
-                    ? "Model ready"
-                    : "Model unavailable"}
+                {assistantAvailabilityLabel[availability]}
               </Badge>
             </div>
             <div
@@ -458,7 +496,11 @@ export function ResearchPaperAssistant() {
             >
               <option value="">
                 {papers.length === 0
-                  ? "No indexed papers available"
+                  ? paperError
+                    ? "Paper index unavailable"
+                    : loadingPapers
+                      ? "Loading indexed papers"
+                      : "No indexed papers available"
                   : "Choose an indexed paper"}
               </option>
               {papers.map((paper) => (
@@ -540,12 +582,12 @@ export function ResearchPaperAssistant() {
               )}
             </div>
 
-            {error && (
+            {(error || paperError) && (
               <div
                 role="alert"
                 className="mt-3 flex items-start justify-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-danger-border)] bg-[var(--color-danger-soft)] p-3 text-sm text-[var(--color-danger)]"
               >
-                <p>{error}</p>
+                <p>{error || paperError}</p>
                 <button
                   type="button"
                   onClick={() => void loadAssistant()}
@@ -575,6 +617,7 @@ export function ResearchPaperAssistant() {
               className="mt-4 w-full"
               disabled={
                 pending ||
+                availability !== "ready" ||
                 !selectedName ||
                 question.trim().length < 3 ||
                 (mode === "compare" && !comparePaper)

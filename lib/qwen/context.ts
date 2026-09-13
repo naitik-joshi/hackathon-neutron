@@ -6,7 +6,8 @@ export function normalizePaperTitle(value: string) {
     .toLocaleLowerCase()
     .replace(/[\p{P}\p{S}]+/gu, " ")
     .replace(/\s+/g, " ")
-    .trim();
+    .trim()
+    .replace(/^demo data\s+/, "");
 }
 
 export function matchPaperByTitle(

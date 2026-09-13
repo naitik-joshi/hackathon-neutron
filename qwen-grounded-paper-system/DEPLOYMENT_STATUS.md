@@ -32,3 +32,7 @@ Rate limiting and Hub-user authorization belong at the public Next.js/API gatewa
 ## Frontend handoff
 
 Use `FRONTEND_CONNECT_GUIDE.md` as the canonical contract. Keep `QWEN_BACKEND_URL` and `QWEN_API_KEY` server-only, validate browser input with Zod, expose only narrow routes, use `Cache-Control: no-store`, provide source paper/section context, and keep normal research pages usable during an AI outage.
+
+## Final acceptance update — 2026-09-13
+
+`store.py` was redeployed and both `qwen-api` and `ollama` restarted healthy. IJMR PDFs now expose their multi-line article title instead of the repeated journal masthead. Through the Next.js same-origin proxy, health, eight-document paper listing, positive query, exact hard-negative, deterministic recommendation and positive comparison passed; the comparison completed in 29.2 seconds. Plain HTTP remains demo infrastructure and still requires trusted HTTPS/private networking for production.

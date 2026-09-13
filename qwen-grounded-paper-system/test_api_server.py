@@ -164,6 +164,27 @@ class TestApiContract(unittest.TestCase):
         )
         self.assertEqual((status, payload["error"]["code"]), (422, "SECTION_NOT_FOUND"))
 
+    def test_pdf_header_title_ignores_journal_masthead(self):
+        store = DocumentStore()
+        store.add_or_update(
+            "paper.pdf",
+            {
+                "Header block": (
+                    "Islington Journal of Multidisciplinary Research Vol. 1\n"
+                    "Original Research Article\n"
+                    "DOI: 10.67556/example\n"
+                    "A Grounded Research Title Across\n"
+                    "Two Header Lines\n"
+                    "Demo Researcher 1,*\n"
+                    "1Islington College, Kathmandu, Nepal"
+                )
+            },
+        )
+        self.assertEqual(
+            store.get_paper_title("paper.pdf"),
+            "A Grounded Research Title Across Two Header Lines",
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
