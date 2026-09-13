@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { resubmitPublication } from "./actions";
 import { Button, Input, Textarea } from "@/components/ui";
 import type { Publication } from "@/lib/supabase/database.types";
+import { SubmissionReadiness } from "@/features/preflight/submission-readiness";
 
 export function EditPublicationForm({
   publication,
@@ -11,6 +12,8 @@ export function EditPublicationForm({
   publication: Publication;
 }) {
   const [state, action, pending] = useActionState(resubmitPublication, {});
+  const [title, setTitle] = useState(publication.title);
+  const [abstract, setAbstract] = useState(publication.abstract);
 
   return (
     <form action={action} className="space-y-5">
@@ -20,7 +23,8 @@ export function EditPublicationForm({
         <Input
           id="edit-title"
           name="title"
-          defaultValue={publication.title}
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
           required
           minLength={3}
           maxLength={240}
@@ -31,7 +35,8 @@ export function EditPublicationForm({
         <Textarea
           id="edit-abstract"
           name="abstract"
-          defaultValue={publication.abstract}
+          value={abstract}
+          onChange={(event) => setAbstract(event.target.value)}
           required
           minLength={20}
           maxLength={12000}
@@ -60,6 +65,11 @@ export function EditPublicationForm({
           />
         </div>
       </div>
+      <SubmissionReadiness
+        title={title}
+        abstract={abstract}
+        currentPublicationId={publication.id}
+      />
       <p className="text-sm text-slate-600">
         Resubmitting sends this version back to the review queue and locks
         editing while administrators review it.

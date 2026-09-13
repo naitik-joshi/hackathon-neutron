@@ -7,6 +7,8 @@ import { ReviewHistory } from "@/components/shared/review-history";
 import { FormMessage, buttonVariants } from "@/components/ui";
 import { ReviewForm } from "@/features/submissions/review-form";
 import { getPublicationReviews } from "@/features/submissions/queries";
+import { getAdminPublicationResearchContext } from "@/features/preflight/admin";
+import { PreflightResults } from "@/features/preflight/preflight-results";
 import { requireRole } from "@/lib/auth/guards";
 
 export const metadata = {
@@ -40,25 +42,31 @@ export default async function AdminSubmissionDetailPage({
   if (error) throw new Error("Could not load submission");
   if (!publication) notFound();
 
-  const [submitterResult, researcherLinks, projectLinks, reviews] =
-    await Promise.all([
-      publication.submitted_by
-        ? client
-            .from("profiles")
-            .select("display_name")
-            .eq("id", publication.submitted_by)
-            .maybeSingle()
-        : Promise.resolve({ data: null, error: null }),
-      client
-        .from("publication_researchers")
-        .select("researcher_id")
-        .eq("publication_id", id),
-      client
-        .from("publication_projects")
-        .select("project_id")
-        .eq("publication_id", id),
-      getPublicationReviews(id),
-    ]);
+  const [
+    submitterResult,
+    researcherLinks,
+    projectLinks,
+    reviews,
+    researchContext,
+  ] = await Promise.all([
+    publication.submitted_by
+      ? client
+          .from("profiles")
+          .select("display_name")
+          .eq("id", publication.submitted_by)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    client
+      .from("publication_researchers")
+      .select("researcher_id")
+      .eq("publication_id", id),
+    client
+      .from("publication_projects")
+      .select("project_id")
+      .eq("publication_id", id),
+    getPublicationReviews(id),
+    getAdminPublicationResearchContext(publication).catch(() => null),
+  ]);
   const researcherIds = (researcherLinks.data ?? []).map(
     (link) => link.researcher_id,
   );
@@ -158,6 +166,38 @@ export default async function AdminSubmissionDetailPage({
                 </dd>
               </div>
             </dl>
+          </section>
+
+          <section
+            className="workspace-panel p-5 sm:p-7"
+            aria-labelledby="research-context-title"
+          >
+            <p className="workspace-overline">Computed guidance</p>
+            <h2
+              id="research-context-title"
+              className="mt-2 workspace-section-title"
+            >
+              Research context
+            </h2>
+            <p className="mt-2 mb-5 text-sm leading-6 text-[var(--color-text-muted)]">
+              Computed from the current saved title and abstract. This is
+              neutral context for review, not the researcher&apos;s stored
+              preflight result.
+            </p>
+            {researchContext ? (
+              <PreflightResults
+                result={researchContext}
+                includeCitations={false}
+              />
+            ) : (
+              <p
+                className="text-sm text-[var(--color-text-muted)]"
+                role="status"
+              >
+                Research context is temporarily unavailable. The publication
+                review workflow remains available.
+              </p>
+            )}
           </section>
 
           <ReviewHistory reviews={reviews} />

@@ -1,11 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { submitPublication } from "./actions";
 import { Button, Input, Textarea } from "@/components/ui";
+import { SubmissionReadiness } from "@/features/preflight/submission-readiness";
 
 export function SubmissionForm() {
   const [state, action, pending] = useActionState(submitPublication, {});
+  const [title, setTitle] = useState("");
+  const [abstract, setAbstract] = useState("");
 
   return (
     <form action={action} className="space-y-7" aria-label="New publication">
@@ -21,6 +24,8 @@ export function SubmissionForm() {
           <Input
             name="title"
             id="title"
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
             required
             minLength={3}
             maxLength={240}
@@ -31,6 +36,8 @@ export function SubmissionForm() {
           <Textarea
             name="abstract"
             id="abstract"
+            value={abstract}
+            onChange={(event) => setAbstract(event.target.value)}
             required
             minLength={20}
             maxLength={12000}
@@ -62,21 +69,7 @@ export function SubmissionForm() {
           </span>
         </label>
       </fieldset>
-      <section
-        aria-labelledby="readiness-title"
-        className="rounded-[var(--radius-md)] border border-dashed border-[var(--color-border-strong)] bg-[var(--color-surface-muted)] p-4"
-      >
-        <h2
-          id="readiness-title"
-          className="font-sans text-sm font-bold text-[var(--color-ink)]"
-        >
-          Submission readiness
-        </h2>
-        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Automated readiness guidance will be added in the next planned phase.
-          No readiness claim is made in this form today.
-        </p>
-      </section>
+      <SubmissionReadiness title={title} abstract={abstract} />
       <p className="text-sm leading-6 text-slate-600">
         Submitting sends this publication for administrative review. It becomes
         public only after an administrator publishes it.
