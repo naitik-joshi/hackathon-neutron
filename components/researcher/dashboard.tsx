@@ -2,11 +2,11 @@ import Link from "next/link";
 import {
   ArrowRight,
   BookOpen,
+  CheckCircle2,
   FilePlus2,
-  ListChecks,
   MessageSquareText,
 } from "lucide-react";
-import { Badge, Card, buttonVariants } from "@/components/ui";
+import { Badge, buttonVariants } from "@/components/ui";
 import { DemoBadge, StatusBadge } from "@/components/shared/status-badge";
 import type { ResearcherDashboardData } from "@/features/researcher/queries";
 
@@ -23,11 +23,12 @@ const metricLabels: Array<{
   key: keyof ResearcherDashboardData["metrics"];
   label: string;
 }> = [
-  { key: "total", label: "Total submissions" },
+  { key: "total", label: "Total" },
   { key: "submitted", label: "Submitted" },
   { key: "underReview", label: "Under review" },
   { key: "changesRequested", label: "Changes requested" },
   { key: "published", label: "Published" },
+  { key: "rejected", label: "Rejected" },
 ];
 
 export function ResearcherDashboardView({
@@ -36,213 +37,167 @@ export function ResearcherDashboardView({
   data: ResearcherDashboardData;
 }) {
   return (
-    <div className="page-shell space-y-10 pb-16">
-      <header className="academic-card overflow-hidden bg-white">
-        <div className="border-b border-slate-200 bg-[#eff4ff] px-5 py-3 sm:px-7">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="border-[#0f2042]/15 bg-white text-[#0f2042]">
-              Researcher workspace
-            </Badge>
-            <span className="text-xs text-slate-600">
-              Private submission and review activity
-            </span>
-          </div>
+    <div className="workspace-page">
+      <header className="workspace-page-header">
+        <div>
+          <p className="workspace-overline">Researcher overview</p>
+          <h1 className="workspace-page-title">
+            Welcome, {data.identity.displayName}
+          </h1>
+          <p className="workspace-page-description">
+            See what needs your response, submit research, and follow each
+            publication through review.
+          </p>
+          {data.identity.publicProfile && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-[var(--color-text-muted)]">
+              <span className="font-semibold text-[var(--color-ink)]">
+                {data.identity.publicProfile.name}
+              </span>
+              {data.identity.publicProfile.position && (
+                <span>{data.identity.publicProfile.position}</span>
+              )}
+              <DemoBadge demo={data.identity.publicProfile.isDemo} />
+            </div>
+          )}
         </div>
-        <div className="grid gap-6 p-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:p-8">
-          <div className="min-w-0">
-            <p className="eyebrow">Your research activity</p>
-            <h1 className="mt-2 break-words text-3xl tracking-[-0.025em] text-[#0f2042] sm:text-4xl">
-              Welcome, {data.identity.displayName}
-            </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              Track submissions, respond to requested changes, and continue to
-              public research when you are ready.
-            </p>
-            {data.identity.publicProfile && (
-              <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-                <span>{data.identity.publicProfile.name}</span>
-                {data.identity.publicProfile.position && (
-                  <>
-                    <span aria-hidden="true">·</span>
-                    <span>{data.identity.publicProfile.position}</span>
-                  </>
-                )}
-                <DemoBadge demo={data.identity.publicProfile.isDemo} />
-              </div>
-            )}
-          </div>
+        <div className="flex flex-wrap gap-2">
           {data.identity.publicProfile && (
             <Link
               href={`/researchers/${data.identity.publicProfile.slug}`}
               className={buttonVariants({ variant: "secondary" })}
             >
-              View public profile <ArrowRight aria-hidden="true" size={16} />
+              Public profile
             </Link>
           )}
+          <Link
+            href="/researcher/publications/new"
+            className={buttonVariants()}
+          >
+            <FilePlus2 aria-hidden="true" size={16} /> Submit publication
+          </Link>
         </div>
       </header>
 
-      <section aria-labelledby="researcher-actions-title">
-        <div className="mb-4">
-          <p className="eyebrow">Continue your work</p>
-          <h2 id="researcher-actions-title" className="mt-1 text-2xl">
-            Next actions
-          </h2>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Link
-            href="/researcher/publications/new"
-            className={buttonVariants({
-              className: "min-h-14 justify-between px-5",
-            })}
-          >
-            <span className="inline-flex items-center gap-2">
-              <FilePlus2 aria-hidden="true" size={18} /> Submit a publication
-            </span>
-            <ArrowRight aria-hidden="true" size={16} />
-          </Link>
-          <Link
-            href="/researcher/publications"
-            className={buttonVariants({
-              variant: "secondary",
-              className: "min-h-14 justify-between px-5",
-            })}
-          >
-            <span className="inline-flex items-center gap-2">
-              <ListChecks aria-hidden="true" size={18} /> View all submissions
-            </span>
-            <ArrowRight aria-hidden="true" size={16} />
-          </Link>
-          <Link
-            href="/research"
-            className={buttonVariants({
-              variant: "secondary",
-              className: "min-h-14 justify-between px-5",
-            })}
-          >
-            <span className="inline-flex items-center gap-2">
-              <BookOpen aria-hidden="true" size={18} /> Browse public research
-            </span>
-            <ArrowRight aria-hidden="true" size={16} />
-          </Link>
-        </div>
-      </section>
-
-      <section aria-labelledby="submission-summary-title">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+      <section
+        className="workspace-section"
+        aria-labelledby="needs-action-title"
+      >
+        <div className="workspace-section-heading">
           <div>
-            <p className="eyebrow">Real submission records</p>
-            <h2 id="submission-summary-title" className="mt-1 text-2xl">
-              Submission summary
-            </h2>
-          </div>
-          {data.metrics.rejected > 0 && (
-            <p className="text-sm text-slate-600">
-              Rejected: <strong>{data.metrics.rejected}</strong>
-            </p>
-          )}
-        </div>
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {metricLabels.map(({ key, label }) => (
-            <Card key={key} className="min-w-0 p-5">
-              <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {label}
-              </dt>
-              <dd className="mt-2 font-serif text-3xl font-bold text-[#0f2042]">
-                {data.metrics[key]}
-              </dd>
-            </Card>
-          ))}
-        </dl>
-      </section>
-
-      <section aria-labelledby="needs-action-title">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="eyebrow">Publication workflow</p>
-            <h2 id="needs-action-title" className="mt-1 text-2xl">
+            <p className="workspace-overline">Priority</p>
+            <h2 id="needs-action-title" className="workspace-section-title">
               Needs your action
             </h2>
           </div>
           <Badge>{data.needsAction.length} records</Badge>
         </div>
-
         {data.needsAction.length === 0 ? (
-          <Card className="border-emerald-200 bg-emerald-50/60">
-            <h3 className="text-lg text-emerald-950">
-              Nothing needs your attention right now.
-            </h3>
-            <p className="mt-2 text-sm text-emerald-900/80">
-              Requested changes will appear here with direct links to feedback
-              and resubmission.
-            </p>
-          </Card>
+          <div className="workspace-panel flex items-start gap-3 border-[var(--color-success-border)] bg-[var(--color-success-soft)] p-5">
+            <CheckCircle2
+              aria-hidden="true"
+              className="mt-0.5 shrink-0 text-[var(--color-success)]"
+              size={19}
+            />
+            <div>
+              <h3 className="font-sans text-sm font-bold text-[var(--color-ink)]">
+                Nothing needs your attention right now
+              </h3>
+              <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                Any requested changes will appear here with direct links to
+                feedback and editing.
+              </p>
+            </div>
+          </div>
         ) : (
-          <ol className="grid gap-4">
+          <ol className="workspace-panel border-[var(--color-warning-border)]">
             {data.needsAction.map((publication) => (
-              <li key={publication.id}>
-                <Card className="border-amber-200 bg-amber-50/35 p-5 sm:p-6">
-                  <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <StatusBadge status={publication.status} />
-                        <DemoBadge demo={publication.is_demo} />
-                      </div>
-                      <h3 className="mt-3 break-words text-xl text-[#0f2042]">
-                        {publication.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-slate-600">
-                        The R&amp;D team requested changes. Review the feedback,
-                        update the submission, and resubmit it for review.
-                      </p>
-                      <p className="mt-2 text-xs text-slate-500">
-                        Last updated {formatDate(publication.updated_at)}
-                      </p>
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row md:shrink-0">
-                      <Link
-                        href={`/researcher/publications/${publication.id}#review-history`}
-                        className={buttonVariants({ variant: "secondary" })}
-                      >
-                        <MessageSquareText aria-hidden="true" size={16} /> View
-                        feedback
-                      </Link>
-                      <Link
-                        href={`/researcher/publications/${publication.id}#edit-resubmit`}
-                        className={buttonVariants()}
-                      >
-                        Edit and resubmit
-                      </Link>
-                    </div>
+              <li
+                key={publication.id}
+                className="workspace-record border-l-4 border-l-amber-500 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={publication.status} />
+                    <DemoBadge demo={publication.is_demo} />
                   </div>
-                </Card>
+                  <h3 className="mt-2 break-words font-sans text-base font-bold text-[var(--color-ink)]">
+                    {publication.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                    Review the recorded feedback, update the submission, and
+                    resubmit it.
+                  </p>
+                  <p className="mt-2 text-xs text-[var(--color-text-subtle)]">
+                    Updated {formatDate(publication.updated_at)}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={`/researcher/publications/${publication.id}#review-history`}
+                    className={buttonVariants({ variant: "secondary" })}
+                  >
+                    <MessageSquareText aria-hidden="true" size={15} /> View
+                    feedback
+                  </Link>
+                  <Link
+                    href={`/researcher/publications/${publication.id}#edit-resubmit`}
+                    className={buttonVariants()}
+                  >
+                    Edit and resubmit
+                  </Link>
+                </div>
               </li>
             ))}
           </ol>
         )}
       </section>
 
-      <section aria-labelledby="recent-submissions-title">
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="eyebrow">Latest activity</p>
-            <h2 id="recent-submissions-title" className="mt-1 text-2xl">
-              Recent submissions
-            </h2>
-          </div>
-          {data.recentSubmissions.length > 0 && (
-            <Link href="/researcher/publications" className="text-link text-sm">
-              View all submissions →
-            </Link>
-          )}
+      <section
+        className="workspace-section"
+        aria-labelledby="submission-summary-title"
+      >
+        <div className="workspace-section-heading">
+          <h2 id="submission-summary-title" className="workspace-section-title">
+            Submission status
+          </h2>
+          <Link href="/researcher/publications" className="text-link text-sm">
+            View all submissions
+          </Link>
         </div>
+        <dl className="workspace-status-strip">
+          {metricLabels.map(({ key, label }) => (
+            <div
+              key={key}
+              className={
+                key === "changesRequested" && data.metrics[key] > 0
+                  ? "workspace-status-item bg-[var(--color-warning-soft)]"
+                  : "workspace-status-item"
+              }
+            >
+              <dt className="workspace-status-label">{label}</dt>
+              <dd className="workspace-status-value">{data.metrics[key]}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
+      <section
+        className="workspace-section"
+        aria-labelledby="recent-submissions-title"
+      >
+        <div className="workspace-section-heading">
+          <h2 id="recent-submissions-title" className="workspace-section-title">
+            Recent submissions
+          </h2>
+        </div>
         {data.recentSubmissions.length === 0 ? (
-          <Card className="border-dashed bg-slate-50/70 text-center">
-            <h3 className="text-xl">No submissions yet</h3>
-            <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
-              Your publication workflow will appear here after your first
-              submission.
+          <div className="workspace-panel p-6 text-center sm:p-8">
+            <h3 className="font-sans text-base font-bold">
+              No submissions yet
+            </h3>
+            <p className="mx-auto mt-1 max-w-lg text-sm text-[var(--color-text-muted)]">
+              Start with a title and abstract. The record stays private until an
+              administrator publishes it.
             </p>
             <Link
               href="/researcher/publications/new"
@@ -250,37 +205,46 @@ export function ResearcherDashboardView({
             >
               Submit a publication
             </Link>
-          </Card>
+          </div>
         ) : (
-          <ol className="divide-y divide-slate-200 rounded-lg border border-slate-200 bg-white px-5 shadow-[0_1px_2px_rgba(15,32,66,0.04)] sm:px-6">
+          <ol className="workspace-panel">
             {data.recentSubmissions.map((publication) => (
-              <li key={publication.id}>
+              <li
+                key={publication.id}
+                className="workspace-record sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={publication.status} />
+                    <DemoBadge demo={publication.is_demo} />
+                    <span className="text-xs text-[var(--color-text-subtle)]">
+                      Updated {formatDate(publication.updated_at)}
+                    </span>
+                  </div>
+                  <h3 className="mt-2 break-words font-sans text-base font-bold text-[var(--color-ink)]">
+                    {publication.title}
+                  </h3>
+                </div>
                 <Link
                   href={`/researcher/publications/${publication.id}`}
-                  className="group flex flex-col gap-3 py-5 outline-none focus-visible:ring-2 focus-visible:ring-[#0f2042] focus-visible:ring-offset-2 sm:flex-row sm:items-center sm:justify-between"
+                  className={buttonVariants({ variant: "secondary" })}
                 >
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <StatusBadge status={publication.status} />
-                      <DemoBadge demo={publication.is_demo} />
-                    </div>
-                    <h3 className="mt-2 break-words text-lg text-[#0f2042] group-hover:underline">
-                      {publication.title}
-                    </h3>
-                    <p className="mt-1 text-xs text-slate-500">
-                      Created {formatDate(publication.created_at)} · Updated{" "}
-                      {formatDate(publication.updated_at)}
-                    </p>
-                  </div>
-                  <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-[#0f2042]">
-                    Open submission <ArrowRight aria-hidden="true" size={15} />
-                  </span>
+                  Open <ArrowRight aria-hidden="true" size={15} />
                 </Link>
               </li>
             ))}
           </ol>
         )}
       </section>
+
+      <div className="flex flex-wrap gap-3 border-t border-[var(--color-border)] pt-5">
+        <Link href="/researcher/publications/new" className={buttonVariants()}>
+          <FilePlus2 aria-hidden="true" size={16} /> Submit publication
+        </Link>
+        <Link href="/research" className={buttonVariants({ variant: "ghost" })}>
+          <BookOpen aria-hidden="true" size={16} /> Browse public research
+        </Link>
+      </div>
     </div>
   );
 }

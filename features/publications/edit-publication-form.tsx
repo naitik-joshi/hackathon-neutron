@@ -13,7 +13,7 @@ export function EditPublicationForm({
   const [state, action, pending] = useActionState(resubmitPublication, {});
 
   return (
-    <form action={action} className="space-y-6">
+    <form action={action} className="space-y-5">
       <input type="hidden" name="id" value={publication.id} />
       <div>
         <label htmlFor="edit-title">Title *</label>

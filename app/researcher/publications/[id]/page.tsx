@@ -1,14 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { requireRole } from "@/lib/auth/guards";
-import { getPublicationReviews } from "@/features/submissions/queries";
-import { editablePublicationStatuses } from "@/features/publications/mutations";
-import { EditPublicationForm } from "@/features/publications/edit-publication-form";
-import { PageHeader } from "@/components/shared/page-header";
 import { DemoBadge, StatusBadge } from "@/components/shared/status-badge";
 import { ReviewHistory } from "@/components/shared/review-history";
-import { Card } from "@/components/ui";
+import { buttonVariants } from "@/components/ui";
+import { EditPublicationForm } from "@/features/publications/edit-publication-form";
+import { editablePublicationStatuses } from "@/features/publications/mutations";
+import { getPublicationReviews } from "@/features/submissions/queries";
+import { requireRole } from "@/lib/auth/guards";
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
 
 export default async function ResearcherPublicationPage({
   params,
@@ -18,7 +26,6 @@ export default async function ResearcherPublicationPage({
   const { client, profile } = await requireRole(["researcher"]);
   const { id } = await params;
   if (!z.uuid().safeParse(id).success) notFound();
-
   const { data: publication, error } = await client
     .from("publications")
     .select("*")
@@ -27,69 +34,113 @@ export default async function ResearcherPublicationPage({
     .maybeSingle();
   if (error) throw new Error("Could not load your publication.");
   if (!publication) notFound();
-
   const reviews = await getPublicationReviews(id);
-  const editable = editablePublicationStatuses.some(
-    (status) => status === publication.status,
+  const editable = editablePublicationStatuses.includes(
+    publication.status as (typeof editablePublicationStatuses)[number],
   );
+  const changesRequested = publication.status === "changes_requested";
 
   return (
-    <div className="page-shell pb-16">
-      <Link
-        href="/researcher/publications"
-        className="text-link mb-6 inline-block"
-      >
-        ← My publications
-      </Link>
-      <PageHeader
-        eyebrow="Researcher / Publication"
-        title={publication.title}
-        description="See the current workflow state, respond to feedback when editing is available, and follow the private review history."
-      />
-      <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,.75fr)]">
-        <div className="space-y-8">
-          <Card>
-            <div className="flex flex-wrap gap-2">
-              <StatusBadge status={publication.status} />
-              <DemoBadge demo={publication.is_demo} />
-            </div>
-            <h2 className="mt-6 text-2xl">Abstract</h2>
-            <p className="mt-3 whitespace-pre-wrap text-slate-700">
+    <div className="workspace-page">
+      <header className="workspace-page-header">
+        <div className="min-w-0">
+          <p className="workspace-overline">Publication record</p>
+          <h1 className="workspace-page-title max-w-4xl">
+            {publication.title}
+          </h1>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <StatusBadge status={publication.status} />
+            <DemoBadge demo={publication.is_demo} />
+            <span className="text-xs text-[var(--color-text-subtle)]">
+              Updated {formatDate(publication.updated_at)}
+            </span>
+          </div>
+        </div>
+        <Link
+          href="/researcher/publications"
+          className={buttonVariants({ variant: "secondary" })}
+        >
+          All publications
+        </Link>
+      </header>
+
+      {changesRequested && (
+        <div
+          className="workspace-panel border-l-4 border-l-amber-500 bg-[var(--color-warning-soft)] p-5"
+          role="status"
+        >
+          <h2 className="font-sans text-base font-bold text-[var(--color-ink)]">
+            Changes are requested
+          </h2>
+          <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+            Read the latest feedback below, then update and resubmit this
+            record.
+          </p>
+          <a
+            href="#review-history"
+            className="text-link mt-3 inline-block text-sm"
+          >
+            Go to feedback
+          </a>
+        </div>
+      )}
+
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(19rem,.75fr)]">
+        <div className="space-y-6">
+          <section
+            className="workspace-panel p-5 sm:p-7"
+            aria-labelledby="abstract-title"
+          >
+            <h2 id="abstract-title" className="workspace-section-title">
+              Abstract
+            </h2>
+            <p className="mt-4 max-w-3xl whitespace-pre-wrap text-sm leading-7 text-[var(--color-text)]">
               {publication.abstract}
             </p>
-            <dl className="mt-6 grid gap-4 border-t border-slate-200 pt-5 text-sm sm:grid-cols-2">
+            <dl className="mt-6 grid gap-4 border-t border-[var(--color-border)] pt-5 text-sm sm:grid-cols-2">
               <div>
-                <dt className="font-semibold text-slate-900">DOI</dt>
-                <dd className="mt-1 text-slate-600">
+                <dt className="font-bold text-[var(--color-ink)]">DOI</dt>
+                <dd className="mt-1 break-all text-[var(--color-text-muted)]">
                   {publication.doi || "Not provided"}
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold text-slate-900">Year</dt>
-                <dd className="mt-1 text-slate-600">
+                <dt className="font-bold text-[var(--color-ink)]">Year</dt>
+                <dd className="mt-1 text-[var(--color-text-muted)]">
                   {publication.year || "Not provided"}
                 </dd>
               </div>
             </dl>
-          </Card>
+          </section>
           <div id="review-history" className="scroll-mt-28">
             <ReviewHistory reviews={reviews} />
           </div>
         </div>
-        <Card id="edit-resubmit" className="scroll-mt-28">
+
+        <section
+          id="edit-resubmit"
+          className="workspace-panel scroll-mt-28 p-5 sm:p-6"
+        >
           {editable ? (
             <>
-              <p className="eyebrow">Next action</p>
-              <h2 className="mb-5 mt-2 text-2xl">Edit and resubmit</h2>
+              <p className="workspace-overline">Next action</p>
+              <h2 className="mt-2 font-sans text-lg font-bold text-[var(--color-ink)]">
+                Edit and resubmit
+              </h2>
+              <p className="mt-2 mb-5 text-sm text-[var(--color-text-muted)]">
+                Saving sends the updated record back to the review queue.
+              </p>
               <EditPublicationForm publication={publication} />
             </>
           ) : (
             <>
-              <p className="eyebrow">Current state</p>
-              <h2 className="mb-3 mt-2 text-2xl">Editing is unavailable</h2>
-              <p className="text-sm text-slate-600">
+              <p className="workspace-overline">Current state</p>
+              <h2 className="mt-2 font-sans text-lg font-bold text-[var(--color-ink)]">
+                Editing is unavailable
+              </h2>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">
                 {publication.status === "published"
-                  ? "This publication is public and can no longer be edited from the submission workspace."
+                  ? "This publication is public and cannot be edited from the submission workspace."
                   : publication.status === "rejected"
                     ? "This submission is closed. Review the feedback and contact the R&D team if you need guidance."
                     : "This submission is locked while the R&D team reviews it."}
@@ -97,14 +148,14 @@ export default async function ResearcherPublicationPage({
               {publication.status === "published" && (
                 <Link
                   href={`/publications/${publication.slug}`}
-                  className="text-link mt-5 inline-block"
+                  className="text-link mt-5 inline-block text-sm"
                 >
-                  View public publication →
+                  View public publication
                 </Link>
               )}
             </>
           )}
-        </Card>
+        </section>
       </div>
     </div>
   );

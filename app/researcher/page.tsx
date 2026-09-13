@@ -2,7 +2,7 @@ import { ResearcherDashboardView } from "@/components/researcher/dashboard";
 import { getResearcherDashboard } from "@/features/researcher/queries";
 
 export const metadata = {
-  title: "Researcher Workspace | Islington R&D Digital Hub",
+  title: "Researcher workspace",
 };
 
 export default async function ResearcherDashboard() {
