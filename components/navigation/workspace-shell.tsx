@@ -15,7 +15,9 @@ export function WorkspaceShell({
   return (
     <div className="workspace-shell">
       <WorkspaceNav title={title} identity={identity} links={links} />
-      <div className="workspace-content">{children}</div>
+      <div className="workspace-content" data-workspace={title.toLowerCase()}>
+        {children}
+      </div>
     </div>
   );
 }

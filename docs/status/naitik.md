@@ -1,4 +1,49 @@
-# Naitik — WEB-29 public UI/UX redesign
+# Naitik — Final delivery integration
+
+## WEB-30 / WEB-15 — Authenticated UI rescue
+
+**Branch:** `feat/WEB-30-private-ui-final`
+
+**Status:** Implementation complete; Phase 1 browser acceptance blocked by hosted demo-account provisioning and the pending live interest write.
+
+### Completed
+
+- Rebuilt the shared authenticated shell with a sticky desktop role rail, a real mobile disclosure menu, active destinations, public-site return, sign out, and consistent workspace widths and rhythm.
+- Redesigned the student account around stored identity, research discovery, project participation, and the signed-in user's real expressions of interest. No application-status lifecycle was invented.
+- Preserved the real WEB-14 researcher query layer while prioritizing Needs Your Action, compact workflow counts, recent submissions, honest identity, and existing feedback/edit/resubmit paths.
+- Reworked researcher publication list, detail, and form surfaces into a compact submission workflow. The form reserves an honest Phase 2 readiness boundary without implementing preflight.
+- Reordered the admin overview around deterministic Needs Attention, followed by compact operational counts, the review queue, and student interests.
+- Simplified the admin queue, detail, decision form, and interest inbox while preserving current server actions, required-note validation, authorization, and RLS boundaries.
+- Added contextual private loading and error states. Shared styles retain visible focus, reduced-motion support, mobile touch targets, and clearance for the global research assistant.
+- Removed inflated private-workspace wording and generated manuscript-style labels. Displayed operational facts remain database-backed.
+
+### Browser acceptance
+
+- Student authentication succeeds and routes to `/account`.
+- Researcher authentication succeeds and routes to `/researcher`.
+- `/account`, `/researcher`, `/researcher/publications`, and `/researcher/publications/new` were checked at 375px, 768px, 1024px, and 1440px with no horizontal overflow.
+- Student requests for `/admin` and `/researcher` redirect to the forbidden route.
+- The 375px workspace menu opens from the keyboard, closes with Escape, restores focus to the trigger, and shows the active route.
+- The supplied researcher has no hosted publication records, so a real `/researcher/publications/[id]` browser journey remains pending.
+- The supplied admin auth user is awaiting email verification and its matching profile role is `student`; `/admin`, `/admin/submissions`, `/admin/submissions/[id]`, and `/admin/interests` remain pending browser acceptance until that account is correctly provisioned.
+- One clearly marked DEMO DATA interest message is prepared in the real public project form but has not been submitted or observed in the admin inbox.
+
+### Verification
+
+- `npm run check`: passed.
+- `npm test`: passed, 47/47 tests.
+- Default `npm run build`: blocked only by the known local Turbopack worker-port sandbox restriction.
+- `npm run build -- --webpack`: passed and generated all routes.
+- `git diff --check`: passed.
+- Hosted Supabase acceptance remains pending for the admin role, the publication-detail journey, and the project-interest round trip.
+
+### Next recommended task
+
+Correct the supplied admin user's email-confirmation state and `profiles.role` through the trusted hosted provisioning process, then finish admin browser QA and submit exactly one marked DEMO DATA interest for inbox verification. Mark Phase 1 complete only after those checks. Phase 2 starts at WEB-31's deterministic, no-migration submission-preflight design.
+
+---
+
+## WEB-29 public UI/UX redesign
 
 **Branch:** `feat/WEB-29-public-experience`
 
