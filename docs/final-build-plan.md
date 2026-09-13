@@ -69,24 +69,32 @@ Phase 2 remains **BLOCKED** only because the supplied hosted admin account still
 ## Phase 3 — Connected Search + public visual parity
 
 **Issues:** WEB-6 + final WEB-29 acceptance
-**Status:** NEXT
+**Status:** BLOCKED — implementation and hosted public-data smoke complete
 
 Build one public search query across Research Areas, Researchers, Projects, and Published Publications, grouped by entity type and constrained to current public data boundaries. Do not require embeddings or semantic search. Events and opportunities may remain absent while there is no credible data source.
 
 Browser-review every public route against the homepage benchmark. Improve routes that still feel generic, reduce repetitive cards, strengthen relationship-led layouts, preserve the IJMR/editorial system, and integrate only approved, real IJMR resources. The phase exits when the homepage is no longer dramatically stronger than the rest of the public site.
 
+### Acceptance record
+
+`/search` is implemented with bounded, deterministic lexical ranking across public research areas, researchers, projects and published publications, including their public relationships. It is linked from the homepage and primary navigation. The repeatable hosted demo graph was applied, and **Artificial Intelligence** returned all four groups through the running app. Automated tests verify unpublished records are excluded. Final multi-width visual acceptance remains blocked because browser-control transport was unavailable.
+
 ## Phase 4 — Research Intelligence / Qwen closure
 
-**Status:** PLANNED
+**Status:** BLOCKED — live contracts complete; final browser acceptance pending
 
 Keep the current Qwen backend, indexed papers, grounded query, recommendation, comparison, global assistant, and same-origin server boundary. Finish live Next.js compare-proxy acceptance, paper selection and context clarity, publication-level “Ask about this paper” integration, hard-negative behavior, related-research presentation, degraded/offline states, secret-boundary verification, and assistant polish. The normal site must remain usable when Qwen is unavailable.
 
 Complete trusted HTTPS or private networking only if it is explicitly available and safe within the remaining time. Otherwise document the current HTTP EC2 endpoint as a demo-infrastructure limitation without destabilizing AWS networking.
 
+### Acceptance record
+
+Same-origin health, papers, positive query, exact hard-negative, deterministic recommendation and positive compare all passed against the live AWS service. The PDF title extractor was deployed and now returns article titles. The assistant validates the paper-list contract and cannot display a ready state when the index is missing. Source keys remain server-only and normal pages do not depend on Qwen. Full dialog keyboard/responsive acceptance remains pending; plain HTTP remains a documented production limitation.
+
 ## Phase 5 — Demo acceptance / freeze / release
 
 **Issue:** WEB-16
-**Status:** PLANNED
+**Status:** BLOCKED
 
 Add no new features. Run the complete hosted journeys:
 
@@ -96,6 +104,8 @@ Add no new features. Run the complete hosted journeys:
 - Admin: Sign in → dashboard → Needs Attention → queue → review detail → request changes or publish → student interest inbox.
 
 Verify 375px, 768px, 1024px, and 1440px layouts; keyboard navigation; visible focus; browser consoles; routes; data fidelity; privacy; DEMO DATA labels; production build; hosted Supabase; Qwen; deployment; README and handoff docs; the demo script; and known limitations. Merge `dev` to `main` only after acceptance, then freeze features.
+
+The release-hardening implementation, hosted demo seed and public/Qwen HTTP smoke checks are complete. Disposable role credentials were not available, the optional administrator-invite service key is not configured, and native browser automation was unavailable. Do not mark WEB-16 complete until those authenticated and visual journeys pass.
 
 ## Non-goals before submission
 

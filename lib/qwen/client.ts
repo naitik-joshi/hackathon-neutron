@@ -5,7 +5,6 @@ import { validateQwenConfig } from "./config.ts";
 import type {
   CompareResponse,
   HealthResponse,
-  PapersResponse,
   QueryResponse,
   RecommendResponse,
 } from "./types.ts";
@@ -14,6 +13,7 @@ import type {
   QueryRequest,
   RecommendRequest,
 } from "./schemas.ts";
+import { parsePapersResponse } from "./papers.ts";
 
 const SHORT_TIMEOUT_MS = 12_000;
 const INFERENCE_TIMEOUT_MS = 165_000;
@@ -118,8 +118,10 @@ async function qwenFetch<T>(
 }
 
 export const qwenClient = {
-  papers: () =>
-    qwenFetch<PapersResponse>("/api/papers", { timeoutMs: SHORT_TIMEOUT_MS }),
+  papers: async () =>
+    parsePapersResponse(
+      await qwenFetch<unknown>("/api/papers", { timeoutMs: SHORT_TIMEOUT_MS }),
+    ),
   health: () =>
     qwenFetch<HealthResponse>("/api/health", {
       timeoutMs: SHORT_TIMEOUT_MS,

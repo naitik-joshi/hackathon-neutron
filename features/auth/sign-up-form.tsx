@@ -27,6 +27,40 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
       {redirectTo && (
         <input type="hidden" name="redirectTo" value={redirectTo} />
       )}
+      <fieldset>
+        <legend>I want to join as</legend>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <label className="flex cursor-pointer gap-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white p-3">
+            <input
+              type="radio"
+              name="intent"
+              value="student"
+              defaultChecked
+              className="mt-1"
+            />
+            <span>
+              <span className="block font-semibold">Student</span>
+              <span className="mt-1 block text-xs text-muted">
+                Save interests and participate with student access.
+              </span>
+            </span>
+          </label>
+          <label className="flex cursor-pointer gap-3 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white p-3">
+            <input
+              type="radio"
+              name="intent"
+              value="researcher"
+              className="mt-1"
+            />
+            <span>
+              <span className="block font-semibold">Researcher</span>
+              <span className="mt-1 block text-xs text-muted">
+                Start as a student, then request administrator approval.
+              </span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
       <div>
         <label htmlFor="signup-email">Email</label>
         <Input
@@ -92,7 +126,7 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
         </FormMessage>
       )}
       <Button className="w-full" disabled={pending} aria-disabled={pending}>
-        {pending ? "Creating student account…" : "Create student account"}
+        {pending ? "Creating account…" : "Create account"}
       </Button>
     </form>
   );

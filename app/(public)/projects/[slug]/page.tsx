@@ -66,7 +66,7 @@ export default async function ProjectDetail({
       <PageIntro
         eyebrow="Research project"
         title={project.title}
-        description="A recorded project in the public Islington research ecosystem."
+        description="A public Islington research project and its connected records."
         meta={
           <>
             <DemoBadge demo={project.is_demo} />

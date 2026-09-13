@@ -71,20 +71,20 @@ export default async function Home() {
           </div>
 
           <form
-            action="/publications"
+            action="/search"
             method="GET"
             role="search"
-            aria-label="Search published research by title"
+            aria-label="Search public research"
             className="rounded-[var(--radius-lg)] bg-[var(--color-surface)] p-5 text-[var(--color-text)] shadow-[var(--shadow-raised)] sm:p-6"
           >
-            <p className="section-kicker">Publication search</p>
-            <h2 className="type-h3 mt-2">Start with a published title</h2>
+            <p className="section-kicker">Connected search</p>
+            <h2 className="type-h3 mt-2">Search public research</h2>
             <p className="mt-2 text-sm text-muted">
-              Search currently covers published publication titles. Connected
-              search across every entity is coming next.
+              Find topics, people, projects and published work through one
+              public search.
             </p>
             <label htmlFor="home-publication-search" className="mt-5">
-              Publication title
+              Topic, person, project or publication
             </label>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Input
@@ -92,7 +92,7 @@ export default async function Home() {
                 name="q"
                 type="search"
                 maxLength={100}
-                placeholder="Search published work"
+                placeholder="Search connected research"
               />
               <button className={buttonVariants()} type="submit">
                 <Search size={17} aria-hidden="true" /> Search
@@ -357,8 +357,8 @@ export default async function Home() {
               Find a project where your interest can become action.
             </h2>
             <p className="mt-3 max-w-2xl text-rose-50">
-              Browse current projects publicly. Student accounts are only needed
-              when you are ready to record an expression of interest.
+              Browse current projects publicly. Sign in with a student account
+              to record an expression of interest.
             </p>
           </div>
           <div className="flex flex-wrap gap-3">

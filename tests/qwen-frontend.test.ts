@@ -13,6 +13,11 @@ import {
 } from "../lib/qwen/rate-limit.ts";
 import { parseJson } from "../lib/qwen/route.ts";
 import { matchPaperByTitle } from "../lib/qwen/context.ts";
+import {
+  assistantAvailabilityLabel,
+  getAssistantAvailability,
+} from "../lib/qwen/availability.ts";
+import { parsePapersResponse } from "../lib/qwen/papers.ts";
 
 test("Qwen configuration is validated and URL is normalized", () => {
   const config = validateQwenConfig(
@@ -123,5 +128,49 @@ test("publication context selects only an exact normalized paper title", () => {
     matchPaperByTitle(papers, "  Grounded Research — A Study  ")?.filename,
     "paper.pdf",
   );
+  assert.equal(
+    matchPaperByTitle(papers, "DEMO DATA — Grounded Research: A Study")
+      ?.filename,
+    "paper.pdf",
+  );
   assert.equal(matchPaperByTitle(papers, "Grounded Research"), undefined);
+});
+
+test("assistant availability never reports ready without a paper index", () => {
+  const status = getAssistantAvailability({
+    health: "healthy",
+    loadingPapers: false,
+    paperCount: 0,
+    paperIndexFailed: true,
+  });
+  assert.equal(status, "paper-index-unavailable");
+  assert.equal(assistantAvailabilityLabel[status], "Paper index unavailable");
+  assert.equal(
+    getAssistantAvailability({
+      health: "degraded",
+      loadingPapers: false,
+      paperCount: 8,
+      paperIndexFailed: false,
+    }),
+    "unavailable",
+  );
+});
+
+test("paper responses are validated before reaching the assistant", () => {
+  const valid = parsePapersResponse({
+    status: "success",
+    count: 1,
+    papers: [
+      {
+        filename: "paper.pdf",
+        title: "Grounded paper",
+        section_count: 1,
+        sections: ["Abstract"],
+      },
+    ],
+  });
+  assert.equal(valid.papers[0].filename, "paper.pdf");
+  assert.throws(() =>
+    parsePapersResponse({ status: "success", count: 2, papers: [] }),
+  );
 });

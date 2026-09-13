@@ -1,6 +1,6 @@
 # Islington College R&D Digital Hub
 
-v0.1 foundation for the official Islington Hackathon 2026 project. A connected research ecosystem: **Discover → Understand → Connect → Participate**. Public knowledge needs no account. Researchers submit publications; administrators review and publish them. This bootstrap deliberately does not implement the entire roadmap.
+Hackathon release candidate for the Islington College R&D Digital Hub. Public research needs no account. Students can express interest, researchers submit publications, administrators review access and submissions, and the optional Research Paper Assistant answers against an intentionally indexed corpus.
 
 ## Stack
 
@@ -11,19 +11,22 @@ Next.js 16.3.5 (stable npm release checked during bootstrap), React 19.3, TypeSc
 ```sh
 git clone https://github.com/naitik-joshi/hackathon-neutron.git
 cd hackathon-neutron
-git switch bootstrap/v0.1
+git switch dev
 npm ci
 cp .env.example .env.local
 ```
 
-Fill in these two public connection values from Supabase's Connect dialog (never fabricate them):
+Fill in the public Supabase connection values (never fabricate them). Qwen values are server-only. The service-role value is optional and is used only for protected administrator invitations:
 
 ```dotenv
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+QWEN_BACKEND_URL=
+QWEN_API_KEY=
 ```
 
-No service-role key is needed. Never commit .env.local, passwords or tokens. Without values the app renders a setup state and protected routes redirect to sign-in; it does not substitute fictional arrays for database data.
+Never commit `.env.local`, passwords or tokens. Normal Supabase access does not use the service role. Without connection values the app renders an honest setup/unavailable state; it does not substitute local arrays for database or Qwen data.
 
 ## Hosted Supabase development workflow
 
@@ -48,13 +51,13 @@ An already-linked checkout with no pending migrations only needs `npm run dev` a
 
 Keep `supabase/config.toml` and versioned SQL in `supabase/migrations/`. Linking and pushing migrations do not apply hosted Auth dashboard settings; configure those separately as described below.
 
-Run `supabase/seed.sql` in the hosted development project's SQL editor to seed the visibly marked examples. Seed is idempotent by stable IDs; no passwords or Auth accounts are seeded. After coordinated schema changes regenerate types with `npx supabase gen types typescript --linked > /tmp/database.types.ts`, compare against `lib/supabase/database.types.ts`, and preserve/relocate the application row aliases while replacing the schema contract.
+Run `npx supabase db push --linked --include-seed` to apply the visibly marked public demo graph. The seed is idempotent by stable IDs, updates only known demo rows, and creates no passwords or Auth accounts. See `docs/demo-data.md` for exact search terms and safe cleanup.
 
 ## Authentication and role provisioning
 
-Password sign-in is implemented at `/auth/sign-in`, and public student registration is available at `/auth/sign-up`. Keep email/password signup enabled in the hosted project. If email confirmation is enabled, a new user sees an honest confirmation message and signs in after verifying their address; if Supabase returns a session immediately, the user is sent to `/account`. Password reset and OAuth are not implemented.
+Password sign-in is implemented at `/auth/sign-in`, and public registration is available at `/auth/sign-up`. Keep email/password signup enabled in the hosted project. If email confirmation is enabled, a new user sees an honest confirmation message and signs in after verifying their address; if Supabase returns a session immediately, the user is sent to `/account`. Password reset and OAuth are not implemented.
 
-Public registration never accepts a role or profile metadata. The Auth insert trigger creates every new profile as `student`, even if a caller attempts to send privileged metadata. Create researcher and admin test users through the trusted hosted Supabase workflow, set secure passwords, and never put credentials in Git.
+Registration accepts a student/researcher intent for onboarding copy, never an application role. The Auth insert trigger creates every new profile as `student`, even if a caller attempts privileged metadata. Researchers request access from `/account`; administrators review it at `/admin/access`. When the optional server-only service-role key is configured, the same admin page can send a Supabase Auth invitation and assign admin access. Administrators never choose or view passwords.
 
 After creating accounts, use trusted SQL editor access and the **actual copied Auth UUIDs** to provision institutional roles:
 
@@ -95,4 +98,4 @@ AI coding tools are used during this hackathon. **All generated code is subject 
 
 ## Scope and verification
 
-The database-backed publication submission/review/publishing implementation, private review feedback, edit/resubmit interface, student signup, and Docker-free PGlite SQL security tests exist. Hosted Supabase Auth/cookie integration still needs the configured project and real test accounts; see the explicit pending checklist in `docs/testing.md`. No claim is made that a hosted end-to-end demo has been run. Advanced search, full participation, events, notifications and AI remain backlog.
+The app includes public connected search, participation, private DOCX/text-PDF intake, submission/review/publishing, researcher access approval and the same-origin grounded-paper assistant. Docker-free PostgreSQL tests enforce role and public/private boundaries. Hosted schema, demo seed and public routes are verified; authenticated end-to-end acceptance still requires disposable QA accounts. See `docs/final-acceptance.md` for passed checks and remaining limits.

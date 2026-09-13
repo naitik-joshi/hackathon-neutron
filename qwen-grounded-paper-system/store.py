@@ -99,6 +99,29 @@ class DocumentStore:
             if header:
                 lines = [line.strip() for line in header.split("\n") if line.strip()]
                 if lines:
+                    for line in lines:
+                        if line.lower().startswith("full article title:"):
+                            title = line.split(":", 1)[1].strip()
+                            if title:
+                                return title
+
+                    doi_index = next(
+                        (index for index, line in enumerate(lines) if line.lower().startswith("doi:")),
+                        None,
+                    )
+                    if doi_index is not None:
+                        title_lines = []
+                        for line in lines[doi_index + 1:]:
+                            # IJMR headers place numbered author affiliations directly
+                            # after the multi-line title (for example, "Name 1,*").
+                            if re.search(r"[A-Za-z][A-Za-z.'-]*(?:\s+[A-Za-z][A-Za-z.'-]*)+\s*\d", line):
+                                break
+                            if line.lower().startswith(("article history", "received:", "correspondence:")):
+                                break
+                            title_lines.append(line.strip(" ,"))
+                        title = " ".join(part for part in title_lines if part)
+                        if title:
+                            return re.sub(r"\s+", " ", title)
                     return lines[0]
             return key.rsplit(".", 1)[0].replace("_", " ")
 

@@ -7,7 +7,7 @@ import { RoleAccessInfo } from "@/features/auth/role-access-info";
 import { authHref, safeRedirectTo } from "@/lib/auth/redirects";
 import { FormMessage } from "@/components/ui";
 
-export const metadata = { title: "Create a student account" };
+export const metadata = { title: "Create an account" };
 
 export default async function SignUpPage({
   searchParams,
@@ -17,12 +17,12 @@ export default async function SignUpPage({
   const redirectTo = safeRedirectTo((await searchParams).redirectTo);
   return (
     <AuthShell
-      eyebrow="Student participation"
-      title="Create your student account"
-      description="Create a student account to participate. Researchers can request upgraded access after signing in. Published research remains open to everyone."
+      eyebrow="Join the research community"
+      title="Create your account"
+      description="Choose how you plan to participate. Every account starts safely as a student; researcher access requires administrator approval. Published research remains open to everyone."
       icon={<UserRoundPlus aria-hidden="true" />}
     >
-      <p className="section-kicker">Student registration</p>
+      <p className="section-kicker">Account registration</p>
       <h2 className="type-h2 mt-2">Create an account</h2>
       <p className="mt-2 text-sm text-muted">
         Registration safely starts as a student account. Researcher access is
