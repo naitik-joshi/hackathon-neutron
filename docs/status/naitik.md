@@ -1,5 +1,42 @@
 # Naitik — Final delivery integration
 
+## WEB-31 — Submission readiness
+
+**Branch:** `feat/WEB-31-submission-preflight`
+
+**Status:** Implementation complete; hosted admin-detail browser acceptance blocked by the supplied admin account.
+
+### Completed
+
+- Added a pure, deterministic preflight boundary for Unicode-aware text normalization, weighted-cosine related-work ranking, research-area suggestions, keyword extraction, and citation readiness.
+- Limited comparison to 100 recent published records, excluded the current publication where supplied, shaped browser results without candidate abstracts, and retained DEMO DATA labels.
+- Added one researcher-only server action with Zod limits for title, abstract, ephemeral references, and optional current publication ID.
+- Integrated Submission Readiness into new submissions and editable Draft/Changes Requested resubmissions. Reference text is clearly ephemeral and is excluded from publication `FormData`.
+- Added stale-result detection when title, abstract, or references change after a run. Readiness remains advisory and never blocks submission.
+- Added admin-only recomputation on publication detail for related work, area suggestions, and keywords. Citation readiness is omitted because references are not stored.
+- Added algorithm and demo guidance in `docs/submission-preflight.md`. No schema, Qwen, public-directory, or dependency changes were made.
+
+### Browser acceptance
+
+- Researcher authentication and `/researcher/publications/new` passed with a real hosted-data readiness run.
+- Related work, area suggestions, keywords, duplicates, missing years, malformed DOI hints, incomplete-reference hints, stale results, and reruns rendered correctly.
+- The mandatory DEMO DATA disclosure token is excluded from analysis after browser QA showed it could otherwise create false overlap between demo records.
+- The readiness control worked from the keyboard. Layout produced no horizontal overflow at 375px, 768px, 1024px, or 1440px.
+- The seeded researcher publication detail opened correctly. Its Submitted state remains locked, so edit/resubmit preflight could not be exercised against that hosted record.
+- The references textarea has no form `name`; its contents are not sent to the existing submission action or database.
+- Admin login still reports invalid credentials. Earlier hosted inspection found the supplied auth user unverified with a student profile role, so admin recomputation browser QA remains pending.
+
+### Verification and limitations
+
+- Pure tests cover normalization, Unicode, deterministic ordering, self-exclusion, published-only candidate mapping, topic confidence, keyword filtering, blank/duplicate/year/DOI/URL/incomplete reference behavior, and finite similarity output.
+- `npm run check` passed; `npm test` passed 56/56 tests; `git diff --check` passed; and `npm run build -- --webpack` generated every route. The default Turbopack build reached only the known sandbox worker-port restriction.
+- Lexical overlap cannot detect semantic similarity expressed with different vocabulary. Analysis is bounded to 100 recent published records and 100 existing areas.
+- Empty related-work results never claim originality. Citation guidance never claims source existence, credibility, style compliance, factual correctness, or academic correctness.
+
+### Next recommended task
+
+Provision the supplied hosted admin demo user correctly, then open a seeded submission detail and verify the recomputed Research context section. Once that browser check passes, mark Phase 2 complete and begin WEB-6 connected public search from the existing published-only query conventions.
+
 ## WEB-30 / WEB-15 — Authenticated UI rescue
 
 **Branch:** `feat/WEB-30-private-ui-final`

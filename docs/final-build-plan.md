@@ -34,7 +34,7 @@ Browser acceptance completed at 375px, 768px, 1024px, and 1440px for `/account`,
 ## Phase 2 — Research Submission Preflight
 
 **Issue:** WEB-31
-**Status:** NEXT
+**Status:** BLOCKED
 
 Build one coherent submission-readiness flow before final researcher submission.
 
@@ -56,10 +56,20 @@ Never claim citation correctness, source credibility, academic correctness, plag
 
 Decide during implementation whether references remain ephemeral preflight input. Prefer no migration. If persistence or schema work is required, stop and coordinate before applying it. Admin users may see or recompute neutral preflight signals where useful.
 
+### Implementation and acceptance record
+
+WEB-31 implementation is complete without a migration. The researcher flow provides deterministic weighted-cosine related-work analysis over published Hub records, existing-area suggestions, extracted keywords, and line-based citation readiness. Reference text and results remain ephemeral. The same tool is available when an owned Draft or Changes Requested publication is editable, excluding that publication from comparison. Admin submission detail recomputes related work and topics from the saved title and abstract and deliberately omits citation readiness.
+
+Researcher browser acceptance passed on `/researcher/publications/new`, including a real readiness run against hosted public data, citation warnings, stale-result detection after an abstract edit, rerun behavior, keyboard activation, and 375px, 768px, 1024px, and 1440px overflow checks. The seeded researcher record was opened successfully; it is Submitted and therefore correctly locked from editing. The ephemeral references textarea was verified to have no form name and cannot enter publication submission `FormData`.
+
+`npm run check` passed, all 56 tests passed, `git diff --check` passed, and the webpack production build generated every route. The default Turbopack build reached only the known sandbox worker-port restriction.
+
+Phase 2 remains **BLOCKED** only because the supplied hosted admin account still cannot authenticate, so `/admin/submissions/[id]` browser acceptance could not be completed. Automated authorization and workflow protections remain unchanged. Phase 3 is **NEXT** after this hosted account is correctly provisioned and the admin detail context receives its final browser check.
+
 ## Phase 3 — Connected Search + public visual parity
 
 **Issues:** WEB-6 + final WEB-29 acceptance
-**Status:** PLANNED
+**Status:** NEXT
 
 Build one public search query across Research Areas, Researchers, Projects, and Published Publications, grouped by entity type and constrained to current public data boundaries. Do not require embeddings or semantic search. Events and opportunities may remain absent while there is no credible data source.
 
