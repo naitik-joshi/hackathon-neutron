@@ -74,13 +74,19 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** WEB-30 assistant submit controls and project documentation cleanup
+**Current issue:** WEB-16 final dev-to-main conflict reconciliation (PR #24)
 
-**Branch:** `fix/WEB-30-assistant-controls-docs`
+**Branch:** `fix/WEB-16-main-merge-conflicts`
 
-**Status:** Assistant action visibility repaired and documentation consolidated locally; wider hosted acceptance remains pending
+**Status:** Main's bootstrap-revert history reconciled while preserving the current dev application; final PR acceptance remains separate
 
 ### Latest handoff
+
+- Final merge reconciliation (2026-09-13):
+  - PR #24 targets main from dev. Main's only unique history is the bootstrap merge followed by its revert; its tree is identical to the initial README-only commit. Conflicts therefore represent old deletions against the completed application, not new main features.
+  - Merged main history using the ours strategy from dev `3707465`, preserving the entire dev tree, including the README and assistant fixes already integrated through PR #23. Only this Rabin status section was additionally edited; no application, migration or teammate status content changed.
+  - Validation: application tree matches pre-resolution dev exactly; lint, TypeScript, 72/72 tests, webpack production build and diff whitespace checks passed before pushing the resolution to dev.
+  - Next: refresh PR #24 after the resolution push, wait for GitHub checks, then complete the team's final main merge. Existing hosted-acceptance limitations still apply.
 
 - Assistant controls and documentation (2026-09-13):
   - Fixed clipped Analyze/Compare controls with a persistent footer, native form association, scrollable dialog content, pending labels and incomplete-input guidance. No server/API/storage behavior changed.
