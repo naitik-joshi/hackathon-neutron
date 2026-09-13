@@ -53,58 +53,71 @@ test("Project directory, relationships and security policies", async (t) => {
       );
     }
 
-    await t.test("anonymous can read public projects and connected relations", async () => {
-      await asUser(null);
-      const projects = await db.query<{ id: string; slug: string; is_demo: boolean }>(
-        "select id, slug, is_demo from projects where slug = 'demo-accessible-learning'",
-      );
-      assert.equal(projects.rows.length, 1);
-      assert.equal(projects.rows[0].slug, "demo-accessible-learning");
-      assert.equal(projects.rows[0].is_demo, true);
+    await t.test(
+      "anonymous can read public projects and connected relations",
+      async () => {
+        await asUser(null);
+        const projects = await db.query<{
+          id: string;
+          slug: string;
+          is_demo: boolean;
+        }>(
+          "select id, slug, is_demo from projects where slug = 'demo-edge-ai-crop-monitoring'",
+        );
+        assert.equal(projects.rows.length, 1);
+        assert.equal(projects.rows[0].slug, "demo-edge-ai-crop-monitoring");
+        assert.equal(projects.rows[0].is_demo, true);
 
-      const areaLinks = await db.query(
-        "select * from project_research_areas where project_id = '30000000-0000-4000-8000-000000000001'",
-      );
-      assert.equal(areaLinks.rows.length, 1);
+        const areaLinks = await db.query(
+          "select * from project_research_areas where project_id = '30000000-0000-4000-8000-000000000001'",
+        );
+        assert.equal(areaLinks.rows.length, 2);
 
-      const researcherLinks = await db.query(
-        "select * from researcher_projects where project_id = '30000000-0000-4000-8000-000000000001'",
-      );
-      assert.equal(researcherLinks.rows.length, 1);
+        const researcherLinks = await db.query(
+          "select * from researcher_projects where project_id = '30000000-0000-4000-8000-000000000001'",
+        );
+        assert.equal(researcherLinks.rows.length, 1);
 
-      const publicationLinks = await db.query(
-        "select * from publication_projects where project_id = '30000000-0000-4000-8000-000000000001'",
-      );
-      assert.equal(publicationLinks.rows.length, 1);
-    });
+        const publicationLinks = await db.query(
+          "select * from publication_projects where project_id = '30000000-0000-4000-8000-000000000001'",
+        );
+        assert.equal(publicationLinks.rows.length, 3);
+      },
+    );
 
-    await t.test("anonymous and students cannot insert or modify projects", async () => {
-      await asUser(null);
-      await assert.rejects(
-        db.exec(
-          "insert into projects(title, slug, summary, status) values ('Unauthorized', 'unauthorized', 'Test', 'proposed')",
-        ),
-      );
+    await t.test(
+      "anonymous and students cannot insert or modify projects",
+      async () => {
+        await asUser(null);
+        await assert.rejects(
+          db.exec(
+            "insert into projects(title, slug, summary, status) values ('Unauthorized', 'unauthorized', 'Test', 'proposed')",
+          ),
+        );
 
-      await asUser(student);
-      await assert.rejects(
-        db.exec(
-          "insert into projects(title, slug, summary, status) values ('Student Project', 'student-proj', 'Test', 'proposed')",
-        ),
-      );
+        await asUser(student);
+        await assert.rejects(
+          db.exec(
+            "insert into projects(title, slug, summary, status) values ('Student Project', 'student-proj', 'Test', 'proposed')",
+          ),
+        );
 
-      // Non-admin update matches 0 rows under RLS
-      const updateRes = await db.query(
-        "update projects set title = 'Hacked' where slug = 'demo-accessible-learning'",
-      );
-      assert.equal(updateRes.affectedRows, 0);
+        // Non-admin update matches 0 rows under RLS
+        const updateRes = await db.query(
+          "update projects set title = 'Hacked' where slug = 'demo-edge-ai-crop-monitoring'",
+        );
+        assert.equal(updateRes.affectedRows, 0);
 
-      // Confirm title was unchanged
-      const checkRes = await db.query<{ title: string }>(
-        "select title from projects where slug = 'demo-accessible-learning'",
-      );
-      assert.equal(checkRes.rows[0].title, "DEMO DATA — Accessible Learning");
-    });
+        // Confirm title was unchanged
+        const checkRes = await db.query<{ title: string }>(
+          "select title from projects where slug = 'demo-edge-ai-crop-monitoring'",
+        );
+        assert.equal(
+          checkRes.rows[0].title,
+          "DEMO DATA — Edge AI Crop Monitoring",
+        );
+      },
+    );
 
     await t.test("admin can create and update project records", async () => {
       await asUser(admin);

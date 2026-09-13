@@ -30,6 +30,37 @@ test("PostgreSQL migration, RLS and publication lifecycle", async (t) => {
     );
     await db.exec(seed);
     await db.exec(seed);
+    assert.deepEqual(
+      (
+        await db.query<{
+          areas: number;
+          researchers: number;
+          projects: number;
+          publications: number;
+        }>(
+          `select
+            (select count(*)::int from research_areas where is_demo) areas,
+            (select count(*)::int from researchers where is_demo) researchers,
+            (select count(*)::int from projects where is_demo) projects,
+            (select count(*)::int from publications where is_demo) publications`,
+        )
+      ).rows[0],
+      { areas: 4, researchers: 4, projects: 4, publications: 6 },
+      "demo seed is idempotent",
+    );
+    await db.exec(
+      "insert into research_areas(id,name,slug,description,is_demo) values ('10000000-0000-4000-8000-000000000099','Real record','real-record','Not demo content',false)",
+    );
+    await db.exec(seed);
+    assert.equal(
+      (
+        await db.query<{ n: number }>(
+          "select count(*)::int n from research_areas where id='10000000-0000-4000-8000-000000000099' and not is_demo",
+        )
+      ).rows[0].n,
+      1,
+      "seeding does not delete non-demo records",
+    );
     await db.exec(
       `insert into auth.users(id,raw_user_meta_data) values ('${researcher}','{"role":"admin"}'),('${other}','{}'),('${admin}','{}'),('${student}','{}');`,
     );
@@ -54,7 +85,7 @@ test("PostgreSQL migration, RLS and publication lifecycle", async (t) => {
       "anonymous reads only public records and cannot write",
       async () => {
         await asUser(null);
-        assert.equal(await count("publications"), 1);
+        assert.equal(await count("publications"), 6);
         assert.equal(await count("profiles"), 0);
         await assert.rejects(
           db.exec(
@@ -84,7 +115,7 @@ test("PostgreSQL migration, RLS and publication lifecycle", async (t) => {
         await db.exec(
           `insert into publications(id,title,slug,abstract,submitted_by,is_demo) values ('${publication}','DEMO DATA — Test output','test-output','DEMO DATA — A real PostgreSQL workflow test publication.','${researcher}',true)`,
         );
-        assert.equal(await count("publications"), 2);
+        assert.equal(await count("publications"), 7);
         await db.exec(
           `update publications set status='published' where id='${publication}'`,
         );
@@ -128,8 +159,8 @@ test("PostgreSQL migration, RLS and publication lifecycle", async (t) => {
         );
         for (const id of [null, other, student]) {
           await asUser(id);
-          assert.equal(await count("publications"), 1);
-          assert.equal(await count("publication_projects"), 1);
+          assert.equal(await count("publications"), 6);
+          assert.equal(await count("publication_projects"), 7);
         }
       },
     );
@@ -182,8 +213,8 @@ test("PostgreSQL migration, RLS and publication lifecycle", async (t) => {
           `update publications set status='under_review' where id='${publication}'; update publications set status='published' where id='${publication}';`,
         );
         await asUser(null);
-        assert.equal(await count("publications"), 2);
-        assert.equal(await count("publication_projects"), 2);
+        assert.equal(await count("publications"), 7);
+        assert.equal(await count("publication_projects"), 8);
         const result = await db.query<{
           published_at: string;
           is_demo: boolean;
