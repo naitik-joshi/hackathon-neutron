@@ -74,13 +74,21 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** Coordinated researcher-access and article-intake backend follow-up (no Linear ID supplied)
+**Current issue:** WEB-16 release hardening with WEB-6, WEB-30 and WEB-32 acceptance
 
-**Branch:** `rabin-03`
+**Branch:** `feat/WEB-16-final-release-hardening`
 
-**Status:** WEB-32 merged in PR #20 and hosted migration applied; demo-account acceptance remains
+**Status:** Public search, demo data and live Qwen contracts pass; authenticated/browser acceptance remains blocked
 
 ### Latest handoff
+
+- Final release hardening (2026-09-13):
+  - Added public `/search` with bounded deterministic ranking across areas, researchers, projects and published publications; private workflow states are excluded in both queries and ranking tests. Homepage and primary navigation now link to it.
+  - Applied a repeatable hosted graph of four areas, four fictional researchers, four projects and six publications. All are visibly `DEMO DATA`; cleanup targets only known demo UUIDs.
+  - Added student/researcher signup intent without role elevation, reused extracted references in Submission Readiness, and added protected Supabase Auth administrator invitation/promotion with explicit confirmation and a server-only optional service key.
+  - Fixed Qwen ready/index state contradictions and deployed PDF article-title extraction to AWS. Live same-origin health, papers, positive query, exact hard-negative, recommendation and positive compare passed; EC2 and Ollama are active.
+  - Checks passed: lint, TypeScript, 72/72 application tests, 7/7 Qwen API tests, hosted seed application and public search smoke. Production build and final diff/secret checks are next.
+  - Blockers: no disposable hosted role credentials, no configured admin-invite service key, browser-control transport unavailable, and Qwen transport remains plain HTTP.
 
 - PDF runtime repair (2026-09-13): externalized server-only PDF.js so its worker resolves correctly under Next.js/Turbopack, replaced the generic error with explicit no-text/malformed/limit states, added IJMR journal-layout title/section extraction and kept every detected PDF field editable. The exact `IJRM_Pant1.pdf` from the reported failure passed the Next.js development route with 62,093 extracted characters. No OCR was added.
 - Researcher access and article intake (2026-09-13):

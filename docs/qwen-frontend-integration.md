@@ -27,12 +27,16 @@ POST bodies are strict Zod schemas. Paper names are limited to 255 characters, s
 
 One global assistant is rendered by the application shell for anonymous visitors and every authenticated role. It keeps an ephemeral local transcript; each question is sent independently and is not represented as model conversation memory. Successful answers display the resolved source paper and section. Hard-negative answers are preserved unchanged.
 
-Every public publication detail includes an **Analyze this paper** action that opens the same assistant. Automatic selection occurs only when the normalized publication title exactly matches an indexed Qwen paper title. Otherwise the user must explicitly select a paper. No loose or silent fuzzy match is used.
+Every public publication detail includes an **Analyze this paper** action that opens the same assistant. Automatic selection occurs only when the normalized publication title exactly matches an indexed Qwen paper title; the display-only `DEMO DATA` prefix is ignored. Otherwise the user must explicitly select a paper. No loose or silent fuzzy match is used.
 
 Selecting a paper requests deterministic related indexed research. Compare mode is secondary to the primary question flow and sends two explicit paper names plus the current question.
 
 ## Failure and abuse behavior
 
 Missing configuration, timeouts and model outages produce an unavailable/retry state inside the assistant without failing the surrounding page. A best-effort in-memory fixed-window limiter applies separate limits to papers, health, query, recommend and compare. This is suitable only for the hackathon server boundary; multi-instance production needs a shared rate-limit store or edge-provider control.
+
+The UI derives one state from both model health and a validated paper index. It reports `Assistant ready` only when the backend is healthy and at least one structurally valid paper is available. An index failure is labelled separately and disables analysis until retry succeeds. A normal 4xx request error does not incorrectly mark the entire model offline.
+
+Live acceptance on 2026-09-13 passed through the same-origin Next.js routes: health reported eight indexed documents and a ready Qwen model; positive query was grounded; the absent-fact response exactly matched the hard negative; recommendation used deterministic `indexed_lexical_overlap` without the model; and a positive comparison completed in 29.2 seconds. The EC2 title extractor was redeployed so IJMR PDFs expose article titles instead of repeated journal mastheads.
 
 The currently configured EC2 endpoint uses plain HTTP. Local/demo server-side integration can use it, but production deployment requires trusted HTTPS or private networking and should restrict direct port 8000 access.
