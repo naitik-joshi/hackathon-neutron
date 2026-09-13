@@ -10,6 +10,7 @@ import { buttonVariants } from "@/components/ui";
 import { cn } from "@/lib/utilities/cn";
 
 const links = [
+  ["/search", "Search"],
   ["/research", "Research"],
   ["/researchers", "Researchers"],
   ["/projects", "Projects"],
@@ -109,7 +110,7 @@ export function SiteNavigation({
               Sign in
             </Link>
             <Link href="/auth/sign-up" className={buttonVariants()}>
-              Create student account
+              Create account
             </Link>
           </>
         )}
@@ -177,7 +178,7 @@ export function SiteNavigation({
                   onClick={() => setOpen(false)}
                   className={buttonVariants({ className: "justify-start" })}
                 >
-                  Create student account
+                  Create account
                 </Link>
               </>
             )}
