@@ -1,5 +1,6 @@
 // v0.1 schema contract. Regenerate from Supabase after coordinated migrations.
 export type Role = "student" | "researcher" | "admin";
+export type ResearcherAccessStatus = "pending" | "approved" | "rejected";
 export type PublicationStatus =
   | "draft"
   | "submitted"
@@ -18,6 +19,10 @@ export type Publication = Stamps & {
   status: PublicationStatus;
   published_at: string | null;
   is_demo: boolean;
+  document_path: string | null;
+  document_name: string | null;
+  document_mime_type: string | null;
+  document_metadata: Record<string, unknown>;
 };
 export type Area = Stamps & {
   name: string;
@@ -58,6 +63,18 @@ export type ProjectInterest = {
   is_demo: boolean;
   created_at: string;
 };
+export type ResearcherAccessRequest = Stamps & {
+  user_id: string;
+  full_name: string;
+  contact_email: string;
+  position: string;
+  affiliation: string;
+  reason: string;
+  status: ResearcherAccessStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_note: string;
+};
 type Table<Row, Required extends keyof Row = never> = {
   Row: Row;
   Insert: Partial<Row> & Pick<Row, Required>;
@@ -79,6 +96,15 @@ export type Database = {
       project_interests: Table<
         ProjectInterest,
         "project_id" | "student_id" | "contact_email" | "message"
+      >;
+      researcher_access_requests: Table<
+        ResearcherAccessRequest,
+        | "user_id"
+        | "full_name"
+        | "contact_email"
+        | "position"
+        | "affiliation"
+        | "reason"
       >;
       researcher_research_areas: Table<
         { researcher_id: string; research_area_id: string },
@@ -107,6 +133,14 @@ export type Database = {
       review_publication: {
         Args: { p_id: string; p_decision: PublicationStatus; p_note?: string };
         Returns: string;
+      };
+      review_researcher_access_request: {
+        Args: { p_id: string; p_decision: string; p_note?: string };
+        Returns: string;
+      };
+      admin_set_profile_role: {
+        Args: { p_user_id: string; p_role: Role };
+        Returns: Role;
       };
     };
     Enums: {

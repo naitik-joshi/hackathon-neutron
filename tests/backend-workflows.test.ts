@@ -199,7 +199,7 @@ test("review transactions and interest privacy use real PostgreSQL RLS", async (
     const rls = await db.query<{ n: number }>(
       "select count(*)::int n from pg_tables where schemaname='public' and rowsecurity",
     );
-    assert.equal(rls.rows[0].n, 12);
+    assert.equal(rls.rows[0].n, 13);
     // Trusted maintenance verifies the documented FK deletion behavior.
     await db.exec(
       `reset role; select set_config('request.jwt.claim.sub','',false); delete from auth.users where id='${admin}'`,

@@ -7,6 +7,7 @@ This is the lightweight code-level handoff log for the hackathon.
 Each member owns ONLY their own section below.
 
 After completing, pausing, handing off or materially changing a task, update your section with:
+
 - current Linear issue
 - branch
 - status
@@ -45,6 +46,7 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 **Status:** Local implementation and current admin UI integration complete; hosted acceptance pending
 
 ### Latest handoff
+
 - Work completed:
   - WEB-17: added deterministic stale-review, inactive-changes-requested, and stale-ongoing-project rules with configurable demo thresholds and normalized severity/action results.
   - Configured 7-day stale-review, 14-day changes-requested, and 60-day stale-ongoing-project demonstration thresholds; these are not institutional policy.
@@ -72,13 +74,21 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** WEB-30 — grounded assistant integration and authenticated-workspace polish
+**Current issue:** Coordinated researcher-access and article-intake backend follow-up (no Linear ID supplied)
 
-**Branch:** `rabin-02`
+**Branch:** `rabin-03`
 
-**Status:** WEB-30 integrated locally; hosted Supabase acceptance passed; Qwen HTTPS hardening and final compare-proxy recheck remain
+**Status:** Local implementation complete and verified; new hosted Supabase migration not yet applied
 
 ### Latest handoff
+
+- PDF runtime repair (2026-09-13): externalized server-only PDF.js so its worker resolves correctly under Next.js/Turbopack, replaced the generic error with explicit no-text/malformed/limit states, added IJMR journal-layout title/section extraction and kept every detected PDF field editable. The exact `IJRM_Pant1.pdf` from the reported failure passed the Next.js development route with 62,093 extracted characters. No OCR was added.
+- Researcher access and article intake (2026-09-13):
+  - Added student-owned researcher access requests, an admin review queue, atomic database-backed approval/promotion, and guarded role management for existing self-registered accounts. New accounts still always start as students; the app never creates or exposes credentials.
+  - Added upload-first publication intake using the supplied institutional template for DOCX and text-based PDF: authenticated researcher-only extraction, editable optional fields, server re-validation, private `ResearchFileData` upload, and publication/document metadata insertion with cleanup on failure. Image-only PDFs are rejected without OCR.
+  - Added migration `202609130001_researcher_access_document_intake.sql`, Storage policies, shared database types, focused parser/validation/PostgreSQL RLS tests, admin/account wiring, and updated data-model documentation. No Qwen, search, or public publication-page redesign was included.
+  - Checks passed: `npm run lint`, `npm run typecheck`, `npm test` (64/64), and `npm run build`; the supplied blank template was correctly rejected as an uncompleted article, PDF text extraction was verified against an existing research PDF, and malformed/scanned PDF states were covered.
+  - Dependency/blocker: coordinate and apply the new migration to hosted Supabase before using the routes; confirm the existing private bucket is exactly `ResearchFileData`, then complete one real researcher-request approval plus DOCX and PDF submission smoke tests. No hosted database change was made in this branch.
 - WEB-30 integration (2026-09-13):
   - Added server-only Qwen configuration/client/error handling, strict Zod request contracts, bounded bodies, timeouts, no-store responses and best-effort per-route rate limits behind five same-origin Next.js handlers.
   - Added one global public Research Paper Assistant with ephemeral grounded conversation, source paper/section presentation, exact-title publication context matching, deterministic recommendations, compare mode, keyboard/Escape support and offline recovery.
@@ -133,6 +143,7 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 **Status:** Completed WEB-7 and WEB-8. Ready for review/integration.
 
 ### Latest handoff
+
 - Work completed:
   - Added area relationship queries to fetch projects, researchers, and published publications.
   - Connected `/research/[slug]` page to real data.
@@ -163,6 +174,7 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 **Status:** Frontend Complete / Ready for Naitik Backend Integration
 
 ### Latest handoff
+
 - Work completed:
   - Phase 1: Integrated "Get Involved" entry CTA in the project detail header and added `ProjectParticipationCallout` sidebar card linking smoothly to `#get-involved`.
   - Phase 2: Implemented accessible, responsive `InterestForm` (`features/participation/interest-form.tsx`) with contact email, statement of interest textarea, real-time character counter (20–2000 chars), and WCAG semantic markup.
@@ -183,4 +195,3 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
   - Ready for Naitik to connect `expressInterest` server action (`features/participation/actions.ts`) to `InterestForm.onSubmitAction` and wire student session verification.
 - Next:
   - Provide Naitik with integration handoff notes for final backend wiring into `dev`.
-
