@@ -23,8 +23,8 @@ export function RoleAccessInfo({ signup = false }: { signup?: boolean }) {
           </p>
           <p className="mt-1">
             {signup
-              ? "Researcher and administrator accounts are provisioned by the institution and cannot be created here."
-              : "Students use their account. Researchers, staff and administrators use institution-provisioned credentials. The server opens the correct workspace after authentication."}
+              ? "Every new account starts as a student. After signing in, researchers can submit an access request for an administrator to approve."
+              : "Every member uses one secure sign-in. Approved researchers and administrators are routed to their role workspace by the server."}
           </p>
         </div>
       </div>

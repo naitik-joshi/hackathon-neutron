@@ -19,13 +19,14 @@ export default async function SignUpPage({
     <AuthShell
       eyebrow="Student participation"
       title="Create your student account"
-      description="Create a student account to express interest in projects. Published research remains open to everyone."
+      description="Create a student account to participate. Researchers can request upgraded access after signing in. Published research remains open to everyone."
       icon={<UserRoundPlus aria-hidden="true" />}
     >
       <p className="section-kicker">Student registration</p>
       <h2 className="type-h2 mt-2">Create an account</h2>
       <p className="mt-2 text-sm text-muted">
-        Registration creates a student account only.
+        Registration safely starts as a student account. Researcher access is
+        available through an administrator-reviewed request after sign-in.
       </p>
       <div className="mt-6">
         <RoleAccessInfo signup />

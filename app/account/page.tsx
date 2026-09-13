@@ -4,6 +4,8 @@ import { WorkspaceShell } from "@/components/navigation/workspace-shell";
 import { DemoBadge } from "@/components/shared/status-badge";
 import { Badge, FormMessage, buttonVariants } from "@/components/ui";
 import { getMyInterestSummaries } from "@/features/participation/queries";
+import { getMyLatestResearcherAccessRequest } from "@/features/access/queries";
+import { ResearcherRequestForm } from "@/features/access/researcher-request-form";
 import { requireRole } from "@/lib/auth/guards";
 
 export const metadata = { title: "Your account" };
@@ -25,6 +27,10 @@ export default async function AccountPage({
 }) {
   const { profile } = await requireRole(["student", "researcher", "admin"]);
   const interests = await getMyInterestSummaries();
+  const accessRequest =
+    profile.role === "student"
+      ? await getMyLatestResearcherAccessRequest()
+      : null;
   const workspace =
     profile.role === "admin"
       ? "/admin"
@@ -108,6 +114,60 @@ export default async function AccountPage({
             </Link>
           </div>
         </section>
+
+        {profile.role === "student" && (
+          <section
+            className="workspace-section"
+            aria-labelledby="researcher-access-title"
+          >
+            <div className="workspace-section-heading">
+              <div>
+                <h2
+                  id="researcher-access-title"
+                  className="workspace-section-title"
+                >
+                  Researcher access
+                </h2>
+                <p className="mt-1 text-sm text-[var(--color-text-muted)]">
+                  Request access to submit publications. Your account remains a
+                  student account until an administrator approves it.
+                </p>
+              </div>
+              {accessRequest && (
+                <Badge className="capitalize">{accessRequest.status}</Badge>
+              )}
+            </div>
+            <div className="workspace-panel p-5 sm:p-6">
+              {accessRequest?.status === "pending" ? (
+                <FormMessage tone="info" title="Request awaiting review">
+                  Your request was received on{" "}
+                  {formatDate(accessRequest.created_at)}. An administrator must
+                  approve it before the researcher workspace becomes available.
+                </FormMessage>
+              ) : accessRequest?.status === "approved" ? (
+                <FormMessage tone="success" title="Request approved">
+                  Sign out and sign in again if the researcher workspace does
+                  not appear yet.
+                </FormMessage>
+              ) : (
+                <div className="space-y-5">
+                  {accessRequest?.status === "rejected" && (
+                    <FormMessage
+                      tone="warning"
+                      title="Previous request not approved"
+                    >
+                      {accessRequest.review_note ||
+                        "You may update your details and submit a new request."}
+                    </FormMessage>
+                  )}
+                  <ResearcherRequestForm
+                    initialName={profile.display_name || undefined}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <section
           className="workspace-section"

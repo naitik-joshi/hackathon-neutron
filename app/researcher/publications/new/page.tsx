@@ -16,8 +16,8 @@ export default async function NewPublication() {
           <p className="workspace-overline">Publication workflow</p>
           <h1 className="workspace-page-title">Submit a publication</h1>
           <p className="workspace-page-description">
-            Add the title and abstract that administrators will review. DOI and
-            year are optional.
+            Upload a completed article-template document first. Its details are
+            extracted into editable fields before you submit it for review.
           </p>
         </div>
         <Link href="/researcher/publications" className="text-link text-sm">

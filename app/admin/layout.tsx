@@ -15,6 +15,7 @@ export default async function AdminLayout({
         { href: "/admin", label: "Overview" },
         { href: "/admin/submissions", label: "Publication review queue" },
         { href: "/admin/interests", label: "Project interest inbox" },
+        { href: "/admin/access", label: "Account access" },
       ]}
     >
       {children}
