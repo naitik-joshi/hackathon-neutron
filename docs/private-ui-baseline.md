@@ -1,6 +1,6 @@
 # Private UI baseline
 
-Date: 2026-09-13  
+Date: 2026-09-13
 Starting integration commit: `7aec102`
 
 ## Method and authentication constraint

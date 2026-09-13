@@ -4,7 +4,7 @@ This is the authoritative remaining-work plan for the Islington College R&D Digi
 
 ## Phase 1 — Authenticated UI rescue and acceptance
 
-**Issues:** WEB-30 + WEB-15  
+**Issues:** WEB-30 + WEB-15
 **Status:** BLOCKED
 
 ### Goals
@@ -33,7 +33,7 @@ Browser acceptance completed at 375px, 768px, 1024px, and 1440px for `/account`,
 
 ## Phase 2 — Research Submission Preflight
 
-**Issue:** WEB-31  
+**Issue:** WEB-31
 **Status:** NEXT
 
 Build one coherent submission-readiness flow before final researcher submission.
@@ -58,7 +58,7 @@ Decide during implementation whether references remain ephemeral preflight input
 
 ## Phase 3 — Connected Search + public visual parity
 
-**Issues:** WEB-6 + final WEB-29 acceptance  
+**Issues:** WEB-6 + final WEB-29 acceptance
 **Status:** PLANNED
 
 Build one public search query across Research Areas, Researchers, Projects, and Published Publications, grouped by entity type and constrained to current public data boundaries. Do not require embeddings or semantic search. Events and opportunities may remain absent while there is no credible data source.
@@ -75,7 +75,7 @@ Complete trusted HTTPS or private networking only if it is explicitly available 
 
 ## Phase 5 — Demo acceptance / freeze / release
 
-**Issue:** WEB-16  
+**Issue:** WEB-16
 **Status:** PLANNED
 
 Add no new features. Run the complete hosted journeys:
