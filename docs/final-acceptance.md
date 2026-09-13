@@ -7,6 +7,7 @@
 - Qwen EC2 and Ollama services are active. Same-origin health, papers, positive query, exact hard-negative, deterministic recommendation and positive comparison passed. Eight documents are indexed; PDF titles now use article titles instead of journal mastheads.
 - Browser code calls only `/api/research-assistant/*`; backend URL and API key remain server-only. Paper-list responses are validated and the UI cannot report ready when the paper index is unavailable.
 - Automated lint, TypeScript, RLS/workflow, document parser, search and Qwen contract checks pass. See the final PR report for exact totals and build result.
+- Follow-up assistant-control fix: isolated headless Edge tests passed visible/uncovered Analyze and Compare controls, ten form submissions and Escape at 375x667, 375x380, 768x1024, 1024x768 and 1440x900. Responses were mocked with clearly labelled demo data; this does not replace hosted Qwen or authenticated acceptance. Lint, TypeScript, 72 application tests and webpack build passed again.
 
 ## Not accepted in this run
 

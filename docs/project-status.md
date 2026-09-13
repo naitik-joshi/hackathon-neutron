@@ -74,20 +74,27 @@ If simultaneous edits to this single file begin causing merge conflicts, stop ed
 
 **Role:** Backend Primary
 
-**Current issue:** WEB-16 release hardening with WEB-6, WEB-30 and WEB-32 acceptance
+**Current issue:** WEB-30 assistant submit controls and project documentation cleanup
 
-**Branch:** `feat/WEB-16-final-release-hardening`
+**Branch:** `fix/WEB-30-assistant-controls-docs`
 
-**Status:** Public search, demo data and live Qwen contracts pass; authenticated/browser acceptance remains blocked
+**Status:** Assistant action visibility repaired and documentation consolidated locally; wider hosted acceptance remains pending
 
 ### Latest handoff
+
+- Assistant controls and documentation (2026-09-13):
+  - Fixed clipped Analyze/Compare controls with a persistent footer, native form association, scrollable dialog content, pending labels and incomplete-input guidance. No server/API/storage behavior changed.
+  - Rewrote README around the supplied solution and handbook, explicitly disclosed Codex and Antigravity, distinguished runtime Qwen from development agents, and recorded implemented features, setup, security, demo flow and limitations.
+  - Removed ten superseded bootstrap/task-prompt/design-baseline Markdown files, updated references and current architecture, and retained security/data/API contracts, team ownership and acceptance records. Deleted documents remain recoverable from Git history.
+  - Checks: lint, TypeScript, 72/72 tests, webpack production build, documentation links and diff whitespace passed. Isolated headless Edge tests passed Ask/Compare at 375x667, 375x380, 768x1024, 1024x768 and 1440x900, including long recommendations, ten mocked same-origin submissions and Escape; inspected the mobile screenshot.
+  - Limits/next: these UI tests use mocked demo responses, not a new live AWS/hosted-role acceptance claim. Review this local branch, then repeat with the team's live demo session before integration.
 
 - Final release hardening (2026-09-13):
   - Added public `/search` with bounded deterministic ranking across areas, researchers, projects and published publications; private workflow states are excluded in both queries and ranking tests. Homepage and primary navigation now link to it.
   - Applied a repeatable hosted graph of four areas, four fictional researchers, four projects and six publications. All are visibly `DEMO DATA`; cleanup targets only known demo UUIDs.
   - Added student/researcher signup intent without role elevation, reused extracted references in Submission Readiness, and added protected Supabase Auth administrator invitation/promotion with explicit confirmation and a server-only optional service key.
   - Fixed Qwen ready/index state contradictions and deployed PDF article-title extraction to AWS. Live same-origin health, papers, positive query, exact hard-negative, recommendation and positive compare passed; EC2 and Ollama are active.
-  - Checks passed: lint, TypeScript, 72/72 application tests, 7/7 Qwen API tests, hosted seed application and public search smoke. Production build and final diff/secret checks are next.
+  - Checks passed: lint, TypeScript, 72/72 application tests, 7/7 Qwen API tests, hosted seed application, public search smoke, webpack production build and final diff/secret checks. PR #22 merged into dev at `b2fca7e`.
   - Blockers: no disposable hosted role credentials, no configured admin-invite service key, browser-control transport unavailable, and Qwen transport remains plain HTTP.
 
 - PDF runtime repair (2026-09-13): externalized server-only PDF.js so its worker resolves correctly under Next.js/Turbopack, replaced the generic error with explicit no-text/malformed/limit states, added IJMR journal-layout title/section extraction and kept every detected PDF field editable. The exact `IJRM_Pant1.pdf` from the reported failure passed the Next.js development route with 62,093 extracted characters. No OCR was added.

@@ -207,7 +207,7 @@ Prove the integrated hackathon workflow and prepare a fallback demonstration.
 - Priority: P0 / High
 - Milestone: Demo Ready
 - Suggested owner: Backend/Integration
-- Scope: docs/demo-plan.md, docs/handoff-v0.1.md
+- Scope: docs/demo-script.md, docs/final-acceptance.md
 - Estimate: 60 minutes
 - Dependencies: Q01, P02
 - Suggested branch: `feat/WEB-16-demo-rehearsal`
@@ -369,7 +369,7 @@ Explore a grounded assistant that points back to published evidence.
 - Priority: P2 / Low
 - Milestone: Discovery Works
 - Suggested owner: Public UI/UX
-- Scope: docs/product-vision.md, docs/architecture.md
+- Scope: README.md, docs/architecture.md
 - Estimate: 60 minutes
 - Dependencies: Q02
 - Suggested branch: `feat/WEB-25-assistant-spike`
@@ -405,7 +405,7 @@ Plan a partner directory and one useful integration without expanding bootstrap.
 - Priority: P2 / Low
 - Milestone: Participation Works
 - Suggested owner: Backend/Integration
-- Scope: docs/data-model.md, docs/roadmap.md
+- Scope: docs/data-model.md, docs/final-build-plan.md
 - Estimate: 45 minutes
 - Dependencies: Q02
 - Suggested branch: `feat/WEB-27-partner-integrations-spike`

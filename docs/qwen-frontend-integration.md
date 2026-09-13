@@ -31,6 +31,8 @@ Every public publication detail includes an **Analyze this paper** action that o
 
 Selecting a paper requests deterministic related indexed research. Compare mode is secondary to the primary question flow and sends two explicit paper names plus the current question.
 
+The dialog keeps its submit action in a non-scrolling footer, associated with the form through its native `form` attribute. Fields, notices and recommendations scroll above it; the transcript has its own bounded scroll area. Both Analyze and Compare remain visible on short screens, with pending labels and guidance when paper selection or question input is incomplete.
+
 ## Failure and abuse behavior
 
 Missing configuration, timeouts and model outages produce an unavailable/retry state inside the assistant without failing the surrounding page. A best-effort in-memory fixed-window limiter applies separate limits to papers, health, query, recommend and compare. This is suitable only for the hackathon server boundary; multi-instance production needs a shared rate-limit store or edge-provider control.
